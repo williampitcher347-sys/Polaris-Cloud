@@ -2926,6 +2926,59 @@
       }
 
       /* -------------------------------------------------------------------
+         FIREBASE REALTIME DATABASE BRIDGE (NON-DESTRUCTIVE SYNC)
+         ------------------------------------------------------------------- */
+      const FIREBASE_RTDB_URL =
+        "https://polaris-cloud-24c37-default-rtdb.europe-west1.firebasedatabase.app";
+
+      let pendingDeleteGameId = null;
+
+      function syncGameToFirebase(gameRecord) {
+        if (!isValidGameRecord(gameRecord) || !navigator.onLine) return;
+        try {
+          const cleanId = encodeURIComponent(gameRecord.id.trim());
+          fetch(`${FIREBASE_RTDB_URL}/games/${cleanId}.json`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(gameRecord)
+          }).catch(() => {});
+        } catch (_) {}
+      }
+
+      function deleteGameFromFirebase(gameId) {
+        if (!gameId || !navigator.onLine) return;
+        try {
+          const cleanId = encodeURIComponent(String(gameId).trim());
+          fetch(`${FIREBASE_RTDB_URL}/games/${cleanId}.json`, {
+            method: "DELETE"
+          }).catch(() => {});
+        } catch (_) {}
+      }
+
+      function pullGamesFromFirebaseNow() {
+        if (!navigator.onLine) return;
+        try {
+          fetch(`${FIREBASE_RTDB_URL}/games.json`)
+            .then((res) => (res && res.ok ? res.json() : null))
+            .then((data) => {
+              if (!data || typeof data !== "object") return;
+              const list = Object.keys(data)
+                .map((key) => {
+                  const val = data[key];
+                  if (!val || typeof val !== "object") return null;
+                  return { ...val, id: val.id || key };
+                })
+                .filter(isValidGameRecord);
+              if (list.length > 0) {
+                commitCatalogState({ mergeGames: list });
+                renderAllGameViews();
+              }
+            })
+            .catch(() => {});
+        } catch (_) {}
+      }
+
+      /* -------------------------------------------------------------------
          AUTHORITATIVE IN-MEMORY CATALOG & SINGLE-SOURCE-OF-TRUTH COMMIT
          ------------------------------------------------------------------- */
       let idbDatabase = null;
@@ -3470,6 +3523,10 @@
       }
 
       function renderAllViews() {
+        renderAllGameViews();
+      }
+
+      function renderAllGameViews() {
         try {
           const searchTerm = String(document.getElementById("searchBox")?.value || "").trim().toLowerCase();
           const publishedGames = catalogGames.filter((g) => isValidGameRecord(g) && g.published !== false);
@@ -4059,13 +4116,14 @@
 
         commitCatalogState({ upsertGames: draftPayload });
         const committedRecord = catalogGames.find((g) => g.id === draftPayload.id) || draftPayload;
+        syncGameToFirebase(committedRecord);
 
         broadcastTabEvent({ type: "GAME_UPSERT", game: committedRecord });
         consoleState.editingGameId = null;
         closeModalById("gameEditorModal");
         renderStudioGamesManager();
         openModalById("studioManagerModal");
-        renderAllViews();
+        renderAllGameViews();
         if (consoleState.currentRoute === "game-details" && consoleState.activeDetailsGameId === committedRecord.id) {
           renderGameDetailsPage(committedRecord.id);
         }
@@ -4747,14 +4805,30 @@
             if (delTrigger) {
               const gid = delTrigger.getAttribute("data-delete-game-id");
               const found = catalogGames.find((g) => g.id === gid);
+              if (!found) return;
+              // Require two-step explicit confirmation on the Delete button so accidental clicks never wipe a game
+              if (pendingDeleteGameId !== gid) {
+                pendingDeleteGameId = gid;
+                delTrigger.textContent = "Confirm Delete";
+                showToast(`Click "Confirm Delete" again to remove "${found.name}"`);
+                setTimeout(() => {
+                  if (pendingDeleteGameId === gid) {
+                    pendingDeleteGameId = null;
+                    if (consoleState.studioUnlocked) renderStudioGamesManager();
+                  }
+                }, 4000);
+                return;
+              }
+              pendingDeleteGameId = null;
               commitCatalogState({ deleteGameId: gid });
+              deleteGameFromFirebase(gid);
               broadcastTabEvent({ type: "GAME_DELETE", gameId: gid });
               renderStudioGamesManager();
-              renderAllViews();
+              renderAllGameViews();
               if (consoleState.currentRoute === "game-details" && consoleState.activeDetailsGameId === gid) {
                 switchRoute("store");
               }
-              showToast(found ? `Removed "${found.name}"` : "Removed game");
+              showToast(`Removed "${found.name}"`);
               return;
             }
 
@@ -4788,11 +4862,11 @@
               }
               return;
             }
-
-            // 8. Clicking a game tile card opens its details page
+            // 8. Clicking a game tile card ONLY opens its dedicated Game Details page
             const tileCard = el.closest(".game-tile[data-game-id]");
             if (tileCard && !el.closest("button")) {
-              openGameDetailsPage(tileCard.getAttribute("data-game-id"));
+              const cardGameId = tileCard.getAttribute("data-game-id");
+              if (cardGameId) openGameDetailsPage(cardGameId);
               return;
             }
 
@@ -4818,7 +4892,8 @@
         document.getElementById("syncRefreshBtn")?.addEventListener("click", () => {
           publishPeerPresence();
           commitCatalogState();
-          renderAllViews();
+          pullGamesFromFirebaseNow();
+          renderAllGameViews();
           showToast("Console state synchronized");
         });
 
@@ -5071,7 +5146,8 @@
           } else if (catalogGames.length > 0) {
             catalogGames.forEach((g) => writeGameToIdb(g));
           }
-          renderAllViews();
+          pullGamesFromFirebaseNow();
+          renderAllGameViews();
         })
         .catch(() => {})
         .finally(() => {
