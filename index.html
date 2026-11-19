@@ -5,26 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Polaris Cloud Gaming</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
 
     /* =========================================================================
-       POLARIS DESIGN TOKENS & CONSOLE DARK THEME VARIABLES
+       POLARIS DESIGN TOKENS & CONSOLE UI THEME
        ========================================================================= */
     :root {
       --accent: #107c10;
       --accent-bright: #16c86a;
       --accent-soft: rgba(22, 200, 106, 0.16);
-      --accent-glow: rgba(22, 200, 106, 0.34);
-      --bg-base: #080b09;
-      --bg-surface: #0d110e;
-      --bg-elevated: #111612;
-      --bg-card: #151c17;
-      --bg-card-hover: #1d2720;
+      --accent-glow: rgba(22, 200, 106, 0.38);
+      --bg-base: #060908;
+      --bg-surface: #0b0f0c;
+      --bg-elevated: #101612;
+      --bg-card: #141c17;
+      --bg-card-hover: #1b261f;
+      --bg-glass: rgba(12, 18, 14, 0.84);
       --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-strong: rgba(255, 255, 255, 0.15);
-      --text-main: #f4f7f5;
-      --text-muted: #93a197;
-      --text-dim: #6f7c73;
+      --border-strong: rgba(255, 255, 255, 0.17);
+      --text-main: #f4f8f5;
+      --text-muted: #98a89d;
+      --text-dim: #6f7f75;
+      --danger: #f87171;
+      --radius-sm: 10px;
+      --radius-md: 14px;
+      --radius-lg: 18px;
+      --radius-xl: 24px;
+      --shadow-card: 0 12px 28px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      --shadow-elevated: 0 24px 64px rgba(0, 0, 0, 0.72);
     }
 
     *, *::before, *::after {
@@ -36,6 +44,9 @@
       padding: 0;
       min-height: 100%;
       background-color: var(--bg-base);
+      background-image:
+        radial-gradient(circle at 14% -4%, rgba(22, 200, 106, 0.11), transparent 44%),
+        radial-gradient(circle at 88% 10%, rgba(56, 189, 248, 0.06), transparent 38%);
       color: var(--text-main);
       font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       overflow-x: hidden;
@@ -44,13 +55,12 @@
 
     ::selection {
       background-color: var(--accent-bright);
-      color: #061309;
+      color: #051309;
     }
 
-    /* Custom Scrollbars */
     ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
     }
 
     ::-webkit-scrollbar-track {
@@ -66,25 +76,16 @@
       background: var(--accent-bright);
     }
 
-    /* Helper Utilities */
     .hidden {
       display: none !important;
     }
 
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
     .cursor-pointer {
       cursor: pointer;
+    }
+
+    .mono {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
     }
 
     .line-clamp-2-safe {
@@ -100,7 +101,121 @@
       white-space: nowrap;
     }
 
-    /* Layout Shell */
+    /* =========================================================================
+       CONSOLE STARTUP BOOT SCREEN
+       ========================================================================= */
+    #consoleBootScreen {
+      position: fixed;
+      inset: 0;
+      z-index: 220;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 45%, rgba(22, 200, 106, 0.14), rgba(5, 8, 6, 0.99) 70%),
+        #050806;
+      transition: opacity 0.42s ease, transform 0.42s ease;
+    }
+
+    #consoleBootScreen.fade-out {
+      opacity: 0;
+      transform: scale(1.02);
+      pointer-events: none;
+    }
+
+    .boot-logo-ring {
+      width: 76px;
+      height: 76px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent-bright), #0c9b50);
+      color: #041208;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: 900;
+      box-shadow: 0 0 36px var(--accent-glow), 0 0 0 8px rgba(22, 200, 106, 0.12);
+      margin-bottom: 18px;
+      animation: bootPulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes bootPulse {
+      0%, 100% { transform: scale(0.97); }
+      50% { transform: scale(1.04); }
+    }
+
+    .boot-brand-title {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      color: #ffffff;
+    }
+
+    .boot-sub-tag {
+      margin: 6px 0 0;
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--accent-bright);
+    }
+
+    .boot-progress-wrap {
+      width: min(420px, 86vw);
+      margin-top: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .boot-track {
+      width: 100%;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .boot-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent-bright), #7ef9b7);
+      box-shadow: 0 0 18px var(--accent-bright);
+      transition: width 0.18s ease;
+    }
+
+    .boot-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .boot-skip-btn {
+      margin-top: 18px;
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .boot-skip-btn:hover {
+      color: #ffffff;
+      border-color: var(--border-strong);
+    }
+
+    /* =========================================================================
+       APP SHELL & MAIN CONTAINER
+       ========================================================================= */
     .app-shell {
       min-height: 100vh;
       display: flex;
@@ -110,49 +225,64 @@
     .main-container {
       flex: 1;
       width: 100%;
-      max-width: 1600px;
+      max-width: 1620px;
       margin: 0 auto;
-      padding: 24px 16px 68px;
+      padding: 20px 16px 80px;
     }
 
     @media (min-width: 640px) {
       .main-container {
-        padding: 28px 32px 72px;
+        padding: 24px 28px 84px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .main-container {
+        padding: 28px 36px 88px;
       }
     }
 
     .page-view {
       display: flex;
       flex-direction: column;
-      gap: 32px;
+      gap: 28px;
+      animation: viewFadeIn 0.22s ease;
     }
 
-    /* Top Header & Navigation */
+    @keyframes viewFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =========================================================================
+       TOP HEADER, MOBILE NAV & FIREBASE SYNC BAR
+       ========================================================================= */
     .top-header {
       position: sticky;
       top: 0;
       z-index: 40;
-      height: 64px;
-      background: rgba(12, 16, 13, 0.95);
-      backdrop-filter: blur(12px);
+      min-height: 68px;
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px) saturate(140%);
       border-bottom: 1px solid var(--border-subtle);
-      padding: 0 16px;
+      padding: 8px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+      flex-wrap: wrap;
     }
 
     @media (min-width: 1024px) {
       .top-header {
-        padding: 0 32px;
+        padding: 8px 32px;
       }
     }
 
     .header-left {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 18px;
       min-width: 0;
     }
 
@@ -164,27 +294,33 @@
       border: 0;
       color: #ffffff;
       padding: 4px 8px 4px 2px;
-      border-radius: 12px;
+      border-radius: var(--radius-md);
+      transition: transform 0.15s ease;
+    }
+
+    .brand-btn:hover {
+      transform: translateY(-1px);
     }
 
     .brand-badge {
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
       border-radius: 999px;
-      background: var(--accent-bright);
-      color: #061309;
+      background: linear-gradient(135deg, var(--accent-bright), #0fa958);
+      color: #051309;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-weight: 900;
-      font-size: 14px;
+      font-size: 15px;
+      box-shadow: 0 0 18px var(--accent-soft);
       flex-shrink: 0;
     }
 
     .brand-title {
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      font-size: 18px;
       color: #ffffff;
       white-space: nowrap;
     }
@@ -195,7 +331,7 @@
       gap: 4px;
     }
 
-    @media (min-width: 768px) {
+    @media (min-width: 840px) {
       .desktop-nav {
         display: flex;
       }
@@ -204,15 +340,16 @@
     .top-nav-btn {
       background: transparent;
       border: 0;
-      padding: 8px 14px;
-      border-radius: 12px;
-      font-size: 14px;
+      padding: 9px 13px;
+      border-radius: var(--radius-md);
+      font-size: 13.5px;
       font-weight: 600;
-      color: #9aa69d;
+      color: var(--text-muted);
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
       transition: background-color 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
     }
 
     .top-nav-btn:hover {
@@ -222,18 +359,31 @@
 
     .top-nav-btn.nav-active,
     .mobile-nav-btn.nav-active {
-      background: rgba(255, 255, 255, 0.11);
+      background: rgba(255, 255, 255, 0.1);
       color: #ffffff;
       box-shadow: inset 0 -2.5px 0 var(--accent-bright);
     }
 
+    .soon-pill {
+      padding: 1.5px 6px;
+      font-size: 9.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.16);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #7dd3fc;
+      line-height: 1.3;
+    }
+
     .unread-badge {
-      padding: 2px 6px;
+      padding: 2px 7px;
       font-size: 10px;
-      font-weight: 700;
+      font-weight: 800;
       border-radius: 999px;
       background: var(--accent-bright);
-      color: #061309;
+      color: #051309;
       line-height: 1.2;
     }
 
@@ -241,12 +391,13 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     .search-wrap {
       display: none;
       position: relative;
-      width: 176px;
+      width: 170px;
     }
 
     @media (min-width: 640px) {
@@ -257,67 +408,70 @@
 
     @media (min-width: 1280px) {
       .search-wrap {
-        width: 256px;
+        width: 220px;
       }
     }
 
     .search-input {
       width: 100%;
-      background: #151b17;
+      background: rgba(16, 22, 18, 0.92);
       color: #ffffff;
       font-size: 13px;
       border-radius: 999px;
-      padding: 6px 16px;
+      padding: 7px 15px;
       border: 1px solid var(--border-subtle);
       outline: none;
-      transition: border-color 0.15s ease;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
 
     .search-input::placeholder {
-      color: #7c887f;
+      color: var(--text-dim);
     }
 
     .search-input:focus {
       border-color: var(--accent-bright);
+      box-shadow: 0 0 0 3px var(--accent-soft);
     }
 
     .studio-header-btn {
-      padding: 6px 14px;
+      padding: 7px 14px;
       border-radius: 999px;
       font-size: 12px;
       font-weight: 700;
       background: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgba(255, 255, 255, 0.09);
+      border: 1px solid var(--border-strong);
       color: #ffffff;
       white-space: nowrap;
-      transition: background-color 0.15s ease;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
     }
 
     .studio-header-btn:hover {
-      background: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.13);
+      border-color: rgba(255, 255, 255, 0.25);
     }
 
     .header-profile-btn {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      padding: 4px 12px 4px 6px;
+      gap: 9px;
+      padding: 4px 12px 4px 5px;
       border-radius: 999px;
-      background: #151b17;
-      border: 1px solid rgba(255, 255, 255, 0.09);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
       color: #ffffff;
-      transition: background-color 0.15s ease;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
     }
 
     .header-profile-btn:hover {
-      background: #1c251f;
+      background: var(--bg-card-hover);
+      border-color: var(--border-strong);
     }
 
     .header-username {
       font-size: 13px;
       font-weight: 600;
       color: #ffffff;
-      max-width: 100px;
+      max-width: 96px;
     }
 
     .mobile-nav-strip {
@@ -325,12 +479,12 @@
       align-items: center;
       gap: 6px;
       padding: 8px 12px;
-      background: #0c100d;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
       overflow-x: auto;
     }
 
-    @media (min-width: 768px) {
+    @media (min-width: 840px) {
       .mobile-nav-strip {
         display: none;
       }
@@ -340,33 +494,98 @@
       background: transparent;
       border: 0;
       padding: 6px 12px;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       font-size: 12px;
       font-weight: 600;
-      color: #9aa69d;
+      color: var(--text-muted);
       white-space: nowrap;
     }
 
-    /* Keyboard / Controller Navigation Highlight */
+    /* Cloud & Sync Status Strip */
+    .cloud-sync-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(90deg, rgba(20, 28, 23, 0.94), rgba(13, 20, 16, 0.96));
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-card);
+    }
+
+    .sync-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent-bright);
+      box-shadow: 0 0 10px var(--accent-bright);
+    }
+
+    .status-dot.local-only {
+      background: #38bdf8;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+    }
+
+    .status-dot.offline {
+      background: #f59e0b;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.45);
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 11px;
+      border-radius: var(--radius-sm);
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border-subtle);
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
     .pad-focused {
       outline: 2.5px solid var(--accent-bright) !important;
       outline-offset: 2px !important;
-      transform: scale(1.02);
+      transform: scale(1.012);
       transition: transform 0.14s ease, box-shadow 0.14s ease;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65), 0 0 0 4px var(--accent-soft);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.65), 0 0 0 4px var(--accent-soft);
       z-index: 25;
     }
 
-    /* Hero Banner */
+    /* =========================================================================
+       HERO BANNER & DASHBOARD SECTIONS
+       ========================================================================= */
     .hero-banner {
       position: relative;
       width: 100%;
       height: 320px;
-      border-radius: 16px;
+      border-radius: var(--radius-xl);
       overflow: hidden;
-      background: linear-gradient(135deg, #122b1a 0%, #0e1510 50%, #080a09 100%);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55);
+      background: linear-gradient(135deg, #13311d 0%, #0d1610 52%, #070a08 100%);
+      border: 1px solid var(--border-strong);
+      box-shadow: var(--shadow-elevated);
     }
 
     @media (min-width: 640px) {
@@ -380,19 +599,24 @@
       inset: 0;
       background-size: cover;
       background-position: center;
-      opacity: 0.4;
+      opacity: 0.42;
+      transition: transform 0.6s ease;
+    }
+
+    .hero-banner:hover .hero-backdrop {
+      transform: scale(1.02);
     }
 
     .hero-scrim-top {
       position: absolute;
       inset: 0;
-      background: linear-gradient(to top, #080b09 0%, rgba(8, 11, 9, 0.6) 55%, transparent 100%);
+      background: linear-gradient(to top, #060908 0%, rgba(6, 9, 8, 0.58) 56%, transparent 100%);
     }
 
     .hero-scrim-side {
       position: absolute;
       inset: 0;
-      background: linear-gradient(to right, rgba(8, 11, 9, 0.95) 0%, rgba(8, 11, 9, 0.55) 55%, transparent 100%);
+      background: linear-gradient(to right, rgba(6, 9, 8, 0.95) 0%, rgba(6, 9, 8, 0.52) 58%, transparent 100%);
     }
 
     .hero-content {
@@ -403,12 +627,12 @@
       flex-direction: column;
       justify-content: flex-end;
       padding: 24px;
-      max-width: 672px;
+      max-width: 680px;
     }
 
     @media (min-width: 640px) {
       .hero-content {
-        padding: 40px;
+        padding: 38px;
       }
     }
 
@@ -416,9 +640,9 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
+      font-size: 11.5px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--accent-bright);
       margin-bottom: 8px;
@@ -429,33 +653,35 @@
       height: 8px;
       border-radius: 999px;
       background: var(--accent-bright);
+      box-shadow: 0 0 10px var(--accent-bright);
     }
 
     .hero-title {
       margin: 0;
       font-size: 30px;
       font-weight: 900;
-      letter-spacing: -0.025em;
+      letter-spacing: -0.03em;
       color: #ffffff;
-      line-height: 1.08;
+      line-height: 1.06;
     }
 
     @media (min-width: 640px) {
       .hero-title {
-        font-size: 48px;
+        font-size: 46px;
       }
     }
 
     .hero-desc {
       margin: 10px 0 0;
       font-size: 14px;
-      color: #b9c6bd;
-      max-width: 576px;
+      color: #c2cfc6;
+      max-width: 580px;
+      line-height: 1.45;
     }
 
     @media (min-width: 640px) {
       .hero-desc {
-        font-size: 16px;
+        font-size: 15.5px;
       }
     }
 
@@ -467,81 +693,87 @@
       gap: 12px;
     }
 
+    /* Buttons */
     .btn-accent {
       padding: 10px 22px;
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       border: 0;
       font-weight: 700;
-      font-size: 14px;
+      font-size: 13.5px;
       background: var(--accent-bright);
-      color: #061309;
-      transition: filter 0.15s ease;
+      color: #051309;
+      box-shadow: 0 6px 20px rgba(22, 200, 106, 0.25);
+      transition: transform 0.14s ease, filter 0.15s ease;
     }
 
     .btn-accent:hover {
       filter: brightness(1.08);
+      transform: translateY(-1px);
     }
 
     .btn-glass {
       padding: 10px 16px;
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       font-weight: 600;
-      font-size: 14px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-size: 13.5px;
+      background: rgba(255, 255, 255, 0.09);
+      border: 1px solid var(--border-strong);
       color: #ffffff;
-      backdrop-filter: blur(6px);
-      transition: background-color 0.15s ease;
+      backdrop-filter: blur(8px);
+      transition: background-color 0.15s ease, transform 0.14s ease;
     }
 
     .btn-glass:hover {
-      background: rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
     }
 
-    /* Section Headers & Grids */
     .section-block {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
     .section-header-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 12px;
     }
 
     .section-title {
       margin: 0;
-      font-size: 18px;
+      font-size: 18.5px;
       font-weight: 800;
-      letter-spacing: -0.015em;
+      letter-spacing: -0.02em;
       color: #ffffff;
     }
 
     @media (min-width: 640px) {
       .section-title {
-        font-size: 20px;
+        font-size: 20.5px;
       }
     }
 
     .section-link-btn {
       background: transparent;
       border: 0;
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 700;
       color: var(--accent-bright);
-      padding: 4px;
+      padding: 4px 6px;
+      border-radius: 8px;
+      transition: background-color 0.15s ease;
     }
 
     .section-link-btn:hover {
-      text-decoration: underline;
+      background: var(--accent-soft);
     }
 
     .page-top-bar {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
     }
 
     @media (min-width: 640px) {
@@ -554,29 +786,34 @@
 
     .page-kicker {
       margin: 0;
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 11.5px;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.09em;
       color: var(--accent-bright);
     }
 
     .page-heading {
-      margin: 2px 0 0;
-      font-size: 24px;
+      margin: 3px 0 0;
+      font-size: 25px;
       font-weight: 900;
+      letter-spacing: -0.025em;
       color: #ffffff;
     }
 
     @media (min-width: 640px) {
       .page-heading {
-        font-size: 30px;
+        font-size: 31px;
       }
     }
 
+    /* =========================================================================
+       FIXED NON-SHRINKING GAME GRIDS & CARDS
+       ========================================================================= */
     .games-grid {
       display: grid;
       grid-template-columns: repeat(1, minmax(0, 1fr));
+      grid-auto-rows: minmax(276px, auto);
       gap: 16px;
     }
 
@@ -599,7 +836,7 @@
       }
     }
 
-    @media (min-width: 1280px) {
+    @media (min-width: 1320px) {
       .games-grid {
         grid-template-columns: repeat(5, minmax(0, 1fr));
       }
@@ -609,42 +846,47 @@
       display: flex;
       gap: 12px;
       overflow-x: auto;
+      min-height: 52px;
+      align-items: center;
       padding-bottom: 8px;
     }
 
-    /* Console Dashboard Tiles & Cards */
     .tile-card {
       position: relative;
       width: 100%;
-      border-radius: 16px;
+      height: 100%;
+      min-height: 276px;
+      border-radius: var(--radius-lg);
       overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      flex-shrink: 0;
       background-color: var(--bg-card);
       border: 1px solid var(--border-subtle);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 8px 20px rgba(0, 0, 0, 0.35);
-      transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow: var(--shadow-card);
+      transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
         background-color 0.18s ease,
         border-color 0.18s ease,
-        box-shadow 0.18s ease;
+        box-shadow 0.2s ease;
     }
 
     .tile-card:hover {
       transform: translateY(-4px);
       background-color: var(--bg-card-hover);
       border-color: var(--accent-bright);
-      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.65), 0 0 0 1px var(--accent-soft);
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--accent-soft);
     }
 
     .game-card-art {
       position: relative;
-      height: 112px;
+      height: 122px;
+      min-height: 122px;
       width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 38px;
+      font-size: 40px;
       overflow: hidden;
       flex-shrink: 0;
     }
@@ -657,19 +899,22 @@
     }
 
     .game-card-body {
-      padding: 14px;
+      padding: 15px;
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 12px;
+      gap: 14px;
     }
 
     .game-card-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
       font-size: 10px;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.07em;
+      letter-spacing: 0.08em;
     }
 
     .game-card-badge.installed {
@@ -677,32 +922,34 @@
     }
 
     .game-card-badge.cloud {
-      color: #9aa69d;
+      color: var(--text-muted);
     }
 
     .game-card-title {
-      margin: 2px 0 0;
-      font-weight: 700;
-      font-size: 14px;
+      margin: 4px 0 0;
+      font-weight: 800;
+      font-size: 15px;
       color: #ffffff;
+      letter-spacing: -0.01em;
     }
 
     .game-card-desc {
-      margin: 4px 0 0;
+      margin: 5px 0 0;
       font-size: 12px;
-      color: #8f9b92;
-      min-height: 32px;
+      color: var(--text-muted);
+      line-height: 1.42;
+      min-height: 34px;
     }
 
     .game-card-btn-play {
       width: 100%;
-      padding: 8px 12px;
-      border-radius: 12px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
       border: 0;
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 700;
       background: var(--accent-bright);
-      color: #061309;
+      color: #051309;
       transition: filter 0.15s ease;
     }
 
@@ -712,36 +959,36 @@
 
     .game-card-btn-install {
       width: 100%;
-      padding: 8px 12px;
-      border-radius: 12px;
-      border: 0;
-      font-size: 12px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong);
+      font-size: 12.5px;
       font-weight: 700;
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.07);
       color: #ffffff;
-      transition: background-color 0.15s ease;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
     }
 
     .game-card-btn-install:hover {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.14);
+      border-color: var(--accent-bright);
     }
 
     .console-panel {
-      background: linear-gradient(180deg, rgba(21, 28, 23, 0.92) 0%, rgba(15, 20, 17, 0.96) 100%);
+      background: linear-gradient(180deg, rgba(20, 28, 23, 0.94) 0%, rgba(13, 19, 15, 0.98) 100%);
       border: 1px solid var(--border-subtle);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      box-shadow: var(--shadow-card);
     }
 
     .empty-grid-panel {
       grid-column: 1 / -1;
-      padding: 32px 24px;
-      border-radius: 16px;
+      padding: 36px 24px;
+      border-radius: var(--radius-lg);
       font-size: 14px;
-      color: #7c887f;
+      color: var(--text-muted);
       text-align: center;
     }
 
-    /* Player Avatar Box */
     .avatar-box {
       position: relative;
       display: inline-flex;
@@ -761,7 +1008,9 @@
       display: block;
     }
 
-    /* Social / Chat Layout */
+    /* =========================================================================
+       SOCIAL / CHAT LAYOUT
+       ========================================================================= */
     .social-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -782,25 +1031,25 @@
     }
 
     .social-sidebar {
-      border-radius: 16px;
-      padding: 16px;
+      border-radius: var(--radius-lg);
+      padding: 18px;
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
 
     .social-subhead {
-      margin: 0 0 8px;
-      font-size: 12px;
-      font-weight: 700;
+      margin: 0 0 9px;
+      font-size: 11.5px;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: #8f9b92;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
     }
 
     .chat-form {
-      padding-top: 12px;
-      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       gap: 10px;
@@ -808,61 +1057,107 @@
 
     .chat-input {
       flex: 1;
-      background: #0a0d0b;
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      border-radius: 12px;
-      padding: 10px 16px;
+      background: rgba(6, 9, 8, 0.88);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 11px 16px;
       font-size: 14px;
       color: #ffffff;
       outline: none;
+      transition: border-color 0.15s ease;
     }
 
     .chat-input:focus {
       border-color: var(--accent-bright);
     }
 
-    /* Profile Card */
+    /* =========================================================================
+       PROFILE CARD & ACCOUNTS (SOON) PANEL
+       ========================================================================= */
+    .profile-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      max-width: 1060px;
+    }
+
+    @media (min-width: 900px) {
+      .profile-layout {
+        grid-template-columns: 1.45fr 1fr;
+        align-items: start;
+      }
+    }
+
     .profile-card {
-      border-radius: 16px;
+      border-radius: var(--radius-xl);
       padding: 24px;
-      max-width: 672px;
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 22px;
     }
 
     @media (min-width: 640px) {
       .profile-card {
-        padding: 32px;
+        padding: 30px;
       }
     }
 
     .field-label {
       display: block;
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 11.5px;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: #8f9b92;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
       margin-bottom: 6px;
     }
 
     .field-input {
       width: 100%;
-      background: #0a0d0b;
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      border-radius: 12px;
+      background: rgba(6, 9, 8, 0.88);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
       padding: 10px 14px;
       font-size: 14px;
       color: #ffffff;
       outline: none;
+      transition: border-color 0.15s ease;
     }
 
     .field-input:focus {
       border-color: var(--accent-bright);
     }
 
-    /* Controller Bar */
+    .account-soon-card {
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      background: linear-gradient(180deg, rgba(16, 26, 32, 0.94) 0%, rgba(10, 15, 19, 0.98) 100%);
+    }
+
+    .soon-feature-item {
+      padding: 11px 13px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .soon-feature-item strong {
+      display: block;
+      color: #ffffff;
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+
+    /* =========================================================================
+       CONTROLLER BAR
+       ========================================================================= */
     .controller-bar {
       position: fixed;
       bottom: 0;
@@ -870,9 +1165,9 @@
       right: 0;
       z-index: 40;
       height: 44px;
-      background: rgba(13, 18, 15, 0.95);
+      background: rgba(11, 16, 13, 0.95);
       backdrop-filter: blur(12px);
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      border-top: 1px solid var(--border-subtle);
       padding: 0 24px;
       display: flex;
       align-items: center;
@@ -882,7 +1177,7 @@
     }
 
     /* =========================================================================
-       HORIZONTAL JET / LIGHT-STREAK LAUNCH TRANSITION OVERLAY
+       CLOUD STREAMING LAUNCH BOOT SCREEN (HORIZONTAL JET STREAK)
        ========================================================================= */
     #jetBootOverlay {
       position: fixed;
@@ -894,7 +1189,7 @@
       flex-direction: column;
       overflow: hidden;
       background:
-        radial-gradient(ellipse at 50% 50%, rgba(22, 200, 106, 0.16), rgba(5, 8, 6, 0.98) 72%),
+        radial-gradient(ellipse at 50% 50%, rgba(22, 200, 106, 0.18), rgba(5, 8, 6, 0.98) 72%),
         linear-gradient(90deg, rgba(5, 8, 6, 0.98) 0%, rgba(12, 24, 16, 0.92) 50%, rgba(5, 8, 6, 0.98) 100%);
       backdrop-filter: blur(14px);
     }
@@ -911,13 +1206,13 @@
 
     .jet-stage {
       position: relative;
-      width: min(720px, 95vw);
-      height: 168px;
+      width: min(740px, 95vw);
+      height: 172px;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      border-radius: 24px;
+      border-radius: var(--radius-xl);
     }
 
     .jet-horizon-line {
@@ -1034,14 +1329,14 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 14px;
+      padding: 8px 15px;
       border-radius: 999px;
-      background: rgba(17, 23, 19, 0.92);
-      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(16, 23, 19, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.18);
       color: #ffffff;
       font-size: 12px;
       font-weight: 800;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(10px);
       opacity: 0.92;
       transition: opacity 0.15s ease, transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
@@ -1051,7 +1346,7 @@
     #guideTriggerBtn:focus-visible {
       opacity: 1;
       transform: translateY(-1px);
-      background: #1a241d;
+      background: #1b261e;
       border-color: var(--accent-bright);
     }
 
@@ -1069,9 +1364,9 @@
     }
 
     .ingame-drawer {
-      width: min(370px, 90vw);
+      width: min(375px, 90vw);
       height: 100%;
-      background: #101511;
+      background: #0f1410;
       border-right: 1px solid var(--border-strong);
       padding: 24px;
       display: flex;
@@ -1091,8 +1386,8 @@
       position: fixed;
       inset: 0;
       z-index: 50;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(6px);
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1100,12 +1395,12 @@
     }
 
     .modal-card {
-      background: #131915;
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      border-radius: 16px;
+      background: #121814;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-xl);
       width: 100%;
       padding: 24px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+      box-shadow: var(--shadow-elevated);
       position: relative;
     }
 
@@ -1116,14 +1411,14 @@
       right: 24px;
       z-index: 170;
       display: none;
-      max-width: 380px;
-      background: #161e19;
+      max-width: 390px;
+      background: #161f19;
       border: 1px solid rgba(22, 200, 106, 0.45);
       color: #ffffff;
       padding: 12px 16px;
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.65);
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 600;
     }
 
@@ -1139,6 +1434,29 @@
   </style>
 </head>
 <body class="app-shell">
+
+  <!-- =======================================================================
+       CONSOLE STARTUP BOOT SCREEN
+       ======================================================================= -->
+  <div id="consoleBootScreen" role="dialog" aria-label="Polaris Boot Screen">
+    <div class="boot-logo-ring">✦</div>
+    <h1 class="boot-brand-title">POLARIS</h1>
+    <p class="boot-sub-tag">CLOUD GAMING &amp; SHARED CATALOG</p>
+
+    <div class="boot-progress-wrap">
+      <div class="boot-track">
+        <div id="bootProgressFill" class="boot-fill"></div>
+      </div>
+      <div class="boot-meta-row">
+        <span id="bootStatusText">Initializing local IndexedDB &amp; console shell...</span>
+        <span id="bootPercentText" class="mono" style="color:#fff;font-weight:700;">0%</span>
+      </div>
+    </div>
+
+    <button id="skipBootBtn" type="button" class="boot-skip-btn cursor-pointer">
+      Skip Boot
+    </button>
+  </div>
 
   <!-- =======================================================================
        TOP CONSOLE NAVIGATION HEADER
@@ -1167,14 +1485,15 @@
           My Games
         </button>
         <button type="button" data-route="social" data-action="navigate" class="top-nav-btn nav-focusable cursor-pointer">
-          <span>Global &amp; Peer Chat</span>
+          <span>Global &amp; Friends Chat</span>
           <span id="unreadBadge" class="unread-badge hidden">0</span>
         </button>
         <button type="button" data-route="downloads" data-action="navigate" class="top-nav-btn nav-focusable cursor-pointer">
           Downloads
         </button>
         <button type="button" data-route="profile" data-action="navigate" class="top-nav-btn nav-focusable cursor-pointer">
-          Profile
+          <span>Profile</span>
+          <span class="soon-pill">Accounts Soon</span>
         </button>
       </nav>
     </div>
@@ -1216,9 +1535,9 @@
     <button type="button" data-route="home" data-action="navigate" class="mobile-nav-btn nav-focusable cursor-pointer">Home</button>
     <button type="button" data-route="store" data-action="navigate" class="mobile-nav-btn nav-focusable cursor-pointer">Store</button>
     <button type="button" data-route="library" data-action="navigate" class="mobile-nav-btn nav-focusable cursor-pointer">My Games</button>
-    <button type="button" data-route="social" data-action="navigate" class="mobile-nav-btn nav-focusable cursor-pointer">Global &amp; Peer Chat</button>
+    <button type="button" data-route="social" data-action="navigate" class="mobile-nav-btn nav-focusable cursor-pointer">Global &amp; Friends Chat</button>
     <button type="button" data-route="downloads" data-action="navigate" class="mobile-nav-btn nav-focusable cursor-pointer">Downloads</button>
-    <button type="button" data-route="profile" data-action="navigate" class="mobile-nav-btn nav-focusable cursor-pointer">Profile</button>
+    <button type="button" data-route="profile" data-action="navigate" class="mobile-nav-btn nav-focusable cursor-pointer">Profile (Accounts Soon)</button>
   </div>
 
   <!-- =======================================================================
@@ -1226,8 +1545,41 @@
        ======================================================================= -->
   <main class="main-container">
 
+    <!-- FIREBASE REALTIME DATABASE & OFFLINE CACHE STATUS BAR -->
+    <div class="cloud-sync-bar">
+      <div class="sync-group">
+        <span class="status-pill">
+          <span id="cloudStatusDot" class="status-dot local-only"></span>
+          <span id="cloudStatusLabel">Local Offline Cache Ready</span>
+        </span>
+        <span class="meta-chip">
+          <span>Project:</span>
+          <strong class="mono" style="color:#fff;">polaris-cloud-24c37</strong>
+        </span>
+        <span class="meta-chip">
+          <span>Shared Games:</span>
+          <strong id="sharedGameCount" style="color:var(--accent-bright);">0</strong>
+        </span>
+      </div>
+
+      <div class="sync-group">
+        <span class="meta-chip">
+          <span>Accounts:</span>
+          <strong style="color:#7dd3fc;">Coming Soon</strong>
+        </span>
+        <button
+          id="resyncCloudBtn"
+          type="button"
+          class="btn-glass nav-focusable cursor-pointer"
+          style="padding:5px 12px;font-size:11.5px;border-radius:8px;"
+        >
+          Sync Now
+        </button>
+      </div>
+    </div>
+
     <!-- 1. HOME DASHBOARD -->
-    <section id="view-home" class="page-view">
+    <section id="view-home" class="page-view" style="margin-top:24px;">
       <div id="heroBanner" class="hero-banner">
         <div id="heroBackdrop" class="hero-backdrop"></div>
         <div class="hero-scrim-top"></div>
@@ -1236,11 +1588,11 @@
         <div class="hero-content">
           <div class="hero-eyebrow">
             <span class="hero-dot"></span>
-            <span id="heroEyebrow">POLARIS CLOUD MESH</span>
+            <span id="heroEyebrow">POLARIS CLOUD &amp; LOCAL CONSOLE</span>
           </div>
           <h1 id="heroTitle" class="hero-title">Ready to Play</h1>
           <p id="heroDesc" class="hero-desc line-clamp-2-safe">
-            Instant browser cloud launches, local P2P game sync, live global chat, and direct peer messages.
+            Instant browser game launches, shared Firebase Realtime Database catalog &amp; chat, and full offline IndexedDB persistence.
           </p>
           <div class="hero-actions">
             <button
@@ -1258,7 +1610,7 @@
               data-route="social"
               class="btn-glass nav-focusable cursor-pointer"
             >
-              Global &amp; Peer Chat (<span id="homePeerCount">1</span>)
+              Global &amp; Friends Chat (<span id="homeOnlineCount">1</span>)
             </button>
           </div>
         </div>
@@ -1280,10 +1632,10 @@
         <div id="jumpBackRow" class="games-grid"></div>
       </div>
 
-      <!-- Featured & Synced Store Row -->
+      <!-- Shared & Featured Games Row -->
       <div class="section-block">
         <div class="section-header-row">
-          <h2 class="section-title">Featured &amp; Synced Games</h2>
+          <h2 class="section-title">Shared Store &amp; Featured Games</h2>
           <button
             type="button"
             data-action="navigate"
@@ -1296,10 +1648,10 @@
         <div id="recentGamesRow" class="games-grid"></div>
       </div>
 
-      <!-- Active Peers Strip -->
+      <!-- Active Players Strip -->
       <div class="section-block">
         <div class="section-header-row">
-          <h2 class="section-title">Active P2P Players</h2>
+          <h2 class="section-title">Active Players</h2>
           <button
             type="button"
             data-action="navigate"
@@ -1314,17 +1666,17 @@
     </section>
 
     <!-- 2. STORE CATALOG VIEW -->
-    <section id="view-store" class="page-view hidden">
+    <section id="view-store" class="page-view hidden" style="margin-top:24px;">
       <div class="page-top-bar">
         <div>
-          <p class="page-kicker">Polaris Catalog</p>
+          <p class="page-kicker">Polaris Shared Catalog</p>
           <h1 class="page-heading">Store</h1>
         </div>
         <button
           type="button"
           data-action="open-publisher"
           class="btn-accent nav-focusable cursor-pointer"
-          style="padding: 8px 16px; font-size: 12px;"
+          style="padding: 9px 18px; font-size: 12.5px;"
         >
           + Upload Game
         </button>
@@ -1333,24 +1685,24 @@
     </section>
 
     <!-- 3. MY GAMES LIBRARY VIEW -->
-    <section id="view-library" class="page-view hidden">
+    <section id="view-library" class="page-view hidden" style="margin-top:24px;">
       <div>
-        <p class="page-kicker">Local Collection</p>
+        <p class="page-kicker">Offline &amp; Local Collection</p>
         <h1 class="page-heading">My Games</h1>
       </div>
       <div id="libraryGrid" class="games-grid"></div>
     </section>
 
-    <!-- 4. SOCIAL HUB: GLOBAL CHAT + FRIENDS & P2P DIRECT MESSAGES -->
-    <section id="view-social" class="page-view hidden">
+    <!-- 4. SOCIAL HUB: GLOBAL CHAT + FRIENDS & DIRECT MESSAGES -->
+    <section id="view-social" class="page-view hidden" style="margin-top:24px;">
       <div class="page-top-bar">
         <div>
-          <p class="page-kicker">Polaris Comms</p>
+          <p class="page-kicker">Polaris Community</p>
           <h1 class="page-heading">Global Chat, Friends &amp; DMs</h1>
         </div>
-        <div class="console-panel" style="display:flex;align-items:center;gap:8px;font-size:12px;color:#9aa69d;padding:8px 14px;border-radius:12px;">
+        <div class="console-panel" style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);padding:8px 14px;border-radius:12px;">
           <span style="width:8px;height:8px;border-radius:999px;background:var(--accent-bright);"></span>
-          <span>Live BroadcastChannel Mesh • <strong id="socialOnlineCount" style="color:#fff;">1</strong> online</span>
+          <span>Firebase RTDB + Local Sync • <strong id="socialOnlineCount" style="color:#fff;">1</strong> active</span>
         </div>
       </div>
 
@@ -1363,27 +1715,27 @@
               type="button"
               data-action="select-global-chat"
               class="nav-focusable cursor-pointer"
-              style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:12px;text-align:left;background:rgba(22,200,106,0.15);border:1px solid rgba(22,200,106,0.45);color:#fff;"
+              style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-radius:12px;text-align:left;background:rgba(22,200,106,0.15);border:1px solid rgba(22,200,106,0.45);color:#fff;"
             >
               <div style="display:flex;align-items:center;gap:10px;">
-                <span style="width:28px;height:28px;border-radius:999px;background:var(--accent-bright);color:#061309;font-weight:900;font-size:12px;display:inline-flex;align-items:center;justify-content:center;">#</span>
+                <span style="width:28px;height:28px;border-radius:999px;background:var(--accent-bright);color:#051309;font-weight:900;font-size:12px;display:inline-flex;align-items:center;justify-content:center;">#</span>
                 <div>
-                  <div style="font-size:12px;font-weight:800;color:#fff;">Global Chat</div>
-                  <div style="font-size:10px;color:#9aa69d;">Shared room for all connected peers</div>
+                  <div style="font-size:12.5px;font-weight:800;color:#fff;">Global Chat</div>
+                  <div style="font-size:10.5px;color:var(--text-muted);">Shared with everyone on Polaris</div>
                 </div>
               </div>
-              <span style="font-size:10px;font-weight:700;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:var(--accent-bright);color:#061309;">LIVE</span>
+              <span style="font-size:10px;font-weight:800;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--accent-bright);color:#051309;">LIVE</span>
             </button>
           </div>
 
           <div>
             <h3 class="social-subhead">
-              Discovered Peers (<span id="peerListCount">0</span>)
+              Online Players (<span id="peerListCount">0</span>)
             </h3>
             <div id="discoveredPeersList" style="display:flex;flex-direction:column;gap:8px;max-height:176px;overflow-y:auto;padding-right:4px;"></div>
           </div>
 
-          <div style="border-top:1px solid rgba(255,255,255,0.07);padding-top:16px;flex:1;display:flex;flex-direction:column;">
+          <div style="border-top:1px solid var(--border-subtle);padding-top:16px;flex:1;display:flex;flex-direction:column;">
             <h3 class="social-subhead">
               Friends (<span id="friendsListCount">0</span>)
             </h3>
@@ -1391,14 +1743,14 @@
           </div>
         </div>
 
-        <div class="social-thread console-panel" style="border-radius:16px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;">
-          <div id="dmThreadHeader" style="padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div class="social-thread console-panel" style="border-radius:18px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;">
+          <div id="dmThreadHeader" style="padding-bottom:14px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;gap:12px;">
             <div style="display:flex;align-items:center;gap:12px;min-width:0;">
               <div id="dmActiveAvatar" class="avatar-box" style="width:40px;height:40px;font-size:14px;background:var(--accent-bright);">#</div>
               <div style="min-width:0;">
                 <div id="dmActiveName" class="truncate" style="font-weight:700;font-size:15px;color:#fff;">Global Chat</div>
-                <div id="dmActiveMeta" class="truncate" style="font-size:12px;color:#8f9b92;">
-                  Live messages synced across open Polaris tabs &amp; peers • Click any sender name to view profile
+                <div id="dmActiveMeta" class="truncate" style="font-size:12px;color:var(--text-muted);">
+                  Synced with Firebase RTDB &amp; saved offline • Click any sender name to view profile
                 </div>
               </div>
             </div>
@@ -1427,7 +1779,7 @@
               id="sendChatBtn"
               type="submit"
               class="btn-accent nav-focusable cursor-pointer"
-              style="padding:10px 20px;"
+              style="padding:11px 22px;"
             >
               Send
             </button>
@@ -1437,7 +1789,7 @@
     </section>
 
     <!-- 5. DOWNLOADS QUEUE VIEW -->
-    <section id="view-downloads" class="page-view hidden">
+    <section id="view-downloads" class="page-view hidden" style="margin-top:24px;">
       <div>
         <p class="page-kicker">Installation Queue</p>
         <h1 class="page-heading">Downloads</h1>
@@ -1445,97 +1797,138 @@
       <div id="downloadsGrid" class="games-grid"></div>
     </section>
 
-    <!-- 6. PROFILE & CUSTOMIZATION VIEW -->
-    <section id="view-profile" class="page-view hidden">
+    <!-- 6. PROFILE, CUSTOMIZATION & ACCOUNTS (SOON) VIEW -->
+    <section id="view-profile" class="page-view hidden" style="margin-top:24px;">
       <div>
         <p class="page-kicker">Identity &amp; Appearance</p>
-        <h1 class="page-heading">Profile Settings</h1>
+        <h1 class="page-heading">Profile &amp; Accounts</h1>
       </div>
 
-      <div class="profile-card console-panel">
-        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:24px;">
-          <div id="profilePreviewAvatar" class="avatar-box" style="width:96px;height:96px;font-size:30px;box-shadow:0 0 0 4px rgba(22,200,106,0.28);">P</div>
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <p style="margin:0;font-size:14px;font-weight:700;color:#fff;">Profile Picture (Animated GIF, WebP, APNG, PNG, JPG)</p>
-            <div style="display:flex;flex-wrap:wrap;gap:10px;">
-              <button
-                id="triggerAvatarUploadBtn"
-                type="button"
-                class="btn-accent nav-focusable cursor-pointer"
-                style="padding:8px 16px;font-size:12px;"
-              >
-                Upload Picture
-              </button>
-              <button
-                id="clearAvatarBtn"
-                type="button"
-                class="btn-glass nav-focusable cursor-pointer"
-                style="padding:8px 16px;font-size:12px;"
-              >
-                Use Initials
-              </button>
+      <div class="profile-layout">
+        <div class="profile-card console-panel">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:24px;">
+            <div id="profilePreviewAvatar" class="avatar-box" style="width:96px;height:96px;font-size:30px;box-shadow:0 0 0 4px rgba(22,200,106,0.28);">P</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <p style="margin:0;font-size:14px;font-weight:700;color:#fff;">Profile Picture (Animated GIF, WebP, APNG, PNG, JPG)</p>
+              <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                <button
+                  id="triggerAvatarUploadBtn"
+                  type="button"
+                  class="btn-accent nav-focusable cursor-pointer"
+                  style="padding:8px 16px;font-size:12px;"
+                >
+                  Upload Picture
+                </button>
+                <button
+                  id="clearAvatarBtn"
+                  type="button"
+                  class="btn-glass nav-focusable cursor-pointer"
+                  style="padding:8px 16px;font-size:12px;"
+                >
+                  Use Initials
+                </button>
+              </div>
+              <input id="avatarUploadInput" type="file" accept="image/*" class="hidden" />
             </div>
-            <input id="avatarUploadInput" type="file" accept="image/*" class="hidden" />
           </div>
-        </div>
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
+            <div>
+              <label for="profileUsernameInput" class="field-label">Username (Locked on Claim)</label>
+              <input
+                id="profileUsernameInput"
+                type="text"
+                maxlength="24"
+                placeholder="Enter username"
+                class="field-input nav-focusable"
+              />
+              <p id="usernameLockNote" style="font-size:11px;color:var(--text-muted);margin:6px 0 0;"></p>
+            </div>
+
+            <div>
+              <label for="profileInitialsInput" class="field-label">Initials (Fallback)</label>
+              <input
+                id="profileInitialsInput"
+                type="text"
+                maxlength="2"
+                placeholder="PL"
+                class="field-input nav-focusable"
+                style="text-transform:uppercase;"
+              />
+            </div>
+          </div>
+
           <div>
-            <label for="profileUsernameInput" class="field-label">Username (Locked on Claim)</label>
-            <input
-              id="profileUsernameInput"
-              type="text"
-              maxlength="24"
-              placeholder="Enter username"
-              class="field-input nav-focusable"
-            />
-            <p id="usernameLockNote" style="font-size:11px;color:#8f9b92;margin:6px 0 0;"></p>
+            <label for="profileColorInput" class="field-label">Accent Color</label>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <input
+                id="profileColorInput"
+                type="color"
+                value="#16c86a"
+                class="nav-focusable cursor-pointer"
+                style="width:56px;height:44px;border-radius:12px;background:transparent;border:0;"
+              />
+              <span style="font-size:12px;color:var(--text-muted);">Updates highlights, buttons, and player badge accents immediately.</span>
+            </div>
           </div>
 
-          <div>
-            <label for="profileInitialsInput" class="field-label">Initials (Fallback)</label>
-            <input
-              id="profileInitialsInput"
-              type="text"
-              maxlength="2"
-              placeholder="PL"
-              class="field-input nav-focusable"
-              style="text-transform:uppercase;"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label for="profileColorInput" class="field-label">Accent Color</label>
-          <div style="display:flex;align-items:center;gap:12px;">
-            <input
-              id="profileColorInput"
-              type="color"
-              value="#16c86a"
-              class="nav-focusable cursor-pointer"
-              style="width:56px;height:44px;border-radius:12px;background:transparent;border:0;"
-            />
-            <span style="font-size:12px;color:#8f9b92;">Updates highlights, buttons, and player badge accents immediately.</span>
+          <div style="padding-top:8px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;">
+            <button
+              id="saveProfileBtn"
+              type="button"
+              class="btn-accent nav-focusable cursor-pointer"
+            >
+              Save Profile
+            </button>
+            <button
+              id="releaseUsernameBtn"
+              type="button"
+              class="btn-glass nav-focusable cursor-pointer"
+              style="padding:10px 16px;font-size:12px;"
+            >
+              Release Claimed Name
+            </button>
           </div>
         </div>
 
-        <div style="padding-top:8px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;">
+        <!-- ACCOUNTS (SOON) PREVIEW MODULE -->
+        <aside class="account-soon-card" aria-label="Accounts Coming Soon">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <div>
+              <p class="page-kicker" style="color:#7dd3fc;">Polaris ID</p>
+              <h2 style="margin:3px 0 0;font-size:20px;font-weight:900;color:#fff;">Accounts (Soon)</h2>
+            </div>
+            <span class="soon-pill">Preview</span>
+          </div>
+
+          <p style="margin:0;font-size:13px;color:var(--text-muted);line-height:1.5;">
+            Full sign-in accounts are on the roadmap so you can sign into your Polaris profile from any browser or device. For now, your session uses a local &amp; Firebase device profile with instant play and zero login walls.
+          </p>
+
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="soon-feature-item">
+              <strong>Cross-Device Account Sign-In</strong>
+              Sign in with email or provider to carry your handle, friends, and preferences across devices.
+            </div>
+            <div class="soon-feature-item">
+              <strong>Cloud Saves &amp; Library Sync</strong>
+              Back up installed games, favorites, and progress to your account automatically.
+            </div>
+            <div class="soon-feature-item">
+              <strong>Verified Username Ownership</strong>
+              Bind claimed usernames permanently to an authenticated account ID.
+            </div>
+          </div>
+
           <button
-            id="saveProfileBtn"
-            type="button"
-            class="btn-accent nav-focusable cursor-pointer"
-          >
-            Save Profile
-          </button>
-          <button
-            id="releaseUsernameBtn"
+            id="previewAccountsSoonBtn"
             type="button"
             class="btn-glass nav-focusable cursor-pointer"
-            style="padding:10px 16px;font-size:12px;"
+            style="width:100%;border-color:rgba(56,189,248,0.4);color:#bae6fd;"
           >
-            Release Claimed Name
+            Join Accounts Rollout Note
           </button>
-        </div>
+        </aside>
       </div>
     </section>
   </main>
@@ -1567,7 +1960,7 @@
        MODALS: PLAYER CARD, INSTALL PROGRESS, PUBLISHER STUDIO & GAME EDITOR
        ======================================================================= -->
   <div id="playerCardModal" class="modal-backdrop hidden">
-    <div class="modal-card" style="max-width:384px;text-align:center;display:flex;flex-direction:column;gap:20px;">
+    <div class="modal-card" style="max-width:388px;text-align:center;display:flex;flex-direction:column;gap:20px;">
       <button
         type="button"
         data-close-modal="playerCardModal"
@@ -1581,8 +1974,8 @@
 
       <div>
         <h3 id="playerCardName" style="margin:0;font-size:20px;font-weight:900;color:#fff;">Player</h3>
-        <p id="playerCardStatus" style="margin:4px 0 0;font-size:12px;font-weight:600;color:var(--accent-bright);">Online on P2P Network</p>
-        <p id="playerCardRole" style="margin:4px 0 0;font-size:12px;color:#8f9b92;"></p>
+        <p id="playerCardStatus" style="margin:4px 0 0;font-size:12px;font-weight:600;color:var(--accent-bright);">Online on Polaris</p>
+        <p id="playerCardRole" style="margin:4px 0 0;font-size:12px;color:var(--text-muted);"></p>
       </div>
 
       <div id="playerCardActions" style="display:flex;flex-direction:column;gap:10px;"></div>
@@ -1592,11 +1985,11 @@
   <div id="downloadModal" class="modal-backdrop hidden">
     <div class="modal-card" style="max-width:448px;display:flex;flex-direction:column;gap:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent-bright);">Polaris Installer</span>
+        <span style="font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.09em;color:var(--accent-bright);">Polaris Offline Installer</span>
         <span id="dlPercentText" style="font-size:12px;font-weight:700;color:#fff;">0%</span>
       </div>
       <h3 id="dlGameTitle" style="margin:0;font-size:18px;font-weight:800;color:#fff;">Installing Game</h3>
-      <p id="dlStatusText" style="margin:0;font-size:12px;color:#9aa69d;">Preparing local package...</p>
+      <p id="dlStatusText" style="margin:0;font-size:12px;color:var(--text-muted);">Saving local package to IndexedDB...</p>
       <div style="width:100%;height:10px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;">
         <div id="dlProgressBar" style="height:100%;width:0%;background:var(--accent-bright);border-radius:999px;transition:width 0.1s linear;"></div>
       </div>
@@ -1604,19 +1997,19 @@
   </div>
 
   <div id="pubAuthModal" class="modal-backdrop hidden">
-    <div class="modal-card" style="max-width:384px;display:flex;flex-direction:column;gap:16px;">
+    <div class="modal-card" style="max-width:388px;display:flex;flex-direction:column;gap:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <h3 style="margin:0;font-size:18px;font-weight:800;color:#fff;">Publisher Studio</h3>
-        <button type="button" data-close-modal="pubAuthModal" class="nav-focusable cursor-pointer" style="background:transparent;border:0;color:#9aa69d;font-size:16px;">✕</button>
+        <button type="button" data-close-modal="pubAuthModal" class="nav-focusable cursor-pointer" style="background:transparent;border:0;color:var(--text-muted);font-size:16px;">✕</button>
       </div>
-      <p style="margin:0;font-size:12px;color:#9aa69d;">Enter access code to upload and manage games.</p>
+      <p style="margin:0;font-size:12px;color:var(--text-muted);">Enter access code to upload, edit, and share HTML5 games with everyone.</p>
       <input
         id="pubCodeInput"
         type="password"
         placeholder="Access code"
         class="field-input nav-focusable"
       />
-      <p id="pubCodeError" style="margin:0;font-size:12px;color:#f87171;min-height:16px;"></p>
+      <p id="pubCodeError" style="margin:0;font-size:12px;color:var(--danger);min-height:16px;"></p>
       <button
         id="verifyPubCodeBtn"
         type="button"
@@ -1630,7 +2023,7 @@
 
   <div id="pubManagerModal" class="modal-backdrop hidden">
     <div class="modal-card" style="max-width:672px;max-height:88vh;display:flex;flex-direction:column;gap:16px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.07);padding-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-subtle);padding-bottom:14px;">
         <div>
           <p class="page-kicker">Publisher Studio</p>
           <h3 style="margin:2px 0 0;font-size:20px;font-weight:800;color:#fff;">Published Games</h3>
@@ -1662,7 +2055,7 @@
     <div class="modal-card" style="max-width:512px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <h3 id="gameEditorHeading" style="margin:0;font-size:18px;font-weight:800;color:#fff;">Upload Game</h3>
-        <button type="button" data-close-modal="gameEditorModal" class="nav-focusable cursor-pointer" style="background:transparent;border:0;color:#9aa69d;font-size:16px;">✕</button>
+        <button type="button" data-close-modal="gameEditorModal" class="nav-focusable cursor-pointer" style="background:transparent;border:0;color:var(--text-muted);font-size:16px;">✕</button>
       </div>
 
       <input id="editGameId" type="hidden" />
@@ -1694,16 +2087,16 @@
 
       <div>
         <label for="editorCoverFile" class="field-label">Cover Artwork (Image or GIF)</label>
-        <input id="editorCoverFile" type="file" accept="image/*" style="font-size:12px;color:#9aa69d;width:100%;" />
+        <input id="editorCoverFile" type="file" accept="image/*" style="font-size:12px;color:var(--text-muted);width:100%;" />
         <div id="editorCoverPreview" class="hidden" style="margin-top:8px;">
           <img id="editorCoverImg" alt="Cover preview" style="width:100%;height:112px;object-fit:cover;border-radius:12px;" />
         </div>
       </div>
 
-      <div style="background:#0d110e;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;border:1px solid rgba(255,255,255,0.07);">
+      <div style="background:rgba(6,9,8,0.75);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--border-subtle);">
         <label for="editorGameFile" class="field-label" style="margin:0;color:#fff;">Game Package (.html / .htm)</label>
-        <input id="editorGameFile" type="file" accept=".html,.htm" style="font-size:12px;color:#9aa69d;width:100%;" />
-        <p id="editorPackageStatus" style="margin:0;font-size:12px;color:#8f9b92;">No game file loaded yet.</p>
+        <input id="editorGameFile" type="file" accept=".html,.htm" style="font-size:12px;color:var(--text-muted);width:100%;" />
+        <p id="editorPackageStatus" style="margin:0;font-size:12px;color:var(--text-muted);">No game file loaded yet.</p>
       </div>
 
       <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding-top:8px;">
@@ -1716,14 +2109,14 @@
           class="btn-accent nav-focusable cursor-pointer"
           style="padding:8px 20px;font-size:12px;"
         >
-          Save &amp; Sync
+          Save &amp; Share
         </button>
       </div>
     </div>
   </div>
 
   <!-- =======================================================================
-       HORIZONTAL JET STREAK LAUNCH SCREEN
+       CLOUD STREAMING LAUNCH SCREEN (HORIZONTAL JET STREAK)
        ======================================================================= -->
   <div id="jetBootOverlay">
     <div class="jet-stage">
@@ -1736,8 +2129,8 @@
       <div class="jet-pulse-flare"></div>
     </div>
     <p id="jetBootGameName" style="margin:16px 0 0;font-size:28px;font-weight:900;letter-spacing:-0.02em;color:#fff;">Launching Game</p>
-    <p style="margin:6px 0 0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.24em;color:var(--accent-bright);">
-      Polaris Stream Initializing
+    <p id="jetBootStatusLabel" style="margin:6px 0 0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.24em;color:var(--accent-bright);">
+      Polaris Cloud Stream Booting
     </p>
   </div>
 
@@ -1768,7 +2161,7 @@
             <div style="min-width:0;">
               <p style="margin:0;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent-bright);">Polaris Guide</p>
               <h2 id="inGameTitle" class="truncate" style="margin:4px 0 0;font-size:20px;font-weight:900;color:#fff;">Game Session</h2>
-              <p style="margin:4px 0 0;font-size:12px;color:#8f9b92;">Click Guide, press Esc, Alt+G, or double-tap Ctrl</p>
+              <p style="margin:4px 0 0;font-size:12px;color:var(--text-muted);">Click Guide, press Esc, Alt+G, or double-tap Ctrl</p>
             </div>
             <button
               id="closeGuideDrawerBtn"
@@ -1817,18 +2210,47 @@
           </div>
         </div>
 
-        <div style="font-size:11px;color:#7f8c83;border-top:1px solid rgba(255,255,255,0.08);padding-top:16px;display:flex;flex-direction:column;gap:4px;">
-          <div style="font-weight:600;color:#b8c4bb;">Polaris Cloud Session</div>
-          <div>Use the top-left Guide button anytime to pause or return to the dashboard.</div>
+        <div style="font-size:11px;color:var(--text-dim);border-top:1px solid var(--border-subtle);padding-top:16px;display:flex;flex-direction:column;gap:4px;">
+          <div style="font-weight:600;color:#b8c4bb;">Polaris Cloud + Offline Session</div>
+          <div>Games and progress remain saved in IndexedDB even when offline.</div>
         </div>
       </aside>
     </div>
   </div>
 
   <!-- =======================================================================
-       APPLICATION LOGIC: BUILT-IN GAMES, P2P MESH, GLOBAL CHAT, DMs & UI
-       ======================================================================= -->
-  <script>
+       APPLICATION LOGIC: STARTER GAMES, OFFLINE DB, FIREBASE RTDB & UI
+       ========================================================================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+    import {
+      getDatabase,
+      ref,
+      set,
+      get,
+      push,
+      remove,
+      onValue,
+      onChildAdded,
+      onChildRemoved,
+      query,
+      limitToLast,
+      onDisconnect
+    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBB1tIJ5UwCcGACHPGzw2E8pIhOifl4qFU",
+      authDomain: "polaris-cloud-24c37.firebaseapp.com",
+      databaseURL: "https://polaris-cloud-24c37-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "polaris-cloud-24c37",
+      storageBucket: "polaris-cloud-24c37.firebasestorage.app",
+      messagingSenderId: "952695716638",
+      appId: "1:952695716638:web:219922b74051c40aa8670f",
+      measurementId: "G-YFDH388W18"
+    };
+
     /* =========================================================================
        1. BUILT-IN PLAYABLE HTML5 MINI-GAMES
        ========================================================================= */
@@ -2442,24 +2864,24 @@
     ];
 
     /* =========================================================================
-       2. APPLICATION STATE, STORAGE & P2P MESH
+       2. OFFLINE STATE, STORAGE & FIREBASE REALTIME DATABASE LAYER
        ========================================================================= */
-    const DB_NAME = "PolarisCloudMeshDB";
-    const CHANNEL_NAME = "polaris_p2p_network_v1";
+    const DB_NAME = "PolarisCloudOfflineDB";
+    const CHANNEL_NAME = "polaris_cloud_tab_bus_v1";
 
     let dbInstance = null;
     let syncedGames = [...STARTER_GAMES];
-    let installedIds = safeJsonParse(localStorage.getItem("polaris_installed_v1"), ["polaris-orbital-drift"]);
-    let friendsList = safeJsonParse(localStorage.getItem("polaris_friends_v1"), []);
-    let bannedNames = safeJsonParse(localStorage.getItem("polaris_banned_names_v1"), []);
-    let claimedRegistry = safeJsonParse(localStorage.getItem("polaris_claimed_names_v1"), {});
-    let dmThreads = safeJsonParse(localStorage.getItem("polaris_dm_threads_v1"), {});
-    let globalChatMessages = safeJsonParse(localStorage.getItem("polaris_global_chat_v1"), []);
+    let installedIds = safeJsonParse(localStorage.getItem("polaris_installed_v3"), ["polaris-orbital-drift"]);
+    let friendsList = safeJsonParse(localStorage.getItem("polaris_friends_v3"), []);
+    let bannedNames = safeJsonParse(localStorage.getItem("polaris_banned_names_v3"), []);
+    let claimedRegistry = safeJsonParse(localStorage.getItem("polaris_claimed_names_v3"), {});
+    let dmThreads = safeJsonParse(localStorage.getItem("polaris_dm_threads_v3"), {});
+    let globalChatMessages = safeJsonParse(localStorage.getItem("polaris_global_chat_v3"), []);
 
-    const nodeId = localStorage.getItem("polaris_node_id_v1") || ("peer-" + generateId().slice(0, 8));
-    localStorage.setItem("polaris_node_id_v1", nodeId);
+    const nodeId = localStorage.getItem("polaris_node_id_v3") || ("plr-" + generateId().replace(/[^a-zA-Z0-9]/g, "").slice(0, 10));
+    localStorage.setItem("polaris_node_id_v3", nodeId);
 
-    const savedProfile = safeJsonParse(localStorage.getItem("polaris_profile_v1"), {});
+    const savedProfile = safeJsonParse(localStorage.getItem("polaris_profile_v3"), {});
     const localState = {
       nodeId,
       username: savedProfile.username || "Player",
@@ -2475,17 +2897,24 @@
       activeGame: null,
       inGameMenuOpen: false,
       draftGameCode: "",
-      draftGameCover: ""
+      draftGameCover: "",
+      rtdbConnected: false,
+      authReady: false
     };
 
-    const peersMap = new Map();
-    let meshChannel = null;
+    const onlineUsersMap = new Map();
+    let firebaseApp = null;
+    let firebaseAnalytics = null;
+    let firebaseAuth = null;
+    let rtdb = null;
+
+    let tabBus = null;
     try {
       if ("BroadcastChannel" in window) {
-        meshChannel = new BroadcastChannel(CHANNEL_NAME);
+        tabBus = new BroadcastChannel(CHANNEL_NAME);
       }
     } catch (_) {
-      meshChannel = null;
+      tabBus = null;
     }
 
     function safeJsonParse(raw, fallback) {
@@ -2513,7 +2942,7 @@
       clearTimeout(showToast._timer);
       showToast._timer = setTimeout(() => {
         banner.classList.remove("show");
-      }, 2800);
+      }, 3000);
     }
 
     function openModal(id) {
@@ -2559,26 +2988,45 @@
 
     function persistLocalState() {
       try {
-        localStorage.setItem("polaris_profile_v1", JSON.stringify({
+        localStorage.setItem("polaris_profile_v3", JSON.stringify({
           username: localState.username,
           lockedUsername: localState.lockedUsername,
           initials: localState.initials,
           color: localState.color,
           avatar: localState.avatar
         }));
-        localStorage.setItem("polaris_installed_v1", JSON.stringify(installedIds));
-        localStorage.setItem("polaris_friends_v1", JSON.stringify(friendsList));
-        localStorage.setItem("polaris_banned_names_v1", JSON.stringify(bannedNames));
-        localStorage.setItem("polaris_claimed_names_v1", JSON.stringify(claimedRegistry));
-        localStorage.setItem("polaris_dm_threads_v1", JSON.stringify(dmThreads));
-        localStorage.setItem("polaris_global_chat_v1", JSON.stringify(globalChatMessages.slice(-150)));
-      } catch (_) {
-        // Ignore storage quota issues
+        localStorage.setItem("polaris_installed_v3", JSON.stringify(installedIds));
+        localStorage.setItem("polaris_friends_v3", JSON.stringify(friendsList));
+        localStorage.setItem("polaris_banned_names_v3", JSON.stringify(bannedNames));
+        localStorage.setItem("polaris_claimed_names_v3", JSON.stringify(claimedRegistry));
+        localStorage.setItem("polaris_dm_threads_v3", JSON.stringify(dmThreads));
+        localStorage.setItem("polaris_global_chat_v3", JSON.stringify(globalChatMessages.slice(-200)));
+      } catch (_) {}
+    }
+
+    function updateCloudSyncBar() {
+      const dot = document.getElementById("cloudStatusDot");
+      const label = document.getElementById("cloudStatusLabel");
+      const gameCount = document.getElementById("sharedGameCount");
+
+      const publishedCount = syncedGames.filter((g) => g.published !== false).length;
+      if (gameCount) gameCount.textContent = String(publishedCount);
+
+      if (!dot || !label) return;
+      if (!navigator.onLine) {
+        dot.className = "status-dot offline";
+        label.textContent = "Offline Mode • IndexedDB & LocalStorage Active";
+      } else if (localState.rtdbConnected) {
+        dot.className = "status-dot";
+        label.textContent = "Firebase Realtime DB Connected + Offline Cache";
+      } else {
+        dot.className = "status-dot local-only";
+        label.textContent = "Local & Tab Sync Active • Offline Cache Ready";
       }
     }
 
     /* =========================================================================
-       3. INDEXEDDB STORAGE FOR GAMES (RESILIENT & NEVER WIPES GAMES)
+       3. INDEXEDDB OFFLINE PERSISTENCE FOR GAMES
        ========================================================================= */
     function initDatabase() {
       return new Promise((resolve, reject) => {
@@ -2617,6 +3065,8 @@
         if (idx === -1) syncedGames.push(game);
         else syncedGames[idx] = game;
 
+        updateCloudSyncBar();
+
         if (!dbInstance) {
           resolve();
           return;
@@ -2631,6 +3081,8 @@
     function removeGameRecord(gameId) {
       return new Promise((resolve, reject) => {
         syncedGames = syncedGames.filter((g) => g.id !== gameId);
+        updateCloudSyncBar();
+
         if (!dbInstance) {
           resolve();
           return;
@@ -2649,216 +3101,352 @@
         }
         syncedGames = [...STARTER_GAMES];
       }
+      updateCloudSyncBar();
     }
 
     /* =========================================================================
-       4. P2P BROADCASTCHANNEL SYNC (GLOBAL CHAT, DMs, FRIENDS, PRESENCE, GAMES)
+       4. FIREBASE REALTIME DATABASE + ANALYTICS + AUTH + TAB SYNC
        ========================================================================= */
-    function sendMeshPacket(payload) {
-      if (!meshChannel) return;
+    function getDmThreadKey(idA, idB) {
+      return [String(idA), String(idB)].sort().join("__");
+    }
+
+    function postLocalTabPacket(packet) {
+      if (!tabBus) return;
       try {
-        meshChannel.postMessage({
-          ...payload,
-          senderId: localState.nodeId
-        });
-      } catch (_) {
-        // Ignore channel errors
+        tabBus.postMessage({ ...packet, senderId: localState.nodeId });
+      } catch (_) {}
+    }
+
+    async function publishGameToCloud(game) {
+      await putGameRecord(game);
+      postLocalTabPacket({ type: "GAME_SYNC", game });
+
+      if (rtdb && navigator.onLine) {
+        try {
+          await set(ref(rtdb, `games/${game.id}`), game);
+          localState.rtdbConnected = true;
+          updateCloudSyncBar();
+        } catch (_) {}
       }
     }
 
-    function broadcastPresence() {
-      sendMeshPacket({
-        type: "PRESENCE",
-        profile: {
-          peerId: localState.nodeId,
-          username: localState.username,
-          lockedUsername: localState.lockedUsername,
-          initials: localState.initials,
-          color: localState.color,
-          avatar: localState.avatar
-        },
-        claims: claimedRegistry,
-        bannedNames
-      });
+    async function deleteGameFromCloud(gameId) {
+      await removeGameRecord(gameId);
+      postLocalTabPacket({ type: "GAME_DELETE", gameId });
+
+      if (rtdb && navigator.onLine) {
+        try {
+          await remove(ref(rtdb, `games/${gameId}`));
+        } catch (_) {}
+      }
     }
 
-    if (meshChannel) {
-      meshChannel.onmessage = async (event) => {
-        const msg = event.data;
-        if (!msg || !msg.senderId || msg.senderId === localState.nodeId) return;
-
-        if (msg.type === "PRESENCE" || msg.type === "PRESENCE_ACK") {
-          if (msg.profile) {
-            peersMap.set(msg.senderId, {
-              ...msg.profile,
-              lastSeen: Date.now()
-            });
-          }
-          if (msg.claims) {
-            Object.entries(msg.claims).forEach(([key, claim]) => {
-              if (!claimedRegistry[key]) {
-                claimedRegistry[key] = claim;
-              }
-            });
-          }
-          if (Array.isArray(msg.bannedNames)) {
-            msg.bannedNames.forEach((bn) => {
-              if (!bannedNames.includes(bn)) bannedNames.push(bn);
-            });
-          }
-          persistLocalState();
-          renderSocialView();
-          renderDashboard();
-
-          if (msg.type === "PRESENCE") {
-            sendMeshPacket({
-              type: "PRESENCE_ACK",
-              profile: {
-                peerId: localState.nodeId,
-                username: localState.username,
-                lockedUsername: localState.lockedUsername,
-                initials: localState.initials,
-                color: localState.color,
-                avatar: localState.avatar
-              },
-              claims: claimedRegistry,
-              bannedNames
-            });
-          }
-        }
-
-        if (msg.type === "CLAIM_USERNAME") {
-          const key = (msg.username || "").trim().toLowerCase();
-          if (!key) return;
-          const existing = claimedRegistry[key];
-          if (!existing || existing.ownerId === msg.senderId) {
-            claimedRegistry[key] = {
-              ownerId: msg.senderId,
-              username: msg.username.trim(),
-              lockedAt: Date.now()
-            };
-            persistLocalState();
-            renderSocialView();
-          }
-        }
-
-        if (msg.type === "RELEASE_USERNAME") {
-          const key = (msg.username || "").trim().toLowerCase();
-          if (claimedRegistry[key] && claimedRegistry[key].ownerId === msg.senderId) {
-            delete claimedRegistry[key];
-            persistLocalState();
-            renderSocialView();
-          }
-        }
-
-        if (msg.type === "FRIEND_CONNECT") {
-          const peerInfo = peersMap.get(msg.senderId) || {
-            peerId: msg.senderId,
-            username: msg.fromName || "Peer",
-            initials: "",
-            color: "#16c86a",
-            avatar: ""
-          };
-          peersMap.set(msg.senderId, { ...peerInfo, lastSeen: Date.now() });
-
-          if (!friendsList.some((f) => f.peerId === msg.senderId)) {
-            friendsList.push({
-              peerId: msg.senderId,
-              username: peerInfo.username,
-              initials: peerInfo.initials,
-              color: peerInfo.color,
-              avatar: peerInfo.avatar
-            });
-          }
-          if (!dmThreads[msg.senderId]) {
-            dmThreads[msg.senderId] = [];
-          }
-          persistLocalState();
-          showToast(`${peerInfo.username} connected as a friend`);
-          renderSocialView();
-          renderDashboard();
-        }
-
-        if (msg.type === "GLOBAL_CHAT_MESSAGE") {
-          const entry = {
-            id: msg.id || generateId(),
-            fromId: msg.senderId,
-            fromName: msg.fromName || "Peer",
-            color: msg.color || "#16c86a",
-            avatar: msg.avatar || "",
-            text: msg.text,
-            ts: msg.ts || Date.now()
-          };
-          if (!globalChatMessages.some((m) => m.id === entry.id)) {
-            globalChatMessages.push(entry);
-            globalChatMessages = globalChatMessages.slice(-150);
-            persistLocalState();
-
-            if (localState.currentRoute === "social" && localState.chatMode === "global") {
-              renderChatThread();
-            } else {
-              localState.unreadCount += 1;
-              updateUnreadBadge();
-              showToast(`Global Chat: ${entry.fromName}`);
-            }
-          }
-        }
-
-        if (msg.type === "DIRECT_MESSAGE") {
-          const fromId = msg.senderId;
-          if (!dmThreads[fromId]) dmThreads[fromId] = [];
-          dmThreads[fromId].push({
-            id: msg.id || generateId(),
-            fromId,
-            fromName: msg.fromName || "Peer",
-            text: msg.text,
-            ts: msg.ts || Date.now()
-          });
-          persistLocalState();
-
-          if (localState.currentRoute === "social" && localState.chatMode === "dm" && localState.selectedChatPeerId === fromId) {
-            renderChatThread();
-          } else {
-            localState.unreadCount += 1;
-            updateUnreadBadge();
-            showToast(`Direct message from ${msg.fromName || "Peer"}`);
-          }
-        }
-
-        if (msg.type === "GAME_SYNC" && msg.game) {
-          await putGameRecord(msg.game);
-          renderDashboard();
-          showToast(`Synced game: ${msg.game.name}`);
-        }
-
-        if (msg.type === "GAME_DELETE" && msg.gameId) {
-          await removeGameRecord(msg.gameId);
-          installedIds = installedIds.filter((id) => id !== msg.gameId);
-          persistLocalState();
-          renderDashboard();
-        }
+    async function publishPresenceToCloud() {
+      const profilePayload = {
+        peerId: localState.nodeId,
+        username: localState.username || "Player",
+        lockedUsername: localState.lockedUsername || "",
+        initials: localState.initials || "",
+        color: localState.color || "#16c86a",
+        avatar: localState.avatar || "",
+        lastSeen: Date.now()
       };
+
+      postLocalTabPacket({ type: "PRESENCE", profile: profilePayload });
+
+      if (rtdb && navigator.onLine) {
+        try {
+          const presenceRef = ref(rtdb, `presence/${localState.nodeId}`);
+          await set(presenceRef, profilePayload);
+          onDisconnect(presenceRef).remove().catch(() => {});
+          localState.rtdbConnected = true;
+          updateCloudSyncBar();
+        } catch (_) {}
+      }
     }
 
-    setInterval(() => {
-      const now = Date.now();
-      let changed = false;
-      peersMap.forEach((p, id) => {
-        if (now - p.lastSeen > 15000) {
-          peersMap.delete(id);
-          changed = true;
-        }
+    async function syncClaimedUsernameToCloud(username, release = false) {
+      const key = (username || "").trim().toLowerCase();
+      if (!key) return;
+
+      postLocalTabPacket({
+        type: release ? "RELEASE_USERNAME" : "CLAIM_USERNAME",
+        username: username.trim()
       });
-      if (changed) {
+
+      if (rtdb && navigator.onLine) {
+        try {
+          const claimRef = ref(rtdb, `claimedUsernames/${encodeURIComponent(key)}`);
+          if (release) {
+            await remove(claimRef);
+          } else {
+            await set(claimRef, {
+              ownerId: localState.nodeId,
+              username: username.trim(),
+              lockedAt: Date.now()
+            });
+          }
+        } catch (_) {}
+      }
+    }
+
+    async function pushGlobalChatToCloud(entry) {
+      postLocalTabPacket({ type: "GLOBAL_CHAT_MESSAGE", entry });
+      if (rtdb && navigator.onLine) {
+        try {
+          await set(ref(rtdb, `globalChat/${entry.id}`), entry);
+          localState.rtdbConnected = true;
+          updateCloudSyncBar();
+        } catch (_) {}
+      }
+    }
+
+    async function pushDirectMessageToCloud(targetPeerId, entry) {
+      postLocalTabPacket({ type: "DIRECT_MESSAGE", targetPeerId, entry });
+      if (rtdb && navigator.onLine) {
+        try {
+          const threadKey = getDmThreadKey(localState.nodeId, targetPeerId);
+          await set(ref(rtdb, `directMessages/${threadKey}/${entry.id}`), {
+            ...entry,
+            threadKey
+          });
+          localState.rtdbConnected = true;
+          updateCloudSyncBar();
+        } catch (_) {}
+      }
+    }
+
+    async function handleTabBusPacket(msg) {
+      if (!msg || !msg.senderId || msg.senderId === localState.nodeId) return;
+
+      if (msg.type === "PRESENCE" && msg.profile) {
+        onlineUsersMap.set(msg.senderId, { ...msg.profile, lastSeen: Date.now() });
         renderSocialView();
         renderDashboard();
       }
-    }, 5000);
 
-    setInterval(broadcastPresence, 3500);
+      if (msg.type === "CLAIM_USERNAME") {
+        const key = (msg.username || "").trim().toLowerCase();
+        if (key && !claimedRegistry[key]) {
+          claimedRegistry[key] = { ownerId: msg.senderId, username: msg.username.trim(), lockedAt: Date.now() };
+          persistLocalState();
+        }
+      }
+
+      if (msg.type === "RELEASE_USERNAME") {
+        const key = (msg.username || "").trim().toLowerCase();
+        if (key && claimedRegistry[key]?.ownerId === msg.senderId) {
+          delete claimedRegistry[key];
+          persistLocalState();
+        }
+      }
+
+      if (msg.type === "GAME_SYNC" && msg.game) {
+        const isNew = !syncedGames.some((g) => g.id === msg.game.id);
+        await putGameRecord(msg.game);
+        renderDashboard();
+        if (isNew) showToast(`Synced shared game: ${msg.game.name}`);
+      }
+
+      if (msg.type === "GAME_DELETE" && msg.gameId) {
+        await removeGameRecord(msg.gameId);
+        installedIds = installedIds.filter((id) => id !== msg.gameId);
+        persistLocalState();
+        renderDashboard();
+      }
+
+      if (msg.type === "GLOBAL_CHAT_MESSAGE" && msg.entry) {
+        ingestGlobalChatEntry(msg.entry);
+      }
+
+      if (msg.type === "DIRECT_MESSAGE" && msg.entry && msg.targetPeerId === localState.nodeId) {
+        ingestDirectMessageEntry(msg.senderId, msg.entry);
+      }
+    }
+
+    function ingestGlobalChatEntry(entry) {
+      if (!entry || !entry.id) return;
+      if (globalChatMessages.some((m) => m.id === entry.id)) return;
+      globalChatMessages.push(entry);
+      globalChatMessages.sort((a, b) => (a.ts || 0) - (b.ts || 0));
+      globalChatMessages = globalChatMessages.slice(-200);
+      persistLocalState();
+
+      if (localState.currentRoute === "social" && localState.chatMode === "global") {
+        renderChatThread();
+      } else if (entry.fromId !== localState.nodeId) {
+        localState.unreadCount += 1;
+        updateUnreadBadge();
+        showToast(`Global Chat: ${entry.fromName}`);
+      }
+    }
+
+    function ingestDirectMessageEntry(peerId, entry) {
+      if (!entry || !entry.id || !peerId) return;
+      if (!dmThreads[peerId]) dmThreads[peerId] = [];
+      if (dmThreads[peerId].some((m) => m.id === entry.id)) return;
+      dmThreads[peerId].push(entry);
+      dmThreads[peerId].sort((a, b) => (a.ts || 0) - (b.ts || 0));
+      persistLocalState();
+
+      if (localState.currentRoute === "social" && localState.chatMode === "dm" && localState.selectedChatPeerId === peerId) {
+        renderChatThread();
+      } else if (entry.fromId !== localState.nodeId) {
+        localState.unreadCount += 1;
+        updateUnreadBadge();
+        showToast(`Direct message from ${entry.fromName || "Player"}`);
+      }
+    }
+
+    function subscribeDirectMessageThread(peerId) {
+      if (!rtdb || !peerId) return;
+      const threadKey = getDmThreadKey(localState.nodeId, peerId);
+      const threadRef = query(ref(rtdb, `directMessages/${threadKey}`), limitToLast(100));
+      onChildAdded(threadRef, (snap) => {
+        const val = snap.val();
+        if (!val || !val.id) return;
+        const otherId = val.fromId === localState.nodeId ? peerId : val.fromId;
+        ingestDirectMessageEntry(otherId, val);
+      }, () => {});
+    }
+
+    function attachFirebaseListeners() {
+      if (!rtdb) return;
+
+      // 1. Shared Games Catalog
+      onChildAdded(ref(rtdb, "games"), async (snap) => {
+        const game = snap.val();
+        if (!game || !game.id || !game.name) return;
+        localState.rtdbConnected = true;
+        updateCloudSyncBar();
+        const isNew = !syncedGames.some((g) => g.id === game.id);
+        await putGameRecord(game);
+        renderDashboard();
+        if (isNew && localState.currentRoute !== "home") {
+          showToast(`New shared game available: ${game.name}`);
+        }
+      }, () => {});
+
+      onValue(ref(rtdb, "games"), async (snap) => {
+        if (!snap.exists()) return;
+        localState.rtdbConnected = true;
+        updateCloudSyncBar();
+        const rawObj = snap.val() || {};
+        const cloudGames = Object.values(rawObj).filter((g) => g && g.id && g.name);
+        for (const cg of cloudGames) {
+          await putGameRecord(cg);
+        }
+        renderDashboard();
+      }, () => {});
+
+      onChildRemoved(ref(rtdb, "games"), async (snap) => {
+        const removedId = snap.key;
+        if (!removedId) return;
+        await removeGameRecord(removedId);
+        renderDashboard();
+      }, () => {});
+
+      // 2. Global Chat
+      onChildAdded(query(ref(rtdb, "globalChat"), limitToLast(120)), (snap) => {
+        const entry = snap.val();
+        if (!entry || !entry.id) return;
+        localState.rtdbConnected = true;
+        updateCloudSyncBar();
+        ingestGlobalChatEntry(entry);
+      }, () => {});
+
+      // 3. Presence
+      onValue(ref(rtdb, "presence"), (snap) => {
+        localState.rtdbConnected = true;
+        updateCloudSyncBar();
+        const raw = snap.val() || {};
+        onlineUsersMap.clear();
+        Object.entries(raw).forEach(([pid, pData]) => {
+          if (pid && pid !== localState.nodeId && pData) {
+            onlineUsersMap.set(pid, { ...pData, peerId: pid, lastSeen: pData.lastSeen || Date.now() });
+          }
+        });
+        renderSocialView();
+        renderDashboard();
+      }, () => {});
+
+      // 4. Claimed Usernames
+      onValue(ref(rtdb, "claimedUsernames"), (snap) => {
+        if (!snap.exists()) return;
+        const raw = snap.val() || {};
+        Object.entries(raw).forEach(([encodedKey, claim]) => {
+          const decodedKey = decodeURIComponent(encodedKey).toLowerCase();
+          if (claim && claim.ownerId) {
+            claimedRegistry[decodedKey] = claim;
+          }
+        });
+        persistLocalState();
+      }, () => {});
+
+      // 5. Subscribe to saved friends' DM threads
+      friendsList.forEach((f) => {
+        if (f && f.peerId) subscribeDirectMessageThread(f.peerId);
+      });
+    }
+
+    async function initFirebaseLayer() {
+      try {
+        firebaseApp = initializeApp(firebaseConfig);
+        try {
+          firebaseAnalytics = getAnalytics(firebaseApp);
+        } catch (_) {}
+        rtdb = getDatabase(firebaseApp, firebaseConfig.databaseURL);
+        firebaseAuth = getAuth(firebaseApp);
+
+        onAuthStateChanged(firebaseAuth, (user) => {
+          localState.authReady = Boolean(user);
+        });
+
+        signInAnonymously(firebaseAuth).catch(() => {});
+        attachFirebaseListeners();
+        await publishPresenceToCloud();
+      } catch (_) {
+        localState.rtdbConnected = false;
+        updateCloudSyncBar();
+      }
+    }
+
+    if (tabBus) {
+      tabBus.onmessage = (ev) => {
+        handleTabBusPacket(ev.data);
+      };
+    }
+
+    window.addEventListener("online", async () => {
+      updateCloudSyncBar();
+      await publishPresenceToCloud();
+      for (const g of syncedGames) {
+        if (g.published !== false) {
+          try {
+            const snap = await get(ref(rtdb, `games/${g.id}`));
+            if (!snap.exists()) {
+              await set(ref(rtdb, `games/${g.id}`), g);
+            }
+          } catch (_) {}
+        }
+      }
+      showToast("Back online — synced local games & presence");
+    });
+
+    window.addEventListener("offline", () => {
+      localState.rtdbConnected = false;
+      updateCloudSyncBar();
+      showToast("Offline mode — games, chats & profile remain saved locally");
+    });
+
+    setInterval(() => {
+      publishPresenceToCloud();
+      updateCloudSyncBar();
+    }, 15000);
 
     /* =========================================================================
-       5. PROFILE CUSTOMIZATION & USERNAME CLAIM/LOCK RULES
+       5. PROFILE CUSTOMIZATION, USERNAME LOCK & ACCOUNTS (SOON)
        ========================================================================= */
     function syncThemeAndHeader() {
       const accentHex = localState.color || "#16c86a";
@@ -2871,11 +3459,11 @@
       const lockNote = document.getElementById("usernameLockNote");
       if (lockNote) {
         if (localState.lockedUsername) {
-          lockNote.textContent = `Username "${localState.lockedUsername}" is claimed and locked to your node.`;
+          lockNote.textContent = `Username "${localState.lockedUsername}" is claimed and locked to your device.`;
           lockNote.style.color = "var(--accent-bright)";
         } else {
-          lockNote.textContent = "Saving claims and locks your username so other peers cannot take it.";
-          lockNote.style.color = "#8f9b92";
+          lockNote.textContent = "Saving claims and locks your username so others cannot claim it.";
+          lockNote.style.color = "var(--text-muted)";
         }
       }
     }
@@ -2902,30 +3490,30 @@
         return;
       }
       const reader = new FileReader();
-      reader.onload = () => {
+      reader.onload = async () => {
         localState.avatar = reader.result;
         persistLocalState();
         syncThemeAndHeader();
-        broadcastPresence();
+        await publishPresenceToCloud();
         renderSocialView();
         renderDashboard();
-        showToast("Profile picture updated");
+        showToast("Profile picture updated & saved");
       };
       reader.readAsDataURL(file);
       event.target.value = "";
     }
 
-    function clearProfileAvatar() {
+    async function clearProfileAvatar() {
       localState.avatar = "";
       persistLocalState();
       syncThemeAndHeader();
-      broadcastPresence();
+      await publishPresenceToCloud();
       renderSocialView();
       renderDashboard();
       showToast("Switched back to initials");
     }
 
-    function saveProfileChanges() {
+    async function saveProfileChanges() {
       const desiredName = (document.getElementById("profileUsernameInput")?.value || "").trim() || "Player";
       const desiredKey = desiredName.toLowerCase();
 
@@ -2944,7 +3532,7 @@
         const prevKey = localState.lockedUsername.toLowerCase();
         if (claimedRegistry[prevKey]?.ownerId === localState.nodeId) {
           delete claimedRegistry[prevKey];
-          sendMeshPacket({ type: "RELEASE_USERNAME", username: localState.lockedUsername });
+          await syncClaimedUsernameToCloud(localState.lockedUsername, true);
         }
       }
 
@@ -2961,14 +3549,14 @@
 
       persistLocalState();
       syncThemeAndHeader();
-      sendMeshPacket({ type: "CLAIM_USERNAME", username: desiredName });
-      broadcastPresence();
+      await syncClaimedUsernameToCloud(desiredName, false);
+      await publishPresenceToCloud();
       renderSocialView();
       renderDashboard();
       showToast(`Profile saved and "${desiredName}" locked`);
     }
 
-    function releaseClaimedUsername() {
+    async function releaseClaimedUsername() {
       if (!localState.lockedUsername) {
         showToast("No locked username to release.");
         return;
@@ -2977,11 +3565,11 @@
       if (claimedRegistry[key]?.ownerId === localState.nodeId) {
         delete claimedRegistry[key];
       }
-      sendMeshPacket({ type: "RELEASE_USERNAME", username: localState.lockedUsername });
+      await syncClaimedUsernameToCloud(localState.lockedUsername, true);
       localState.lockedUsername = "";
       persistLocalState();
       syncThemeAndHeader();
-      broadcastPresence();
+      await publishPresenceToCloud();
       renderSocialView();
       showToast("Claimed username released");
     }
@@ -3002,7 +3590,7 @@
           isOnline: true
         };
       }
-      const livePeer = peersMap.get(targetId);
+      const livePeer = onlineUsersMap.get(targetId);
       if (livePeer) {
         return { ...livePeer, isSelf: false, isOnline: true };
       }
@@ -3012,7 +3600,7 @@
       }
       return {
         peerId: targetId,
-        username: "Peer Player",
+        username: "Polaris Player",
         initials: "PP",
         color: "#16c86a",
         avatar: "",
@@ -3027,10 +3615,10 @@
 
       applyAvatarToElement(document.getElementById("playerCardAvatar"), player, 96, 30);
       document.getElementById("playerCardName").textContent = player.username;
-      document.getElementById("playerCardStatus").textContent = player.isOnline ? "Online on P2P Network" : "Saved Peer / Offline";
+      document.getElementById("playerCardStatus").textContent = player.isOnline ? "Online on Polaris" : "Saved Friend (Offline Ready)";
       document.getElementById("playerCardRole").textContent = player.isSelf
-        ? "Your local Polaris node identity"
-        : `Peer ID: ${player.peerId.slice(0, 12)}`;
+        ? `Device Profile: ${localState.username}`
+        : `Player ID: ${player.peerId}`;
 
       const actionsEl = document.getElementById("playerCardActions");
       actionsEl.innerHTML = "";
@@ -3053,8 +3641,8 @@
         friendBtn.type = "button";
         friendBtn.className = `${alreadyFriend ? "btn-glass" : "btn-accent"} nav-focusable cursor-pointer`;
         friendBtn.style.width = "100%";
-        friendBtn.textContent = alreadyFriend ? "Connected Friend" : "Add Friend & Auto-Connect";
-        friendBtn.onclick = () => connectFriendPeer(player);
+        friendBtn.textContent = alreadyFriend ? "Added as Friend" : "Add Friend";
+        friendBtn.onclick = () => addFriendPlayer(player);
         actionsEl.appendChild(friendBtn);
 
         const dmBtn = document.createElement("button");
@@ -3063,7 +3651,7 @@
         dmBtn.style.width = "100%";
         dmBtn.textContent = "Open Direct Message";
         dmBtn.onclick = () => {
-          connectFriendPeer(player, true);
+          addFriendPlayer(player, true);
           closeModal("playerCardModal");
           navigateTo("social");
           selectDmPeer(player.peerId);
@@ -3075,14 +3663,13 @@
           banBtn.type = "button";
           banBtn.className = "nav-focusable cursor-pointer";
           banBtn.style.cssText = "width:100%;padding:8px 14px;border-radius:12px;font-size:12px;font-weight:600;background:rgba(239,68,68,0.15);border:0;color:#fca5a5;";
-          banBtn.textContent = "Ban Username on Network";
+          banBtn.textContent = "Ban Username";
           banBtn.onclick = () => {
             const key = (player.username || "").toLowerCase();
             if (key && !bannedNames.includes(key)) {
               bannedNames.push(key);
               delete claimedRegistry[key];
               persistLocalState();
-              broadcastPresence();
               renderSocialView();
               closeModal("playerCardModal");
               showToast(`Banned username "${player.username}"`);
@@ -3095,7 +3682,7 @@
       openModal("playerCardModal");
     }
 
-    function connectFriendPeer(player, silent = false) {
+    function addFriendPlayer(player, silent = false) {
       if (!player || player.peerId === localState.nodeId) return;
       const idx = friendsList.findIndex((f) => f.peerId === player.peerId);
       const entry = {
@@ -3114,17 +3701,11 @@
         dmThreads[player.peerId] = [];
       }
       persistLocalState();
-
-      sendMeshPacket({
-        type: "FRIEND_CONNECT",
-        targetId: player.peerId,
-        fromName: localState.username
-      });
-
+      subscribeDirectMessageThread(player.peerId);
       renderSocialView();
       renderDashboard();
       if (!silent) {
-        showToast(`Connected with ${player.username} — P2P chat ready`);
+        showToast(`Added ${player.username} to Friends`);
       }
     }
 
@@ -3152,6 +3733,7 @@
       localState.selectedChatPeerId = peerId;
       localState.unreadCount = 0;
       updateUnreadBadge();
+      subscribeDirectMessageThread(peerId);
       renderSocialView();
     }
 
@@ -3166,7 +3748,7 @@
       const friendsContainer = document.getElementById("friendsListContainer");
       const globalBtn = document.getElementById("globalChannelBtn");
 
-      const livePeers = Array.from(peersMap.values()).filter((p) => p.peerId !== localState.nodeId);
+      const livePeers = Array.from(onlineUsersMap.values()).filter((p) => p.peerId !== localState.nodeId);
       const onlineCountEl = document.getElementById("socialOnlineCount");
       if (onlineCountEl) onlineCountEl.textContent = String(livePeers.length + 1);
 
@@ -3188,7 +3770,7 @@
       if (peersContainer) {
         peersContainer.innerHTML = "";
         if (!livePeers.length) {
-          peersContainer.innerHTML = `<div style="font-size:12px;color:#768279;padding:12px;text-align:center;">No other peers detected yet. Open another tab or join on the local mesh to see live peers.</div>`;
+          peersContainer.innerHTML = `<div style="font-size:12px;color:var(--text-dim);padding:12px;text-align:center;">No other online players detected yet. Open another tab or invite friends!</div>`;
         } else {
           livePeers.forEach((peer) => {
             const row = document.createElement("div");
@@ -3216,7 +3798,7 @@
             addBtn.style.cssText = "padding:4px 10px;border-radius:8px;font-size:11px;";
             addBtn.textContent = isFriend ? "DM" : "Add";
             addBtn.onclick = () => {
-              connectFriendPeer(peer, true);
+              addFriendPlayer(peer, true);
               selectDmPeer(peer.peerId);
             };
 
@@ -3229,7 +3811,7 @@
       if (friendsContainer) {
         friendsContainer.innerHTML = "";
         if (!friendsList.length) {
-          friendsContainer.innerHTML = `<div style="font-size:12px;color:#768279;padding:12px;text-align:center;">No friends added yet. Click a peer above to add and message privately.</div>`;
+          friendsContainer.innerHTML = `<div style="font-size:12px;color:var(--text-dim);padding:12px;text-align:center;">No friends added yet. Click an online player above to add and message privately.</div>`;
         } else {
           friendsList.forEach((friend) => {
             const isSelected = localState.chatMode === "dm" && localState.selectedChatPeerId === friend.peerId;
@@ -3253,10 +3835,10 @@
             nm.className = "truncate";
             nm.style.cssText = "font-size:12px;font-weight:700;color:#fff;";
             nm.textContent = friend.username;
-            const online = peersMap.has(friend.peerId);
+            const online = onlineUsersMap.has(friend.peerId);
             const st = document.createElement("div");
-            st.style.cssText = `font-size:10px;color:${online ? "var(--accent-bright)" : "#7c887f"};`;
-            st.textContent = online ? "Online • Auto-connected" : "Saved friend";
+            st.style.cssText = `font-size:10px;color:${online ? "var(--accent-bright)" : "var(--text-dim)"};`;
+            st.textContent = online ? "Online • Cloud synced" : "Saved offline friend";
             info.append(nm, st);
 
             selectBtn.append(av, info);
@@ -3289,16 +3871,16 @@
 
       if (localState.chatMode === "global") {
         headerAvatar.className = "avatar-box";
-        headerAvatar.style.cssText = "width:40px;height:40px;border-radius:999px;font-size:14px;background:var(--accent-bright);color:#061309;";
+        headerAvatar.style.cssText = "width:40px;height:40px;border-radius:999px;font-size:14px;background:var(--accent-bright);color:#051309;";
         headerAvatar.innerHTML = "#";
         headerName.textContent = "Global Chat";
-        headerMeta.textContent = "Broadcast room across all Polaris tabs & connected peers • Click any username to inspect";
+        headerMeta.textContent = "Synced with Firebase RTDB & saved offline • Click any sender name to view profile";
         inspectBtn.classList.add("hidden");
         inputEl.placeholder = `Message Global Chat as ${localState.username}...`;
 
         area.innerHTML = "";
         if (!globalChatMessages.length) {
-          area.innerHTML = `<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;color:#7c887f;text-align:center;padding:0 24px;">Global Chat is live. Send the first message below!</div>`;
+          area.innerHTML = `<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-dim);text-align:center;padding:0 24px;">Global Chat is ready. Send a message to share with everyone on Polaris!</div>`;
           return;
         }
 
@@ -3316,12 +3898,12 @@
 
           const bubble = document.createElement("div");
           bubble.style.cssText = mine
-            ? "max-width:80%;padding:8px 14px;border-radius:16px;font-size:14px;word-break:break-word;background:var(--accent-bright);color:#061309;font-weight:600;"
-            : "max-width:80%;padding:8px 14px;border-radius:16px;font-size:14px;word-break:break-word;background:#1b241e;border:1px solid rgba(255,255,255,0.06);color:#fff;";
+            ? "max-width:80%;padding:9px 14px;border-radius:16px;font-size:14px;word-break:break-word;background:var(--accent-bright);color:#051309;font-weight:600;"
+            : "max-width:80%;padding:9px 14px;border-radius:16px;font-size:14px;word-break:break-word;background:#1b241e;border:1px solid rgba(255,255,255,0.06);color:#fff;";
           bubble.textContent = m.text;
 
           const timeLabel = document.createElement("span");
-          timeLabel.style.cssText = "font-size:10px;color:#727f76;margin-top:4px;padding:0 4px;";
+          timeLabel.style.cssText = "font-size:10px;color:var(--text-dim);margin-top:4px;padding:0 4px;";
           timeLabel.textContent = new Date(m.ts || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
           wrap.append(senderBtn, bubble, timeLabel);
@@ -3341,14 +3923,14 @@
 
       applyAvatarToElement(headerAvatar, target, 40, 14);
       headerName.textContent = `DM • ${target.username}`;
-      headerMeta.textContent = target.isOnline ? "Connected on local P2P channel" : "Peer offline • messages saved locally";
+      headerMeta.textContent = target.isOnline ? "Online on Polaris" : "Saved offline • syncs automatically when connected";
       inspectBtn.classList.remove("hidden");
       inputEl.placeholder = `Direct message ${target.username}...`;
 
       const messages = dmThreads[peerId] || [];
       area.innerHTML = "";
       if (!messages.length) {
-        area.innerHTML = `<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;color:#7c887f;text-align:center;padding:0 24px;">No direct messages with ${target.username} yet. Say hello below.</div>`;
+        area.innerHTML = `<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-dim);text-align:center;padding:0 24px;">No direct messages with ${target.username} yet. Say hello below.</div>`;
         return;
       }
 
@@ -3359,12 +3941,12 @@
 
         const bubble = document.createElement("div");
         bubble.style.cssText = mine
-          ? "max-width:80%;padding:8px 14px;border-radius:16px;font-size:14px;word-break:break-word;background:var(--accent-bright);color:#061309;font-weight:600;"
-          : "max-width:80%;padding:8px 14px;border-radius:16px;font-size:14px;word-break:break-word;background:#1b241e;border:1px solid rgba(255,255,255,0.06);color:#fff;";
+          ? "max-width:80%;padding:9px 14px;border-radius:16px;font-size:14px;word-break:break-word;background:var(--accent-bright);color:#051309;font-weight:600;"
+          : "max-width:80%;padding:9px 14px;border-radius:16px;font-size:14px;word-break:break-word;background:#1b241e;border:1px solid rgba(255,255,255,0.06);color:#fff;";
         bubble.textContent = m.text;
 
         const timeLabel = document.createElement("span");
-        timeLabel.style.cssText = "font-size:10px;color:#727f76;margin-top:4px;padding:0 4px;";
+        timeLabel.style.cssText = "font-size:10px;color:var(--text-dim);margin-top:4px;padding:0 4px;";
         const timeStr = new Date(m.ts || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
         timeLabel.textContent = `${m.fromName} • ${timeStr}`;
 
@@ -3375,7 +3957,7 @@
       area.scrollTop = area.scrollHeight;
     }
 
-    function handleSendChatMessage(event) {
+    async function handleSendChatMessage(event) {
       event.preventDefault();
       const input = document.getElementById("dmInputField");
       if (!input) return;
@@ -3395,22 +3977,9 @@
           text,
           ts: timestamp
         };
-        globalChatMessages.push(entry);
-        globalChatMessages = globalChatMessages.slice(-150);
-        persistLocalState();
-
-        sendMeshPacket({
-          type: "GLOBAL_CHAT_MESSAGE",
-          id: msgId,
-          fromName: localState.username || "Player",
-          color: localState.color || "#16c86a",
-          avatar: localState.avatar || "",
-          text,
-          ts: timestamp
-        });
-
+        ingestGlobalChatEntry(entry);
+        await pushGlobalChatToCloud(entry);
         input.value = "";
-        renderChatThread();
         return;
       }
 
@@ -3420,27 +3989,16 @@
         return;
       }
 
-      if (!dmThreads[targetId]) dmThreads[targetId] = [];
-      dmThreads[targetId].push({
+      const dmEntry = {
         id: msgId,
         fromId: localState.nodeId,
         fromName: localState.username || "Player",
         text,
         ts: timestamp
-      });
-      persistLocalState();
-
-      sendMeshPacket({
-        type: "DIRECT_MESSAGE",
-        id: msgId,
-        targetId,
-        fromName: localState.username || "Player",
-        text,
-        ts: timestamp
-      });
-
+      };
+      ingestDirectMessageEntry(targetId, dmEntry);
+      await pushDirectMessageToCloud(targetId, dmEntry);
       input.value = "";
-      renderChatThread();
     }
 
     /* =========================================================================
@@ -3528,7 +4086,7 @@
         const statusEl = document.getElementById("editorPackageStatus");
         if (statusEl) {
           statusEl.textContent = existingGame.code ? "Game package attached" : "No game file loaded yet.";
-          statusEl.style.color = existingGame.code ? "var(--accent-bright)" : "#8f9b92";
+          statusEl.style.color = existingGame.code ? "var(--accent-bright)" : "var(--text-muted)";
           statusEl.style.fontWeight = existingGame.code ? "600" : "400";
         }
         if (existingGame.cover) {
@@ -3551,7 +4109,7 @@
         const statusEl = document.getElementById("editorPackageStatus");
         if (statusEl) {
           statusEl.textContent = "No game file loaded yet.";
-          statusEl.style.color = "#8f9b92";
+          statusEl.style.color = "var(--text-muted)";
           statusEl.style.fontWeight = "400";
         }
         localState.draftGameCode = "";
@@ -3587,14 +4145,13 @@
         createdAt: existing ? existing.createdAt : Date.now()
       };
 
-      await putGameRecord(gameRecord);
-      sendMeshPacket({ type: "GAME_SYNC", game: gameRecord });
+      await publishGameToCloud(gameRecord);
 
       closeModal("gameEditorModal");
       renderPublisherList();
       openModal("pubManagerModal");
       renderDashboard();
-      showToast(`"${gameRecord.name}" saved and synced`);
+      showToast(`"${gameRecord.name}" saved locally & shared to catalog`);
     }
 
     function renderPublisherList() {
@@ -3603,13 +4160,13 @@
       container.innerHTML = "";
 
       if (!syncedGames.length) {
-        container.innerHTML = `<div style="text-align:center;font-size:14px;color:#8f9b92;padding:40px 0;">No games in catalog yet. Click "+ Add Game" to upload one.</div>`;
+        container.innerHTML = `<div style="text-align:center;font-size:14px;color:var(--text-muted);padding:40px 0;">No games in catalog yet. Click "+ Add Game" to upload one.</div>`;
         return;
       }
 
       syncedGames.forEach((g) => {
         const row = document.createElement("div");
-        row.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:12px;background:#0d110e;border:1px solid rgba(255,255,255,0.06);";
+        row.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:12px;background:rgba(6,9,8,0.75);border:1px solid var(--border-subtle);";
 
         const left = document.createElement("div");
         left.style.cssText = "display:flex;align-items:center;gap:12px;min-width:0;";
@@ -3632,8 +4189,8 @@
         nm.style.cssText = "font-size:14px;font-weight:700;color:#fff;";
         nm.textContent = g.name;
         const st = document.createElement("div");
-        st.style.cssText = `font-size:12px;color:${g.published !== false ? "var(--accent-bright)" : "#8f9b92"};`;
-        st.textContent = g.published !== false ? "Published & Synced" : "Hidden";
+        st.style.cssText = `font-size:12px;color:${g.published !== false ? "var(--accent-bright)" : "var(--text-muted)"};`;
+        st.textContent = g.published !== false ? "Published • Shared & Cached Offline" : "Hidden";
         meta.append(nm, st);
         left.append(thumb, meta);
 
@@ -3647,8 +4204,7 @@
         toggleBtn.textContent = g.published !== false ? "Hide" : "Publish";
         toggleBtn.onclick = async () => {
           g.published = !(g.published !== false);
-          await putGameRecord(g);
-          sendMeshPacket({ type: "GAME_SYNC", game: g });
+          await publishGameToCloud(g);
           renderPublisherList();
           renderDashboard();
         };
@@ -3666,10 +4222,9 @@
         delBtn.style.cssText = "padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(239,68,68,0.15);border:0;color:#fca5a5;";
         delBtn.textContent = "Delete";
         delBtn.onclick = async () => {
-          await removeGameRecord(g.id);
+          await deleteGameFromCloud(g.id);
           installedIds = installedIds.filter((id) => id !== g.id);
           persistLocalState();
-          sendMeshPacket({ type: "GAME_DELETE", gameId: g.id });
           renderPublisherList();
           renderDashboard();
           showToast(`Deleted "${g.name}"`);
@@ -3682,7 +4237,7 @@
     }
 
     /* =========================================================================
-       8. INSTALL PROGRESS, HORIZONTAL JET BOOT & IN-GAME GUIDE SIDEBAR
+       8. INSTALL PROGRESS, CLOUD LAUNCH BOOT & IN-GAME GUIDE SIDEBAR
        ========================================================================= */
     let activeDownloadLock = false;
 
@@ -3696,7 +4251,7 @@
       activeDownloadLock = true;
 
       document.getElementById("dlGameTitle").textContent = game.name;
-      document.getElementById("dlStatusText").textContent = "Downloading local package...";
+      document.getElementById("dlStatusText").textContent = "Saving local package to IndexedDB...";
       document.getElementById("dlProgressBar").style.width = "0%";
       document.getElementById("dlPercentText").textContent = "0%";
       openModal("downloadModal");
@@ -3704,7 +4259,7 @@
       const totalMs = Math.max(700, Math.min(3500, (game.installSeconds || 2) * 750));
       const started = performance.now();
 
-      const interval = setInterval(() => {
+      const interval = setInterval(async () => {
         const elapsed = performance.now() - started;
         const pct = Math.min(100, Math.round((elapsed / totalMs) * 100));
         document.getElementById("dlProgressBar").style.width = `${pct}%`;
@@ -3712,7 +4267,8 @@
 
         if (pct >= 100) {
           clearInterval(interval);
-          document.getElementById("dlStatusText").textContent = "Installed — ready to launch";
+          document.getElementById("dlStatusText").textContent = "Saved offline — ready to launch";
+          await putGameRecord(game);
           if (!installedIds.includes(game.id)) {
             installedIds.push(game.id);
             persistLocalState();
@@ -3721,7 +4277,7 @@
             closeModal("downloadModal");
             activeDownloadLock = false;
             renderDashboard();
-            showToast(`${game.name} installed to My Games`);
+            showToast(`${game.name} saved to My Games`);
           }, 240);
         }
       }, 45);
@@ -3737,6 +4293,7 @@
         installedIds.push(game.id);
         persistLocalState();
       }
+      putGameRecord(game).catch(() => {});
 
       localState.activeGame = game;
       localState.inGameMenuOpen = false;
@@ -3745,7 +4302,13 @@
 
       const overlay = document.getElementById("jetBootOverlay");
       const nameEl = document.getElementById("jetBootGameName");
+      const statusEl = document.getElementById("jetBootStatusLabel");
       if (nameEl) nameEl.textContent = game.name;
+      if (statusEl) {
+        statusEl.textContent = navigator.onLine
+          ? "Polaris Cloud Stream • Allocating Sandbox"
+          : "Polaris Offline Stream • Loading IndexedDB Cache";
+      }
       if (overlay) overlay.classList.add("active");
 
       setTimeout(() => {
@@ -3795,7 +4358,7 @@
         }
         window.focus();
         refreshFocusableElements();
-      }, 900);
+      }, 920);
     }
 
     function toggleInGameMenu(forceState) {
@@ -3928,7 +4491,7 @@
       const topInfo = document.createElement("div");
       const badge = document.createElement("div");
       badge.className = `game-card-badge ${isInstalled ? "installed" : "cloud"}`;
-      badge.textContent = isInstalled ? "Installed" : "Cloud Ready";
+      badge.textContent = isInstalled ? "● Installed Offline" : "◇ Shared Cloud Game";
 
       const title = document.createElement("h3");
       title.className = "game-card-title truncate";
@@ -3936,7 +4499,7 @@
 
       const desc = document.createElement("p");
       desc.className = "game-card-desc line-clamp-2-safe";
-      desc.textContent = game.description || "Local synced game";
+      desc.textContent = game.description || "Shared Polaris game";
 
       topInfo.append(badge, title, desc);
 
@@ -4003,7 +4566,7 @@
 
       if (heroFeatured) {
         if (heroTitle) heroTitle.textContent = heroFeatured.name;
-        if (heroDesc) heroDesc.textContent = heroFeatured.description || "Ready to launch over your Polaris cloud mesh.";
+        if (heroDesc) heroDesc.textContent = heroFeatured.description || "Ready to stream or play offline in your Polaris library.";
         if (heroBackdrop) heroBackdrop.style.backgroundImage = heroFeatured.cover ? `url("${heroFeatured.cover}")` : "none";
         if (heroCta) {
           const isInst = installedIds.includes(heroFeatured.id);
@@ -4011,16 +4574,16 @@
         }
       } else {
         if (heroTitle) heroTitle.textContent = "Polaris Cloud Gaming";
-        if (heroDesc) heroDesc.textContent = "Upload your own games in Publisher Studio and sync them across connected peers.";
+        if (heroDesc) heroDesc.textContent = "Upload HTML5 games in Publisher Studio and share them across Polaris.";
         if (heroBackdrop) heroBackdrop.style.backgroundImage = "none";
         if (heroCta) heroCta.textContent = "Open Store";
       }
 
-      const livePeerCount = Array.from(peersMap.values()).filter((p) => p.peerId !== localState.nodeId).length;
-      const homePeerEl = document.getElementById("homePeerCount");
-      if (homePeerEl) homePeerEl.textContent = String(livePeerCount + 1);
+      const livePeerCount = Array.from(onlineUsersMap.values()).filter((p) => p.peerId !== localState.nodeId).length;
+      const homeOnlineEl = document.getElementById("homeOnlineCount");
+      if (homeOnlineEl) homeOnlineEl.textContent = String(livePeerCount + 1);
 
-      renderGrid("jumpBackRow", matchingInstalled.slice(0, 5), "No installed games yet. Click Install on any game below to add it.", true);
+      renderGrid("jumpBackRow", matchingInstalled.slice(0, 5), "No installed games yet. Click Install on any game below to save it offline.", true);
       renderGrid("recentGamesRow", newest.slice(0, 5), "No games available right now.");
 
       const peersRow = document.getElementById("homePeersRow");
@@ -4034,14 +4597,14 @@
             color: localState.color,
             avatar: localState.avatar
           },
-          ...Array.from(peersMap.values()).filter((p) => p.peerId !== localState.nodeId)
+          ...Array.from(onlineUsersMap.values()).filter((p) => p.peerId !== localState.nodeId)
         ];
 
         allKnownPlayers.forEach((p) => {
           const chip = document.createElement("button");
           chip.type = "button";
           chip.className = "nav-focusable cursor-pointer";
-          chip.style.cssText = "flex-shrink:0;display:inline-flex;align-items:center;gap:10px;padding:8px 14px;border-radius:999px;background:var(--bg-card);border:1px solid rgba(255,255,255,0.08);color:#fff;";
+          chip.style.cssText = "flex-shrink:0;display:inline-flex;align-items:center;gap:10px;padding:8px 14px;border-radius:999px;background:var(--bg-card);border:1px solid var(--border-subtle);color:#fff;";
           chip.onclick = () => openPlayerCardById(p.peerId);
           const av = document.createElement("span");
           applyAvatarToElement(av, p, 28, 11);
@@ -4056,11 +4619,12 @@
       renderGrid("storeGrid", matching, "No games match your search.");
       renderGrid("libraryGrid", matchingInstalled, "No games installed yet.", true);
       renderGrid("downloadsGrid", installedGames, "No installed packages in Downloads.", true);
+      updateCloudSyncBar();
       refreshFocusableElements();
     }
 
     /* =========================================================================
-       10. CENTRALIZED RELIABLE EVENT WIRING (NEVER SWALLOWS POINTER CLICKS)
+       10. CENTRALIZED RELIABLE EVENT WIRING
        ========================================================================= */
     function bindAllInteractiveControls() {
       document.addEventListener("click", (e) => {
@@ -4136,6 +4700,16 @@
             startGameInstall(gameObj);
           }
         }
+      });
+
+      document.getElementById("resyncCloudBtn")?.addEventListener("click", async () => {
+        await publishPresenceToCloud();
+        renderDashboard();
+        showToast("Synced local state & presence");
+      });
+
+      document.getElementById("previewAccountsSoonBtn")?.addEventListener("click", () => {
+        showToast("Polaris Accounts are coming soon — your local & cloud profile stays active.");
       });
 
       document.getElementById("guideTriggerBtn")?.addEventListener("click", (e) => {
@@ -4273,7 +4847,7 @@
       }
 
       const activeSection = document.querySelector(".page-view:not(.hidden)");
-      const headerEls = Array.from(document.querySelectorAll("header .nav-focusable")).filter(isElementVisible);
+      const headerEls = Array.from(document.querySelectorAll("header .nav-focusable, .cloud-sync-bar .nav-focusable")).filter(isElementVisible);
       const sectionEls = activeSection
         ? Array.from(activeSection.querySelectorAll(".nav-focusable")).filter(isElementVisible)
         : [];
@@ -4390,11 +4964,34 @@
     }
 
     /* =========================================================================
-       12. STARTUP INITIALIZATION
+       12. STARTUP BOOT SCREEN & INITIALIZATION
        ========================================================================= */
+    let bootDismissed = false;
+    function dismissConsoleBoot() {
+      if (bootDismissed) return;
+      bootDismissed = true;
+      const bootEl = document.getElementById("consoleBootScreen");
+      if (!bootEl) return;
+      bootEl.classList.add("fade-out");
+      setTimeout(() => {
+        bootEl.classList.add("hidden");
+      }, 440);
+    }
+
+    function setBootProgress(pct, statusText) {
+      const fill = document.getElementById("bootProgressFill");
+      const pctEl = document.getElementById("bootPercentText");
+      const stEl = document.getElementById("bootStatusText");
+      if (fill) fill.style.width = `${pct}%`;
+      if (pctEl) pctEl.textContent = `${pct}%`;
+      if (stEl && statusText) stEl.textContent = statusText;
+    }
+
     (async function bootPolaris() {
       bindAllInteractiveControls();
+      document.getElementById("skipBootBtn")?.addEventListener("click", dismissConsoleBoot);
 
+      setBootProgress(20, "Opening IndexedDB offline game store...");
       try {
         dbInstance = await initDatabase();
         const loaded = await fetchAllGames();
@@ -4407,12 +5004,18 @@
         syncedGames = [...STARTER_GAMES];
       }
 
+      setBootProgress(52, "Restoring profile, friends & chat cache...");
       syncThemeAndHeader();
       updateUnreadBadge();
       renderSocialView();
       navigateTo("home");
-      broadcastPresence();
+
+      setBootProgress(82, "Connecting Polaris cloud services...");
+      await initFirebaseLayer();
+
+      setBootProgress(100, "Console ready");
       requestAnimationFrame(pollGamepadLoop);
+      setTimeout(dismissConsoleBoot, 380);
     })();
   </script>
 </body>
