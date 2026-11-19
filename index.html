@@ -8,48 +8,62 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
+    /* =========================================================================
+       POLARIS DESIGN TOKENS & CONSOLE DARK THEME VARIABLES
+       ========================================================================= */
     :root {
       --accent: #107c10;
       --accent-bright: #16c86a;
       --accent-soft: rgba(22, 200, 106, 0.16);
-      --bg-base: #090c0a;
-      --bg-elevated: #101411;
-      --bg-card: #151b17;
-      --bg-card-hover: #1d2620;
+      --accent-glow: rgba(22, 200, 106, 0.34);
+      --bg-base: #080b09;
+      --bg-surface: #0d110e;
+      --bg-elevated: #111612;
+      --bg-card: #151c17;
+      --bg-card-hover: #1d2720;
       --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.15);
       --text-main: #f4f7f5;
-      --text-muted: #8f9b92;
+      --text-muted: #93a197;
+      --text-dim: #6f7c73;
     }
 
     * {
       box-sizing: border-box;
     }
 
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
+      min-height: 100%;
       background-color: var(--bg-base);
       color: var(--text-main);
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Clean scrollbar styling */
+    /* Custom Scrollbars */
     ::-webkit-scrollbar {
-      width: 7px;
-      height: 7px;
+      width: 8px;
+      height: 8px;
     }
+
     ::-webkit-scrollbar-track {
       background: rgba(255, 255, 255, 0.02);
     }
+
     ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.16);
       border-radius: 999px;
     }
+
     ::-webkit-scrollbar-thumb:hover {
       background: var(--accent-bright);
     }
 
+    /* Text Clamp Utilities */
     .line-clamp-2-safe {
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -57,27 +71,57 @@
       overflow: hidden;
     }
 
-    /* Focus indicator only when navigating via gamepad or keyboard arrows */
+    .line-clamp-3-safe {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Keyboard / Controller Navigation Highlight */
     .pad-focused {
       outline: 2.5px solid var(--accent-bright) !important;
       outline-offset: 2px !important;
       transform: scale(1.02);
       transition: transform 0.14s ease, box-shadow 0.14s ease;
       box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65), 0 0 0 4px var(--accent-soft);
-      z-index: 20;
+      z-index: 25;
     }
 
+    /* Console Dashboard Tiles & Cards */
     .tile-card {
-      transition: transform 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-      border: 1px solid rgba(255, 255, 255, 0.07);
-    }
-    .tile-card:hover {
-      transform: translateY(-3px);
-      background-color: var(--bg-card-hover);
-      border-color: rgba(22, 200, 106, 0.35);
-      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.55);
+      position: relative;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 8px 20px rgba(0, 0, 0, 0.35);
+      transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+        background-color 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
     }
 
+    .tile-card:hover {
+      transform: translateY(-4px);
+      background-color: var(--bg-card-hover);
+      border-color: var(--accent-bright);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.65), 0 0 0 1px var(--accent-soft);
+    }
+
+    .console-panel {
+      background: linear-gradient(180deg, rgba(21, 28, 23, 0.92) 0%, rgba(15, 20, 17, 0.96) 100%);
+      border: 1px solid var(--border-subtle);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    /* Active Top & Mobile Nav Styling */
+    .top-nav-btn.nav-active,
+    .mobile-nav-btn.nav-active {
+      background-color: rgba(255, 255, 255, 0.11);
+      color: #ffffff;
+      box-shadow: inset 0 -2.5px 0 var(--accent-bright);
+    }
+
+    /* Player Avatar Box */
     .avatar-box {
       position: relative;
       display: inline-flex;
@@ -86,8 +130,10 @@
       overflow: hidden;
       flex-shrink: 0;
       font-weight: 800;
-      color: #061309;
+      color: #051208;
+      user-select: none;
     }
+
     .avatar-box img {
       width: 100%;
       height: 100%;
@@ -95,200 +141,395 @@
       display: block;
     }
 
-    /* Polaris Star Launch Animation */
-    #starOverlay {
+    /* =========================================================================
+       HORIZONTAL JET / LIGHT-STREAK LAUNCH TRANSITION OVERLAY
+       ========================================================================= */
+    #jetBootOverlay {
       position: fixed;
       inset: 0;
-      z-index: 95;
+      z-index: 120;
       display: none;
       align-items: center;
       justify-content: center;
       flex-direction: column;
-      background: radial-gradient(circle at 50% 45%, rgba(22, 200, 106, 0.18), rgba(6, 9, 7, 0.98) 70%);
-      backdrop-filter: blur(12px);
-    }
-    #starOverlay.active {
-      display: flex;
-      animation: overlayFadeIn 0.25s ease forwards;
-    }
-    @keyframes overlayFadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse at 50% 50%, rgba(22, 200, 106, 0.16), rgba(5, 8, 6, 0.98) 72%),
+        linear-gradient(90deg, rgba(5, 8, 6, 0.98) 0%, rgba(12, 24, 16, 0.92) 50%, rgba(5, 8, 6, 0.98) 100%);
+      backdrop-filter: blur(14px);
     }
 
-    .polaris-star {
+    #jetBootOverlay.active {
+      display: flex;
+      animation: jetOverlayIn 0.22s ease forwards;
+    }
+
+    @keyframes jetOverlayIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .jet-stage {
       position: relative;
-      width: 132px;
-      height: 132px;
+      width: min(720px, 95vw);
+      height: 168px;
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
+      border-radius: 24px;
     }
-    .polaris-star-core {
+
+    .jet-horizon-line {
+      position: absolute;
+      left: -25%;
+      width: 150%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(22, 200, 106, 0.35), rgba(255, 255, 255, 0.55), rgba(22, 200, 106, 0.35), transparent);
+      animation: jetHorizonSweep 1.1s ease-in-out infinite;
+    }
+
+    .jet-core-beam {
+      position: absolute;
+      left: -25%;
+      width: 150%;
+      height: 5px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, var(--accent-bright), #ffffff, var(--accent-bright), transparent);
+      box-shadow: 0 0 26px var(--accent-bright), 0 0 64px var(--accent-glow);
+      animation: jetBeamSurge 0.95s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    }
+
+    .jet-streak {
+      position: absolute;
+      left: -40%;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, var(--accent-bright), rgba(255, 255, 255, 0.9), transparent);
+      opacity: 0;
+    }
+
+    .jet-streak-1 {
+      width: 62%;
+      top: 22%;
+      animation: jetStreakFly 0.85s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+    }
+
+    .jet-streak-2 {
+      width: 78%;
+      top: 36%;
+      height: 2.5px;
+      animation: jetStreakFly 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.11s infinite;
+    }
+
+    .jet-streak-3 {
+      width: 68%;
+      top: 64%;
+      height: 2.5px;
+      animation: jetStreakFly 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.2s infinite;
+    }
+
+    .jet-streak-4 {
+      width: 54%;
+      top: 78%;
+      height: 1.5px;
+      animation: jetStreakFly 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.31s infinite;
+    }
+
+    .jet-pulse-flare {
+      position: relative;
       width: 26px;
       height: 26px;
       border-radius: 999px;
       background: #ffffff;
-      box-shadow: 0 0 28px var(--accent-bright), 0 0 64px var(--accent-bright);
-      animation: starCorePulse 1.3s ease-in-out infinite;
-    }
-    .polaris-spike-v,
-    .polaris-spike-h {
-      position: absolute;
-      background: linear-gradient(to bottom, transparent, var(--accent-bright), #ffffff, var(--accent-bright), transparent);
-      border-radius: 999px;
-      animation: spikeSweep 1.6s ease-in-out infinite;
-    }
-    .polaris-spike-v {
-      width: 4px;
-      height: 128px;
-    }
-    .polaris-spike-h {
-      height: 4px;
-      width: 128px;
-      background: linear-gradient(to right, transparent, var(--accent-bright), #ffffff, var(--accent-bright), transparent);
-    }
-    .polaris-ring {
-      position: absolute;
-      width: 96px;
-      height: 96px;
-      border-radius: 999px;
-      border: 1.5px solid rgba(22, 200, 106, 0.45);
-      animation: ringExpand 1.6s ease-out infinite;
+      box-shadow: 0 0 24px #ffffff, 0 0 64px var(--accent-bright);
+      animation: jetFlarePulse 0.95s ease-in-out infinite;
     }
 
-    @keyframes starCorePulse {
-      0%, 100% { transform: scale(0.92); }
-      50% { transform: scale(1.18); }
-    }
-    @keyframes spikeSweep {
-      0%, 100% { opacity: 0.55; transform: scale(0.88); }
-      50% { opacity: 1; transform: scale(1.06); }
-    }
-    @keyframes ringExpand {
-      0% { transform: scale(0.65); opacity: 0.85; }
-      100% { transform: scale(1.45); opacity: 0; }
+    @keyframes jetHorizonSweep {
+      0%, 100% {
+        opacity: 0.35;
+        transform: scaleX(0.8);
+      }
+      50% {
+        opacity: 0.9;
+        transform: scaleX(1.1);
+      }
     }
 
-    /* Fullscreen Game Player & In-game side menu (Double Ctrl or Esc) */
+    @keyframes jetBeamSurge {
+      0% {
+        transform: translateX(-25%) scaleX(0.65);
+        opacity: 0.4;
+      }
+      50% {
+        transform: translateX(5%) scaleX(1.1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(28%) scaleX(0.75);
+        opacity: 0.45;
+      }
+    }
+
+    @keyframes jetStreakFly {
+      0% {
+        transform: translateX(-25%);
+        opacity: 0;
+      }
+      20% {
+        opacity: 0.95;
+      }
+      85% {
+        opacity: 0.6;
+      }
+      100% {
+        transform: translateX(190%);
+        opacity: 0;
+      }
+    }
+
+    @keyframes jetFlarePulse {
+      0%, 100% {
+        transform: scale(0.86);
+      }
+      50% {
+        transform: scale(1.24);
+      }
+    }
+
+    /* =========================================================================
+       FULLSCREEN GAME PLAYER, FLOATING GUIDE BUTTON & SLIDE-OUT SIDEBAR
+       ========================================================================= */
     #gameSessionPlayer {
       position: fixed;
       inset: 0;
-      z-index: 80;
+      z-index: 95;
       background: #000000;
+    }
+
+    #guideTriggerBtn {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 135;
+      opacity: 0.9;
+      transition: opacity 0.15s ease, transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    #guideTriggerBtn:hover,
+    #guideTriggerBtn:focus-visible {
+      opacity: 1;
+      transform: translateY(-1px);
+      background-color: #1a241d;
+      border-color: var(--accent-bright);
     }
 
     #inGameMenu {
       position: fixed;
       inset: 0;
-      z-index: 130;
+      z-index: 150;
       display: none;
-      background: rgba(5, 8, 6, 0.75);
+      background: rgba(4, 7, 5, 0.78);
       backdrop-filter: blur(10px);
     }
+
     #inGameMenu.open {
       display: flex;
     }
+
     .ingame-drawer {
-      width: min(360px, 88vw);
+      width: min(370px, 90vw);
       height: 100%;
       background: #101511;
-      border-right: 1px solid var(--border-subtle);
+      border-right: 1px solid var(--border-strong);
       padding: 24px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      animation: drawerIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    @keyframes drawerIn {
-      from { transform: translateX(-100%); }
-      to { transform: translateX(0); }
+      box-shadow: 18px 0 50px rgba(0, 0, 0, 0.75);
+      animation: drawerSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* Toast notification */
+    @keyframes drawerSlideIn {
+      from {
+        transform: translateX(-100%);
+      }
+      to {
+        transform: translateX(0);
+      }
+    }
+
+    /* =========================================================================
+       TOAST BANNER
+       ========================================================================= */
     #toastBanner {
       position: fixed;
       bottom: 58px;
       right: 24px;
-      z-index: 160;
+      z-index: 170;
       display: none;
-      max-width: 360px;
+      max-width: 380px;
     }
+
     #toastBanner.show {
       display: block;
-      animation: toastSlide 0.2s ease;
+      animation: toastIn 0.2s ease;
     }
-    @keyframes toastSlide {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col selection:bg-[var(--accent-bright)] selection:text-[#061309]">
 
-  <!-- TOP XBOX-STYLE BAR -->
-  <header class="sticky top-0 z-30 h-16 bg-[#0d110e]/95 backdrop-blur-md border-b border-white/[0.08] px-4 lg:px-8 flex items-center justify-between gap-3">
+  <!-- =======================================================================
+       TOP CONSOLE NAVIGATION HEADER
+       ======================================================================= -->
+  <header class="sticky top-0 z-40 h-16 bg-[#0c100d]/95 backdrop-blur-md border-b border-white/[0.08] px-4 lg:px-8 flex items-center justify-between gap-3">
     <div class="flex items-center gap-5 min-w-0">
-      <button type="button" onclick="navigateTo('home')" class="nav-focusable flex items-center gap-2.5 text-left rounded-xl py-1 pr-2">
-        <span class="w-8 h-8 rounded-full bg-[var(--accent-bright)] text-[#061309] flex items-center justify-center font-black text-sm shadow-sm">✦</span>
-        <span class="font-extrabold tracking-tight text-base sm:text-lg text-white whitespace-nowrap">POLARIS</span>
+      <button
+        id="brandHomeBtn"
+        type="button"
+        data-action="navigate"
+        data-route="home"
+        class="nav-focusable flex items-center gap-2.5 text-left rounded-xl py-1 pr-2 cursor-pointer"
+      >
+        <span class="w-8 h-8 rounded-full bg-[var(--accent-bright)] text-[#061309] flex items-center justify-center font-black text-sm shadow-sm">
+          ✦
+        </span>
+        <span class="font-extrabold tracking-tight text-base sm:text-lg text-white whitespace-nowrap">
+          POLARIS
+        </span>
       </button>
 
-      <nav class="hidden md:flex items-center gap-1">
-        <button type="button" data-route="home" onclick="navigateTo('home')" class="top-nav-btn nav-focusable px-3.5 py-2 rounded-xl text-sm font-semibold text-[#9aa69d] hover:text-white hover:bg-white/[0.06] transition">Home</button>
-        <button type="button" data-route="store" onclick="navigateTo('store')" class="top-nav-btn nav-focusable px-3.5 py-2 rounded-xl text-sm font-semibold text-[#9aa69d] hover:text-white hover:bg-white/[0.06] transition">Store</button>
-        <button type="button" data-route="library" onclick="navigateTo('library')" class="top-nav-btn nav-focusable px-3.5 py-2 rounded-xl text-sm font-semibold text-[#9aa69d] hover:text-white hover:bg-white/[0.06] transition">My Games</button>
-        <button type="button" data-route="social" onclick="navigateTo('social')" class="top-nav-btn nav-focusable px-3.5 py-2 rounded-xl text-sm font-semibold text-[#9aa69d] hover:text-white hover:bg-white/[0.06] transition flex items-center gap-1.5">
-          <span>Social & Chat</span>
-          <span id="unreadBadge" class="hidden px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[var(--accent-bright)] text-[#061309]">0</span>
+      <nav aria-label="Primary Navigation" class="hidden md:flex items-center gap-1">
+        <button
+          type="button"
+          data-route="home"
+          data-action="navigate"
+          class="top-nav-btn nav-focusable px-3.5 py-2 rounded-xl text-sm font-semibold text-[#9aa69d] hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
+        >
+          Home
         </button>
-        <button type="button" data-route="downloads" onclick="navigateTo('downloads')" class="top-nav-btn nav-focusable px-3.5 py-2 rounded-xl text-sm font-semibold text-[#9aa69d] hover:text-white hover:bg-white/[0.06] transition">Downloads</button>
-        <button type="button" data-route="profile" onclick="navigateTo('profile')" class="top-nav-btn nav-focusable px-3.5 py-2 rounded-xl text-sm font-semibold text-[#9aa69d] hover:text-white hover:bg-white/[0.06] transition">Profile</button>
+        <button
+          type="button"
+          data-route="store"
+          data-action="navigate"
+          class="top-nav-btn nav-focusable px-3.5 py-2 rounded-xl text-sm font-semibold text-[#9aa69d] hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
+        >
+          Store
+        </button>
+        <button
+          type="button"
+          data-route="library"
+          data-action="navigate"
+          class="top-nav-btn nav-focusable px-3.5 py-2 rounded-xl text-sm font-semibold text-[#9aa69d] hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
+        >
+          My Games
+        </button>
+        <button
+          type="button"
+          data-route="social"
+          data-action="navigate"
+          class="top-nav-btn nav-focusable px-3.5 py-2 rounded-xl text-sm font-semibold text-[#9aa69d] hover:text-white hover:bg-white/[0.06] transition flex items-center gap-1.5 cursor-pointer"
+        >
+          <span>Global & Peer Chat</span>
+          <span
+            id="unreadBadge"
+            class="hidden px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[var(--accent-bright)] text-[#061309]"
+          >
+            0
+          </span>
+        </button>
+        <button
+          type="button"
+          data-route="downloads"
+          data-action="navigate"
+          class="top-nav-btn nav-focusable px-3.5 py-2 rounded-xl text-sm font-semibold text-[#9aa69d] hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
+        >
+          Downloads
+        </button>
+        <button
+          type="button"
+          data-route="profile"
+          data-action="navigate"
+          class="top-nav-btn nav-focusable px-3.5 py-2 rounded-xl text-sm font-semibold text-[#9aa69d] hover:text-white hover:bg-white/[0.06] transition cursor-pointer"
+        >
+          Profile
+        </button>
       </nav>
     </div>
 
     <div class="flex items-center gap-2.5 sm:gap-3">
-      <div class="hidden sm:block relative w-48 xl:w-64">
+      <div class="hidden sm:block relative w-44 md:w-52 xl:w-64">
         <input
           id="searchBox"
           type="text"
-          oninput="renderDashboard()"
           placeholder="Search games..."
+          aria-label="Search games"
           class="nav-focusable w-full bg-[#151b17] text-sm text-white placeholder-[#7c887f] rounded-full px-4 py-1.5 border border-white/[0.08] focus:outline-none focus:border-[var(--accent-bright)]"
         />
       </div>
 
-      <button type="button" onclick="openPublisherEntry()" class="nav-focusable px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/[0.07] hover:bg-white/[0.13] border border-white/[0.08] text-white transition whitespace-nowrap">
+      <button
+        id="publisherStudioBtn"
+        type="button"
+        data-action="open-publisher"
+        class="nav-focusable px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/[0.07] hover:bg-white/[0.14] border border-white/[0.09] text-white transition whitespace-nowrap cursor-pointer"
+      >
         Publisher Studio
       </button>
 
-      <button type="button" onclick="openPlayerCardById(localState.nodeId)" class="nav-focusable flex items-center gap-2.5 pl-1.5 pr-3 py-1 rounded-full bg-[#151b17] hover:bg-[#1c241e] border border-white/[0.08] transition">
+      <button
+        id="headerProfileBtn"
+        type="button"
+        data-action="open-self-card"
+        class="nav-focusable flex items-center gap-2.5 pl-1.5 pr-3 py-1 rounded-full bg-[#151b17] hover:bg-[#1c251f] border border-white/[0.09] transition cursor-pointer"
+      >
         <span id="topAvatar" class="avatar-box w-8 h-8 rounded-full text-xs">P</span>
         <span id="topUsername" class="text-sm font-semibold text-white max-w-[100px] truncate">Player</span>
       </button>
     </div>
   </header>
 
-  <!-- MOBILE QUICK NAV STRIP -->
-  <div class="md:hidden flex items-center gap-1.5 px-3 py-2 bg-[#0d110e] border-b border-white/[0.06] overflow-x-auto">
-    <button type="button" data-route="home" onclick="navigateTo('home')" class="mobile-nav-btn nav-focusable px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9aa69d] whitespace-nowrap">Home</button>
-    <button type="button" data-route="store" onclick="navigateTo('store')" class="mobile-nav-btn nav-focusable px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9aa69d] whitespace-nowrap">Store</button>
-    <button type="button" data-route="library" onclick="navigateTo('library')" class="mobile-nav-btn nav-focusable px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9aa69d] whitespace-nowrap">My Games</button>
-    <button type="button" data-route="social" onclick="navigateTo('social')" class="mobile-nav-btn nav-focusable px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9aa69d] whitespace-nowrap">Social & Chat</button>
-    <button type="button" data-route="downloads" onclick="navigateTo('downloads')" class="mobile-nav-btn nav-focusable px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9aa69d] whitespace-nowrap">Downloads</button>
-    <button type="button" data-route="profile" onclick="navigateTo('profile')" class="mobile-nav-btn nav-focusable px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9aa69d] whitespace-nowrap">Profile</button>
+  <!-- MOBILE QUICK NAVIGATION STRIP -->
+  <div class="md:hidden flex items-center gap-1.5 px-3 py-2 bg-[#0c100d] border-b border-white/[0.06] overflow-x-auto">
+    <button type="button" data-route="home" data-action="navigate" class="mobile-nav-btn nav-focusable px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9aa69d] whitespace-nowrap cursor-pointer">Home</button>
+    <button type="button" data-route="store" data-action="navigate" class="mobile-nav-btn nav-focusable px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9aa69d] whitespace-nowrap cursor-pointer">Store</button>
+    <button type="button" data-route="library" data-action="navigate" class="mobile-nav-btn nav-focusable px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9aa69d] whitespace-nowrap cursor-pointer">My Games</button>
+    <button type="button" data-route="social" data-action="navigate" class="mobile-nav-btn nav-focusable px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9aa69d] whitespace-nowrap cursor-pointer">Global & Peer Chat</button>
+    <button type="button" data-route="downloads" data-action="navigate" class="mobile-nav-btn nav-focusable px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9aa69d] whitespace-nowrap cursor-pointer">Downloads</button>
+    <button type="button" data-route="profile" data-action="navigate" class="mobile-nav-btn nav-focusable px-3 py-1.5 rounded-lg text-xs font-semibold text-[#9aa69d] whitespace-nowrap cursor-pointer">Profile</button>
   </div>
 
-  <!-- MAIN CONTENT AREA -->
+  <!-- =======================================================================
+       MAIN WORKSPACE CONTAINER
+       ======================================================================= -->
   <main class="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-8 py-6 pb-16">
 
-    <!-- HOME DASHBOARD -->
+    <!-- 1. HOME DASHBOARD -->
     <section id="view-home" class="page-view space-y-8">
-      <!-- Wide Hero Banner -->
-      <div id="heroBanner" class="relative w-full h-[320px] sm:h-[380px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#122a19] via-[#0e1510] to-[#080a09] border border-white/[0.08] shadow-2xl">
+      <!-- Wide Console Hero Banner -->
+      <div
+        id="heroBanner"
+        class="relative w-full h-[320px] sm:h-[380px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#122b1a] via-[#0e1510] to-[#080a09] border border-white/[0.09] shadow-2xl"
+      >
         <div id="heroBackdrop" class="absolute inset-0 bg-cover bg-center opacity-40"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-[#090c0a] via-[#090c0a]/60 to-transparent"></div>
-        <div class="absolute inset-0 bg-gradient-to-r from-[#090c0a]/95 via-[#090c0a]/50 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#080b09] via-[#080b09]/60 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-[#080b09]/95 via-[#080b09]/55 to-transparent"></div>
 
         <div class="relative z-10 h-full flex flex-col justify-end p-6 sm:p-10 max-w-2xl">
           <div class="inline-flex items-center gap-2 text-xs font-bold tracking-wider uppercase text-[var(--accent-bright)] mb-2">
@@ -298,36 +539,57 @@
           <h1 id="heroTitle" class="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
             Ready to Play
           </h1>
-          <p id="heroDesc" class="mt-2.5 text-sm sm:text-base text-[#b8c4bb] line-clamp-2-safe max-w-xl">
-            Instant browser cloud launches, local P2P game sync, global chat, and direct peer messaging.
+          <p id="heroDesc" class="mt-2.5 text-sm sm:text-base text-[#b9c6bd] line-clamp-2-safe max-w-xl">
+            Instant browser cloud launches, local P2P game sync, live global chat, and direct peer messages.
           </p>
           <div class="mt-5 flex flex-wrap items-center gap-3">
-            <button id="heroCtaBtn" type="button" onclick="handleHeroAction()" class="nav-focusable px-6 py-2.5 rounded-xl font-bold text-sm bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition shadow-lg">
+            <button
+              id="heroCtaBtn"
+              type="button"
+              data-action="hero-primary"
+              class="nav-focusable px-6 py-2.5 rounded-xl font-bold text-sm bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition shadow-lg cursor-pointer"
+            >
               Play Featured Game
             </button>
-            <button type="button" onclick="navigateTo('social')" class="nav-focusable px-4 py-2.5 rounded-xl font-semibold text-sm bg-white/[0.1] hover:bg-white/[0.16] border border-white/[0.1] text-white backdrop-blur-sm transition">
-              Global & Peer Chat (<span id="homePeerCount">0</span>)
+            <button
+              id="heroChatBtn"
+              type="button"
+              data-action="navigate"
+              data-route="social"
+              class="nav-focusable px-4 py-2.5 rounded-xl font-semibold text-sm bg-white/[0.1] hover:bg-white/[0.16] border border-white/[0.12] text-white backdrop-blur-sm transition cursor-pointer"
+            >
+              Global & Peer Chat (<span id="homePeerCount">1</span>)
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Jump Back In / Installed Strip -->
+      <!-- Jump Back In Row -->
       <div class="space-y-3">
         <div class="flex items-center justify-between">
           <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-white">Jump Back In</h2>
-          <button type="button" onclick="navigateTo('library')" class="nav-focusable text-xs font-bold text-[var(--accent-bright)] hover:underline">
+          <button
+            type="button"
+            data-action="navigate"
+            data-route="library"
+            class="nav-focusable text-xs font-bold text-[var(--accent-bright)] hover:underline cursor-pointer"
+          >
             See all my games
           </button>
         </div>
         <div id="jumpBackRow" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"></div>
       </div>
 
-      <!-- Store / Recently Synced Strip -->
+      <!-- Featured & Synced Store Row -->
       <div class="space-y-3">
         <div class="flex items-center justify-between">
           <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-white">Featured & Synced Games</h2>
-          <button type="button" onclick="navigateTo('store')" class="nav-focusable text-xs font-bold text-[var(--accent-bright)] hover:underline">
+          <button
+            type="button"
+            data-action="navigate"
+            data-route="store"
+            class="nav-focusable text-xs font-bold text-[var(--accent-bright)] hover:underline cursor-pointer"
+          >
             Open full Store
           </button>
         </div>
@@ -338,7 +600,12 @@
       <div class="space-y-3">
         <div class="flex items-center justify-between">
           <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-white">Active P2P Players</h2>
-          <button type="button" onclick="navigateTo('social')" class="nav-focusable text-xs font-bold text-[var(--accent-bright)] hover:underline">
+          <button
+            type="button"
+            data-action="navigate"
+            data-route="social"
+            class="nav-focusable text-xs font-bold text-[var(--accent-bright)] hover:underline cursor-pointer"
+          >
             Open Chat Hub
           </button>
         </div>
@@ -346,21 +613,25 @@
       </div>
     </section>
 
-    <!-- STORE VIEW -->
+    <!-- 2. STORE CATALOG VIEW -->
     <section id="view-store" class="page-view hidden space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <p class="text-xs font-bold uppercase tracking-wider text-[var(--accent-bright)]">Polaris Catalog</p>
           <h1 class="text-2xl sm:text-3xl font-black text-white mt-0.5">Store</h1>
         </div>
-        <button type="button" onclick="openPublisherEntry()" class="nav-focusable px-4 py-2 rounded-xl text-xs font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition self-start sm:self-auto">
+        <button
+          type="button"
+          data-action="open-publisher"
+          class="nav-focusable px-4 py-2 rounded-xl text-xs font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition self-start sm:self-auto cursor-pointer"
+        >
           + Upload Game
         </button>
       </div>
       <div id="storeGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5"></div>
     </section>
 
-    <!-- MY GAMES LIBRARY VIEW -->
+    <!-- 3. MY GAMES LIBRARY VIEW -->
     <section id="view-library" class="page-view hidden space-y-6">
       <div>
         <p class="text-xs font-bold uppercase tracking-wider text-[var(--accent-bright)]">Local Collection</p>
@@ -369,81 +640,97 @@
       <div id="libraryGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5"></div>
     </section>
 
-    <!-- SOCIAL HUB: GLOBAL CHAT + FRIENDS & P2P DIRECT MESSAGES -->
+    <!-- 4. SOCIAL HUB: GLOBAL CHAT + FRIENDS & P2P DIRECT MESSAGES -->
     <section id="view-social" class="page-view hidden space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <p class="text-xs font-bold uppercase tracking-wider text-[var(--accent-bright)]">Polaris Comms</p>
           <h1 class="text-2xl sm:text-3xl font-black text-white mt-0.5">Global Chat, Friends & DMs</h1>
         </div>
-        <div class="flex items-center gap-2 text-xs text-[#9aa69d] bg-[#141915] border border-white/[0.08] px-3.5 py-2 rounded-xl">
+        <div class="flex items-center gap-2 text-xs text-[#9aa69d] console-panel px-3.5 py-2 rounded-xl">
           <span class="w-2 h-2 rounded-full bg-[var(--accent-bright)]"></span>
-          <span>Live P2P Sync • <strong id="socialOnlineCount" class="text-white">1</strong> online</span>
+          <span>Live BroadcastChannel Mesh • <strong id="socialOnlineCount" class="text-white">1</strong> online</span>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[560px]">
-        <!-- Left Column: Room Switcher, Online Peers & Friends -->
-        <div class="lg:col-span-4 bg-[#121713] border border-white/[0.08] rounded-2xl p-4 flex flex-col gap-5">
-          <!-- Room Switcher -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[580px]">
+        <!-- Left Sidebar: Global Room + Online Peers + Friends -->
+        <div class="lg:col-span-4 console-panel rounded-2xl p-4 flex flex-col gap-5">
           <div>
-            <h3 class="text-xs font-bold uppercase tracking-wider text-[#8f9b92] mb-2">Channels</h3>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-[#8f9b92] mb-2">Global Room</h3>
             <button
-              type="button"
               id="globalChannelBtn"
-              onclick="selectGlobalChat()"
-              class="nav-focusable w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left transition bg-[var(--accent-bright)]/15 border border-[var(--accent-bright)]/45 text-white"
+              type="button"
+              data-action="select-global-chat"
+              class="nav-focusable w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left transition bg-[var(--accent-bright)]/15 border border-[var(--accent-bright)]/45 text-white cursor-pointer"
             >
               <div class="flex items-center gap-2.5">
-                <span class="w-7 h-7 rounded-full bg-[var(--accent-bright)] text-[#061309] font-black text-xs flex items-center justify-center">#</span>
+                <span class="w-7 h-7 rounded-full bg-[var(--accent-bright)] text-[#061309] font-black text-xs flex items-center justify-center">
+                  #
+                </span>
                 <div>
                   <div class="text-xs font-extrabold text-white">Global Chat</div>
-                  <div class="text-[10px] text-[#9aa69d]">All connected Polaris peers</div>
+                  <div class="text-[10px] text-[#9aa69d]">Shared room for all connected peers</div>
                 </div>
               </div>
-              <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[var(--accent-bright)] text-[#061309]">LIVE</span>
+              <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[var(--accent-bright)] text-[#061309]">
+                LIVE
+              </span>
             </button>
           </div>
 
-          <!-- Discovered Peers -->
           <div>
-            <h3 class="text-xs font-bold uppercase tracking-wider text-[#8f9b92] mb-2">Discovered Peers (<span id="peerListCount">0</span>)</h3>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-[#8f9b92] mb-2">
+              Discovered Peers (<span id="peerListCount">0</span>)
+            </h3>
             <div id="discoveredPeersList" class="space-y-2 max-h-44 overflow-y-auto pr-1"></div>
           </div>
 
-          <!-- Friends -->
           <div class="border-t border-white/[0.07] pt-4 flex-1 flex flex-col">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-[#8f9b92] mb-2">Friends (<span id="friendsListCount">0</span>)</h3>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-[#8f9b92] mb-2">
+              Friends (<span id="friendsListCount">0</span>)
+            </h3>
             <div id="friendsListContainer" class="space-y-2 flex-1 overflow-y-auto pr-1"></div>
           </div>
         </div>
 
-        <!-- Right Column: Active Chat Thread (Global Chat or Direct Message) -->
-        <div class="lg:col-span-8 bg-[#121713] border border-white/[0.08] rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
+        <!-- Right Column: Active Chat Thread -->
+        <div class="lg:col-span-8 console-panel rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
           <div id="dmThreadHeader" class="pb-3.5 border-b border-white/[0.07] flex items-center justify-between gap-3">
             <div class="flex items-center gap-3 min-w-0">
-              <div id="dmActiveAvatar" class="avatar-box w-10 h-10 rounded-full text-sm">#</div>
+              <div id="dmActiveAvatar" class="avatar-box w-10 h-10 rounded-full text-sm bg-[var(--accent-bright)]">#</div>
               <div class="min-w-0">
                 <div id="dmActiveName" class="font-bold text-sm sm:text-base text-white truncate">Global Chat</div>
-                <div id="dmActiveMeta" class="text-xs text-[#8f9b92] truncate">Broadcast messages across all open Polaris tabs & peers</div>
+                <div id="dmActiveMeta" class="text-xs text-[#8f9b92] truncate">
+                  Live messages synced across open Polaris tabs & peers • Click any sender name to view profile
+                </div>
               </div>
             </div>
-            <button id="dmInspectBtn" type="button" onclick="inspectActiveChatPeer()" class="hidden nav-focusable px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.07] hover:bg-white/[0.13] border border-white/[0.08] text-white">
+            <button
+              id="dmInspectBtn"
+              type="button"
+              data-action="inspect-active-peer"
+              class="hidden nav-focusable px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.07] hover:bg-white/[0.13] border border-white/[0.08] text-white cursor-pointer"
+            >
               View Profile
             </button>
           </div>
 
-          <div id="dmMessagesArea" class="flex-1 overflow-y-auto py-4 space-y-3 my-2 min-h-[320px] max-h-[400px] px-1"></div>
+          <div id="dmMessagesArea" class="flex-1 overflow-y-auto py-4 space-y-3 my-2 min-h-[320px] max-h-[410px] px-1"></div>
 
-          <form onsubmit="handleSendChatMessage(event)" class="pt-3 border-t border-white/[0.07] flex items-center gap-2.5">
+          <form id="chatComposerForm" class="pt-3 border-t border-white/[0.07] flex items-center gap-2.5">
             <input
               id="dmInputField"
               type="text"
               maxlength="400"
               placeholder="Message Global Chat..."
-              class="nav-focusable flex-1 bg-[#0b0e0c] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder-[#6f7b72] focus:outline-none focus:border-[var(--accent-bright)]"
+              class="nav-focusable flex-1 bg-[#0a0d0b] border border-white/[0.09] rounded-xl px-4 py-2.5 text-sm text-white placeholder-[#6f7b72] focus:outline-none focus:border-[var(--accent-bright)]"
             />
-            <button type="submit" class="nav-focusable px-5 py-2.5 rounded-xl text-sm font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition">
+            <button
+              id="sendChatBtn"
+              type="submit"
+              class="nav-focusable px-5 py-2.5 rounded-xl text-sm font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition cursor-pointer"
+            >
               Send
             </button>
           </form>
@@ -451,7 +738,7 @@
       </div>
     </section>
 
-    <!-- DOWNLOADS VIEW -->
+    <!-- 5. DOWNLOADS QUEUE VIEW -->
     <section id="view-downloads" class="page-view hidden space-y-6">
       <div>
         <p class="text-xs font-bold uppercase tracking-wider text-[var(--accent-bright)]">Installation Queue</p>
@@ -460,57 +747,71 @@
       <div id="downloadsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5"></div>
     </section>
 
-    <!-- PROFILE CUSTOMIZATION VIEW -->
+    <!-- 6. PROFILE & CUSTOMIZATION VIEW -->
     <section id="view-profile" class="page-view hidden space-y-6">
       <div>
         <p class="text-xs font-bold uppercase tracking-wider text-[var(--accent-bright)]">Identity & Appearance</p>
         <h1 class="text-2xl sm:text-3xl font-black text-white mt-0.5">Profile Settings</h1>
       </div>
 
-      <div class="bg-[#121713] border border-white/[0.08] rounded-2xl p-6 sm:p-8 max-w-2xl space-y-6">
+      <div class="console-panel rounded-2xl p-6 sm:p-8 max-w-2xl space-y-6">
         <div class="flex flex-col sm:flex-row items-center gap-6">
           <div id="profilePreviewAvatar" class="avatar-box w-24 h-24 rounded-full text-3xl shadow-xl ring-4 ring-[var(--accent-bright)]/30">P</div>
           <div class="space-y-2.5 text-center sm:text-left">
             <p class="text-sm font-bold text-white">Profile Picture (Animated GIF, WebP, APNG, PNG, JPG)</p>
             <div class="flex flex-wrap justify-center sm:justify-start gap-2.5">
-              <button type="button" onclick="document.getElementById('avatarUploadInput').click()" class="nav-focusable px-4 py-2 rounded-xl text-xs font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition">
+              <button
+                id="triggerAvatarUploadBtn"
+                type="button"
+                class="nav-focusable px-4 py-2 rounded-xl text-xs font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition cursor-pointer"
+              >
                 Upload Picture
               </button>
-              <button type="button" onclick="clearProfileAvatar()" class="nav-focusable px-4 py-2 rounded-xl text-xs font-semibold bg-white/[0.08] hover:bg-white/[0.14] text-white transition">
+              <button
+                id="clearAvatarBtn"
+                type="button"
+                class="nav-focusable px-4 py-2 rounded-xl text-xs font-semibold bg-white/[0.08] hover:bg-white/[0.14] text-white transition cursor-pointer"
+              >
                 Use Initials
               </button>
             </div>
-            <input id="avatarUploadInput" type="file" accept="image/*" class="hidden" onchange="handleAvatarFile(event)" />
+            <input id="avatarUploadInput" type="file" accept="image/*" class="hidden" />
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-[#8f9b92] mb-1.5">Username (Locked on Claim)</label>
+            <label for="profileUsernameInput" class="block text-xs font-bold uppercase tracking-wider text-[#8f9b92] mb-1.5">
+              Username (Locked on Claim)
+            </label>
             <input
               id="profileUsernameInput"
               type="text"
               maxlength="24"
               placeholder="Enter username"
-              class="nav-focusable w-full bg-[#0b0e0c] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[var(--accent-bright)]"
+              class="nav-focusable w-full bg-[#0a0d0b] border border-white/[0.09] rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[var(--accent-bright)]"
             />
             <p id="usernameLockNote" class="text-[11px] text-[#8f9b92] mt-1"></p>
           </div>
 
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-[#8f9b92] mb-1.5">Initials (Fallback)</label>
+            <label for="profileInitialsInput" class="block text-xs font-bold uppercase tracking-wider text-[#8f9b92] mb-1.5">
+              Initials (Fallback)
+            </label>
             <input
               id="profileInitialsInput"
               type="text"
               maxlength="2"
               placeholder="PL"
-              class="nav-focusable w-full bg-[#0b0e0c] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-sm text-white uppercase focus:outline-none focus:border-[var(--accent-bright)]"
+              class="nav-focusable w-full bg-[#0a0d0b] border border-white/[0.09] rounded-xl px-3.5 py-2.5 text-sm text-white uppercase focus:outline-none focus:border-[var(--accent-bright)]"
             />
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-[#8f9b92] mb-1.5">Accent Color</label>
+          <label for="profileColorInput" class="block text-xs font-bold uppercase tracking-wider text-[#8f9b92] mb-1.5">
+            Accent Color
+          </label>
           <div class="flex items-center gap-3">
             <input
               id="profileColorInput"
@@ -523,10 +824,18 @@
         </div>
 
         <div class="pt-2 flex flex-wrap items-center gap-3">
-          <button type="button" onclick="saveProfileChanges()" class="nav-focusable px-6 py-2.5 rounded-xl text-sm font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition">
+          <button
+            id="saveProfileBtn"
+            type="button"
+            class="nav-focusable px-6 py-2.5 rounded-xl text-sm font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition cursor-pointer"
+          >
             Save Profile
           </button>
-          <button type="button" onclick="releaseClaimedUsername()" class="nav-focusable px-4 py-2.5 rounded-xl text-xs font-semibold bg-white/[0.07] hover:bg-white/[0.13] text-[#cbd5ce] transition">
+          <button
+            id="releaseUsernameBtn"
+            type="button"
+            class="nav-focusable px-4 py-2.5 rounded-xl text-xs font-semibold bg-white/[0.07] hover:bg-white/[0.13] text-[#cbd5ce] transition cursor-pointer"
+          >
             Release Claimed Name
           </button>
         </div>
@@ -534,29 +843,41 @@
     </section>
   </main>
 
-  <!-- CONTROLLER PROMPT BAR (SHOWN AUTOMATICALLY WHEN GAMEPAD IS CONNECTED) -->
+  <!-- =======================================================================
+       CONTROLLER PROMPT BAR (AUTO-SHOWN WHEN GAMEPAD DETECTED)
+       ======================================================================= -->
   <div id="controllerPromptBar" class="hidden fixed bottom-0 inset-x-0 z-40 h-11 bg-[#0d120f]/95 backdrop-blur-md border-t border-white/[0.08] px-6 flex items-center justify-between text-xs text-[#b8c4bb]">
     <div class="flex items-center gap-2 font-semibold text-white">
       <span class="w-2 h-2 rounded-full bg-[var(--accent-bright)]"></span>
-      <span id="gamepadNameLabel">Xbox Controller Connected</span>
+      <span id="gamepadNameLabel">Wireless Controller Connected</span>
     </div>
     <div class="hidden sm:flex items-center gap-5">
       <span><strong class="text-white bg-white/10 px-1.5 py-0.5 rounded">D-Pad / Stick</strong> Navigate</span>
       <span><strong class="text-white bg-white/10 px-1.5 py-0.5 rounded">A</strong> Select</span>
       <span><strong class="text-white bg-white/10 px-1.5 py-0.5 rounded">B</strong> Back / Menu</span>
-      <span><strong class="text-white bg-white/10 px-1.5 py-0.5 rounded">Menu / Start</strong> In-Game Menu</span>
+      <span><strong class="text-white bg-white/10 px-1.5 py-0.5 rounded">Menu / Start</strong> Guide Menu</span>
     </div>
   </div>
 
-  <!-- TOAST BANNER -->
-  <div id="toastBanner" class="bg-[#161d18] border border-[var(--accent-bright)]/45 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold">
+  <!-- =======================================================================
+       TOAST NOTIFICATION BANNER
+       ======================================================================= -->
+  <div id="toastBanner" class="bg-[#161e19] border border-[var(--accent-bright)]/45 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold">
     <span id="toastText"></span>
   </div>
 
-  <!-- PLAYER PROFILE CARD MODAL -->
+  <!-- =======================================================================
+       MODALS: PLAYER CARD, INSTALL PROGRESS, PUBLISHER STUDIO & GAME EDITOR
+       ======================================================================= -->
   <div id="playerCardModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-[#131915] border border-white/[0.09] rounded-2xl w-full max-w-sm p-6 text-center space-y-5 relative shadow-2xl">
-      <button type="button" onclick="closeModal('playerCardModal')" class="nav-focusable absolute top-4 right-4 w-8 h-8 rounded-full bg-white/[0.07] hover:bg-white/[0.14] text-white flex items-center justify-center text-sm">✕</button>
+      <button
+        type="button"
+        data-close-modal="playerCardModal"
+        class="nav-focusable absolute top-4 right-4 w-8 h-8 rounded-full bg-white/[0.07] hover:bg-white/[0.14] text-white flex items-center justify-center text-sm cursor-pointer"
+      >
+        ✕
+      </button>
 
       <div id="playerCardAvatar" class="avatar-box w-24 h-24 mx-auto rounded-full text-3xl shadow-lg">P</div>
 
@@ -570,7 +891,6 @@
     </div>
   </div>
 
-  <!-- CLEAN DOWNLOAD PROGRESS MODAL -->
   <div id="downloadModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-[#131915] border border-white/[0.09] rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
@@ -585,29 +905,30 @@
     </div>
   </div>
 
-  <!-- PUBLISHER ACCESS CODE MODAL -->
   <div id="pubAuthModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-[#131915] border border-white/[0.09] rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
         <h3 class="text-lg font-extrabold text-white">Publisher Studio</h3>
-        <button type="button" onclick="closeModal('pubAuthModal')" class="nav-focusable text-[#9aa69d] hover:text-white">✕</button>
+        <button type="button" data-close-modal="pubAuthModal" class="nav-focusable text-[#9aa69d] hover:text-white cursor-pointer">✕</button>
       </div>
       <p class="text-xs text-[#9aa69d]">Enter access code to upload and manage games.</p>
       <input
         id="pubCodeInput"
         type="password"
         placeholder="Access code"
-        onkeydown="if(event.key==='Enter')verifyPublisherCode()"
         class="nav-focusable w-full bg-[#0b0e0c] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-[var(--accent-bright)]"
       />
       <p id="pubCodeError" class="text-xs text-red-400 min-h-[16px]"></p>
-      <button type="button" onclick="verifyPublisherCode()" class="nav-focusable w-full py-2.5 rounded-xl text-sm font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition">
+      <button
+        id="verifyPubCodeBtn"
+        type="button"
+        class="nav-focusable w-full py-2.5 rounded-xl text-sm font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition cursor-pointer"
+      >
         Continue
       </button>
     </div>
   </div>
 
-  <!-- PUBLISHER STUDIO MANAGER MODAL -->
   <div id="pubManagerModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-[#131915] border border-white/[0.09] rounded-2xl w-full max-w-2xl max-h-[88vh] flex flex-col p-6 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between border-b border-white/[0.07] pb-3.5">
@@ -616,86 +937,132 @@
           <h3 class="text-xl font-extrabold text-white">Published Games</h3>
         </div>
         <div class="flex items-center gap-2">
-          <button type="button" onclick="openGameEditor(null)" class="nav-focusable px-4 py-2 rounded-xl text-xs font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition">
+          <button
+            id="openAddGameEditorBtn"
+            type="button"
+            class="nav-focusable px-4 py-2 rounded-xl text-xs font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition cursor-pointer"
+          >
             + Add Game
           </button>
-          <button type="button" onclick="closeModal('pubManagerModal')" class="nav-focusable w-8 h-8 rounded-full bg-white/[0.07] hover:bg-white/[0.14] text-white flex items-center justify-center">✕</button>
+          <button
+            type="button"
+            data-close-modal="pubManagerModal"
+            class="nav-focusable w-8 h-8 rounded-full bg-white/[0.07] hover:bg-white/[0.14] text-white flex items-center justify-center cursor-pointer"
+          >
+            ✕
+          </button>
         </div>
       </div>
       <div id="pubGamesList" class="flex-1 overflow-y-auto space-y-2.5 pr-1"></div>
     </div>
   </div>
 
-  <!-- CLEAN GAME UPLOAD / EDIT MODAL -->
   <div id="gameEditorModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-[#131915] border border-white/[0.09] rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
         <h3 id="gameEditorHeading" class="text-lg font-extrabold text-white">Upload Game</h3>
-        <button type="button" onclick="closeModal('gameEditorModal')" class="nav-focusable text-[#9aa69d] hover:text-white">✕</button>
+        <button type="button" data-close-modal="gameEditorModal" class="nav-focusable text-[#9aa69d] hover:text-white cursor-pointer">✕</button>
       </div>
 
       <input id="editGameId" type="hidden" />
 
       <div>
-        <label class="block text-xs font-bold text-[#9aa69d] mb-1">Game Title</label>
+        <label for="editorTitle" class="block text-xs font-bold text-[#9aa69d] mb-1">Game Title</label>
         <input id="editorTitle" type="text" placeholder="Enter game title" class="nav-focusable w-full bg-[#0b0e0c] border border-white/[0.08] rounded-xl px-3.5 py-2 text-sm text-white" />
       </div>
 
       <div>
-        <label class="block text-xs font-bold text-[#9aa69d] mb-1">Description</label>
+        <label for="editorDesc" class="block text-xs font-bold text-[#9aa69d] mb-1">Description</label>
         <input id="editorDesc" type="text" placeholder="Short description" class="nav-focusable w-full bg-[#0b0e0c] border border-white/[0.08] rounded-xl px-3.5 py-2 text-sm text-white" />
       </div>
 
       <div class="grid grid-cols-3 gap-3">
         <div>
-          <label class="block text-xs font-bold text-[#9aa69d] mb-1">Icon Emoji</label>
+          <label for="editorIcon" class="block text-xs font-bold text-[#9aa69d] mb-1">Icon Emoji</label>
           <input id="editorIcon" type="text" maxlength="4" value="🎮" class="nav-focusable w-full bg-[#0b0e0c] border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-white text-center" />
         </div>
         <div>
-          <label class="block text-xs font-bold text-[#9aa69d] mb-1">Card Color</label>
+          <label for="editorColor" class="block text-xs font-bold text-[#9aa69d] mb-1">Card Color</label>
           <input id="editorColor" type="color" value="#173822" class="nav-focusable w-full h-10 rounded-xl bg-transparent border-0 cursor-pointer" />
         </div>
         <div>
-          <label class="block text-xs font-bold text-[#9aa69d] mb-1">Install Time (s)</label>
+          <label for="editorTime" class="block text-xs font-bold text-[#9aa69d] mb-1">Install Time (s)</label>
           <input id="editorTime" type="number" min="1" max="120" value="2" class="nav-focusable w-full bg-[#0b0e0c] border border-white/[0.08] rounded-xl px-3 py-2 text-sm text-white" />
         </div>
       </div>
 
       <div>
-        <label class="block text-xs font-bold text-[#9aa69d] mb-1">Cover Artwork (Image or GIF)</label>
-        <input id="editorCoverFile" type="file" accept="image/*" onchange="handleCoverFile(event)" class="block w-full text-xs text-[#9aa69d] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-white/[0.09] file:text-white hover:file:bg-white/[0.15]" />
+        <label for="editorCoverFile" class="block text-xs font-bold text-[#9aa69d] mb-1">Cover Artwork (Image or GIF)</label>
+        <input
+          id="editorCoverFile"
+          type="file"
+          accept="image/*"
+          class="block w-full text-xs text-[#9aa69d] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-white/[0.09] file:text-white hover:file:bg-white/[0.15]"
+        />
         <div id="editorCoverPreview" class="mt-2 hidden">
           <img id="editorCoverImg" alt="Cover preview" class="w-full h-28 object-cover rounded-xl" />
         </div>
       </div>
 
-      <div class="bg-[#0d110e] rounded-xl p-3.5 space-y-2 border border-white/[0.06]">
-        <label class="block text-xs font-bold text-white">Game Package (.html / .htm)</label>
-        <input id="editorGameFile" type="file" accept=".html,.htm" onchange="handleGamePackageFile(event)" class="block w-full text-xs text-[#9aa69d] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[var(--accent-bright)] file:text-[#061309]" />
+      <div class="bg-[#0d110e] rounded-xl p-3.5 space-y-2 border border-white/[0.07]">
+        <label for="editorGameFile" class="block text-xs font-bold text-white">Game Package (.html / .htm)</label>
+        <input
+          id="editorGameFile"
+          type="file"
+          accept=".html,.htm"
+          class="block w-full text-xs text-[#9aa69d] file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[var(--accent-bright)] file:text-[#061309]"
+        />
         <p id="editorPackageStatus" class="text-xs text-[#8f9b92]">No game file loaded yet.</p>
       </div>
 
       <div class="flex items-center justify-end gap-2.5 pt-2">
-        <button type="button" onclick="closeModal('gameEditorModal')" class="nav-focusable px-4 py-2 rounded-xl text-xs font-semibold bg-white/[0.07] hover:bg-white/[0.13] text-white">Cancel</button>
-        <button type="button" onclick="savePublishedGame()" class="nav-focusable px-5 py-2 rounded-xl text-xs font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition">Save & Sync</button>
+        <button type="button" data-close-modal="gameEditorModal" class="nav-focusable px-4 py-2 rounded-xl text-xs font-semibold bg-white/[0.07] hover:bg-white/[0.13] text-white cursor-pointer">
+          Cancel
+        </button>
+        <button
+          id="savePublishedGameBtn"
+          type="button"
+          class="nav-focusable px-5 py-2 rounded-xl text-xs font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition cursor-pointer"
+        >
+          Save & Sync
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- POLARIS STAR TRANSITION OVERLAY -->
-  <div id="starOverlay">
-    <div class="polaris-star">
-      <div class="polaris-ring"></div>
-      <div class="polaris-spike-v"></div>
-      <div class="polaris-spike-h"></div>
-      <div class="polaris-star-core"></div>
+  <!-- =======================================================================
+       HORIZONTAL JET STREAK LAUNCH SCREEN
+       ======================================================================= -->
+  <div id="jetBootOverlay">
+    <div class="jet-stage">
+      <div class="jet-horizon-line"></div>
+      <div class="jet-streak jet-streak-1"></div>
+      <div class="jet-streak jet-streak-2"></div>
+      <div class="jet-core-beam"></div>
+      <div class="jet-streak jet-streak-3"></div>
+      <div class="jet-streak jet-streak-4"></div>
+      <div class="jet-pulse-flare"></div>
     </div>
-    <p id="starGameName" class="mt-6 text-xl font-black tracking-tight text-white">Launching Game</p>
-    <p class="text-xs font-semibold uppercase tracking-widest text-[var(--accent-bright)] mt-1">Polaris Session Starting</p>
+    <p id="jetBootGameName" class="mt-4 text-2xl sm:text-3xl font-black tracking-tight text-white">Launching Game</p>
+    <p class="text-xs font-bold uppercase tracking-[0.24em] text-[var(--accent-bright)] mt-1.5">
+      Polaris Stream Initializing
+    </p>
   </div>
 
-  <!-- FULLSCREEN GAME PLAYER -->
+  <!-- =======================================================================
+       FULLSCREEN GAME SESSION + FLOATING GUIDE BUTTON + SLIDE-OUT SIDEBAR
+       ======================================================================= -->
   <div id="gameSessionPlayer" class="hidden">
+    <button
+      id="guideTriggerBtn"
+      type="button"
+      aria-label="Open Guide Sidebar"
+      class="nav-focusable flex items-center gap-2 px-3.5 py-2 rounded-full bg-[#111713]/92 border border-white/[0.16] text-white text-xs font-extrabold shadow-xl backdrop-blur-md cursor-pointer"
+    >
+      <span class="w-2.5 h-2.5 rounded-full bg-[var(--accent-bright)]"></span>
+      <span>Guide</span>
+    </button>
+
     <iframe
       id="gameSandboxFrame"
       sandbox="allow-scripts allow-forms allow-pointer-lock allow-downloads allow-same-origin"
@@ -704,188 +1071,272 @@
       class="w-full h-full border-0 block"
     ></iframe>
 
-    <!-- In-game side menu (Double Ctrl or Esc) -->
     <div id="inGameMenu">
-      <div class="ingame-drawer">
+      <aside class="ingame-drawer" aria-label="In-Game Guide Menu">
         <div class="space-y-5">
-          <div>
-            <p class="text-[11px] font-bold uppercase tracking-widest text-[var(--accent-bright)]">Polaris Guide</p>
-            <h2 id="inGameTitle" class="text-xl font-black text-white mt-1 truncate">Game Session</h2>
-            <p class="text-xs text-[#8f9b92] mt-0.5">Press Ctrl twice or Esc to toggle</p>
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <p class="text-[11px] font-bold uppercase tracking-widest text-[var(--accent-bright)]">Polaris Guide</p>
+              <h2 id="inGameTitle" class="text-xl font-black text-white mt-1 truncate">Game Session</h2>
+              <p class="text-xs text-[#8f9b92] mt-0.5">Click Guide, press Esc, Alt+G, or double-tap Ctrl</p>
+            </div>
+            <button
+              id="closeGuideDrawerBtn"
+              type="button"
+              aria-label="Close Guide Sidebar"
+              class="nav-focusable w-8 h-8 rounded-full bg-white/[0.08] hover:bg-white/[0.16] text-white flex items-center justify-center text-xs flex-shrink-0 cursor-pointer"
+            >
+              ✕
+            </button>
           </div>
 
-          <div class="space-y-2">
-            <button type="button" onclick="resumeGameSession()" class="nav-focusable w-full text-left px-4 py-3 rounded-xl text-sm font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition">
+          <div class="space-y-2.5">
+            <button
+              id="resumeGameBtn"
+              type="button"
+              class="nav-focusable w-full text-left px-4 py-3 rounded-xl text-sm font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition cursor-pointer"
+            >
               Resume Game
             </button>
-            <button type="button" onclick="restartGameSession()" class="nav-focusable w-full text-left px-4 py-3 rounded-xl text-sm font-semibold bg-white/[0.07] hover:bg-white/[0.13] text-white transition">
+            <button
+              id="restartGameBtn"
+              type="button"
+              class="nav-focusable w-full text-left px-4 py-3 rounded-xl text-sm font-semibold bg-white/[0.07] hover:bg-white/[0.14] text-white transition cursor-pointer"
+            >
               Restart Game
             </button>
-            <button type="button" onclick="togglePlayerFullscreen()" class="nav-focusable w-full text-left px-4 py-3 rounded-xl text-sm font-semibold bg-white/[0.07] hover:bg-white/[0.13] text-white transition">
+            <button
+              id="toggleFullscreenBtn"
+              type="button"
+              class="nav-focusable w-full text-left px-4 py-3 rounded-xl text-sm font-semibold bg-white/[0.07] hover:bg-white/[0.14] text-white transition cursor-pointer"
+            >
               Toggle Fullscreen
             </button>
-            <button type="button" onclick="exitGameSession()" class="nav-focusable w-full text-left px-4 py-3 rounded-xl text-sm font-semibold bg-red-500/15 hover:bg-red-500/25 text-red-300 transition">
+            <button
+              id="exitToDashboardBtn"
+              type="button"
+              class="nav-focusable w-full text-left px-4 py-3 rounded-xl text-sm font-semibold bg-red-500/15 hover:bg-red-500/25 border border-red-400/20 text-red-200 transition cursor-pointer"
+            >
               Exit to Dashboard
             </button>
           </div>
         </div>
 
-        <div class="text-[11px] text-[#7c887f] border-t border-white/[0.07] pt-4">
-          Polaris Cloud Session • Double-tap Ctrl or press Esc anytime.
+        <div class="text-[11px] text-[#7f8c83] border-t border-white/[0.08] pt-4 space-y-1">
+          <div class="font-semibold text-[#b8c4bb]">Polaris Cloud Session</div>
+          <div>Use the top-left Guide button anytime to pause or return to the dashboard.</div>
         </div>
-      </div>
+      </aside>
     </div>
   </div>
 
+  <!-- =======================================================================
+       APPLICATION LOGIC: BUILT-IN GAMES, P2P MESH, GLOBAL CHAT, DMs & UI
+       ======================================================================= -->
   <script>
     /* =========================================================================
-       BUILT-IN PLAYABLE HTML5 SAMPLE GAMES (SEEDED ONCE INTO INDEXEDDB)
+       1. BUILT-IN PLAYABLE HTML5 MINI-GAMES
        ========================================================================= */
     const STARTER_GAMES = [
       {
-        id: "polaris-starfighter-arcade",
-        name: "Polaris Starfighter",
-        description: "Fast 2D space blaster. Move with Arrow keys or A/D, fire with Space, and rack up high scores.",
-        icon: "🚀",
+        id: "polaris-orbital-drift",
+        name: "Orbital Drift",
+        description: "Pilot a nimble interceptor through deep space hazards. Move with Arrow keys or A/D and fire with Space.",
+        icon: "🛰️",
         color: "#112b22",
         installSeconds: 2,
         cover: "",
         published: true,
         createdAt: 1735689600000,
         code: `<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <style>
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #060908; color: #f4f7f5; font-family: Inter, system-ui, sans-serif; overflow: hidden; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #060908;
+      color: #f4f7f5;
+      font-family: Inter, system-ui, sans-serif;
+      overflow: hidden;
+    }
     canvas { display: block; width: 100%; height: 100%; }
-    .hud { position: fixed; top: 14px; left: 16px; right: 16px; display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; pointer-events: none; }
-    .badge { background: rgba(16, 24, 19, 0.85); border: 1px solid rgba(255,255,255,0.12); padding: 6px 12px; border-radius: 999px; }
+    .hud {
+      position: fixed;
+      top: 16px;
+      right: 18px;
+      display: flex;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 13px;
+      pointer-events: none;
+    }
+    .pill {
+      background: rgba(16, 24, 19, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 6px 12px;
+      border-radius: 999px;
+    }
   </style>
 </head>
 <body>
   <div class="hud">
-    <div class="badge" id="scoreHud">SCORE: 0</div>
-    <div class="badge" id="livesHud">SHIELD: 3</div>
+    <div class="pill" id="scoreDisp">SCORE: 0</div>
+    <div class="pill" id="shieldDisp">SHIELD: 3</div>
   </div>
-  <canvas id="c"></canvas>
+  <canvas id="gameCanvas"></canvas>
   <script>
-    const canvas = document.getElementById('c');
+    const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     let w = canvas.width = window.innerWidth;
     let h = canvas.height = window.innerHeight;
-    window.addEventListener('resize', () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; });
+    window.addEventListener('resize', () => {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    });
 
     const keys = {};
-    window.addEventListener('keydown', e => keys[e.code] = true);
-    window.addEventListener('keyup', e => keys[e.code] = false);
+    window.addEventListener('keydown', (e) => { keys[e.code] = true; });
+    window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
-    let player = { x: w / 2, y: h - 70, r: 16, speed: 460 };
-    let bullets = [], enemies = [], stars = Array.from({length: 60}, () => ({ x: Math.random()*w, y: Math.random()*h, s: 1 + Math.random()*2.5 }));
-    let score = 0, lives = 3, shotCooldown = 0, spawnTimer = 0, gameOver = false, lastTime = performance.now();
+    let ship = { x: w * 0.5, y: h - 72, speed: 480 };
+    let shots = [];
+    let drones = [];
+    let stars = Array.from({ length: 70 }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      size: 1 + Math.random() * 2.4,
+      spd: 55 + Math.random() * 110
+    }));
+    let score = 0;
+    let shield = 3;
+    let fireTimer = 0;
+    let spawnTimer = 0;
+    let over = false;
+    let prevTime = performance.now();
 
-    function resetGame() {
-      player.x = w / 2; player.y = h - 70;
-      bullets = []; enemies = []; score = 0; lives = 3; gameOver = false;
+    function resetSession() {
+      ship.x = w * 0.5;
+      ship.y = h - 72;
+      shots = [];
+      drones = [];
+      score = 0;
+      shield = 3;
+      fireTimer = 0;
+      spawnTimer = 0;
+      over = false;
     }
 
-    window.addEventListener('keydown', e => { if (gameOver && e.code === 'Space') resetGame(); });
+    window.addEventListener('keydown', (e) => {
+      if (over && (e.code === 'Space' || e.code === 'Enter')) {
+        resetSession();
+      }
+    });
 
     function loop(now) {
-      const dt = Math.min(0.05, (now - lastTime) / 1000);
-      lastTime = now;
+      const dt = Math.min(0.05, (now - prevTime) / 1000);
+      prevTime = now;
+
       ctx.fillStyle = '#060908';
       ctx.fillRect(0, 0, w, h);
 
-      ctx.fillStyle = 'rgba(255,255,255,0.45)';
-      stars.forEach(st => {
-        st.y += st.s * 60 * dt;
-        if (st.y > h) { st.y = 0; st.x = Math.random() * w; }
-        ctx.fillRect(st.x, st.y, st.s, st.s);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
+      stars.forEach((st) => {
+        st.y += st.spd * dt;
+        if (st.y > h) {
+          st.y = -4;
+          st.x = Math.random() * w;
+        }
+        ctx.fillRect(st.x, st.y, st.size, st.size);
       });
 
-      if (!gameOver) {
-        if (keys['ArrowLeft'] || keys['KeyA']) player.x -= player.speed * dt;
-        if (keys['ArrowRight'] || keys['KeyD']) player.x += player.speed * dt;
-        player.x = Math.max(24, Math.min(w - 24, player.x));
+      if (!over) {
+        if (keys['ArrowLeft'] || keys['KeyA']) ship.x -= ship.speed * dt;
+        if (keys['ArrowRight'] || keys['KeyD']) ship.x += ship.speed * dt;
+        ship.x = Math.max(26, Math.min(w - 26, ship.x));
 
-        shotCooldown -= dt;
-        if (keys['Space'] && shotCooldown <= 0) {
-          bullets.push({ x: player.x, y: player.y - 18, vy: -640 });
-          shotCooldown = 0.16;
+        fireTimer -= dt;
+        if (keys['Space'] && fireTimer <= 0) {
+          shots.push({ x: ship.x, y: ship.y - 20, vy: -680 });
+          fireTimer = 0.15;
         }
 
         spawnTimer -= dt;
         if (spawnTimer <= 0) {
-          enemies.push({ x: 30 + Math.random() * (w - 60), y: -20, r: 15, vy: 140 + Math.min(220, score * 0.4) });
-          spawnTimer = Math.max(0.28, 0.72 - score * 0.0015);
+          drones.push({
+            x: 34 + Math.random() * Math.max(20, w - 68),
+            y: -24,
+            r: 15,
+            vy: 150 + Math.min(240, score * 0.45)
+          });
+          spawnTimer = Math.max(0.26, 0.7 - score * 0.0014);
         }
 
-        bullets.forEach(b => b.y += b.vy * dt);
-        bullets = bullets.filter(b => b.y > -20);
+        shots.forEach((s) => { s.y += s.vy * dt; });
+        shots = shots.filter((s) => s.y > -20);
 
-        for (let i = enemies.length - 1; i >= 0; i--) {
-          const en = enemies[i];
-          en.y += en.vy * dt;
-          let hit = false;
-          for (let j = bullets.length - 1; j >= 0; j--) {
-            const b = bullets[j];
-            if (Math.hypot(b.x - en.x, b.y - en.y) < en.r + 8) {
-              bullets.splice(j, 1);
-              enemies.splice(i, 1);
+        for (let i = drones.length - 1; i >= 0; i--) {
+          const d = drones[i];
+          d.y += d.vy * dt;
+          let destroyed = false;
+          for (let j = shots.length - 1; j >= 0; j--) {
+            const s = shots[j];
+            if (Math.hypot(s.x - d.x, s.y - d.y) < d.r + 8) {
+              shots.splice(j, 1);
+              drones.splice(i, 1);
               score += 25;
-              hit = true;
+              destroyed = true;
               break;
             }
           }
-          if (hit) continue;
-          if (Math.hypot(player.x - en.x, player.y - en.y) < en.r + player.r - 3) {
-            enemies.splice(i, 1);
-            lives -= 1;
-            if (lives <= 0) gameOver = true;
+          if (destroyed) continue;
+          if (Math.hypot(ship.x - d.x, ship.y - d.y) < d.r + 14) {
+            drones.splice(i, 1);
+            shield -= 1;
+            if (shield <= 0) over = true;
             continue;
           }
-          if (en.y > h + 30) {
-            enemies.splice(i, 1);
+          if (d.y > h + 30) {
+            drones.splice(i, 1);
           }
         }
       }
 
-      // Draw ship
       ctx.fillStyle = '#16c86a';
       ctx.beginPath();
-      ctx.moveTo(player.x, player.y - 18);
-      ctx.lineTo(player.x - 15, player.y + 14);
-      ctx.lineTo(player.x, player.y + 7);
-      ctx.lineTo(player.x + 15, player.y + 14);
+      ctx.moveTo(ship.x, ship.y - 18);
+      ctx.lineTo(ship.x - 16, ship.y + 14);
+      ctx.lineTo(ship.x, ship.y + 7);
+      ctx.lineTo(ship.x + 16, ship.y + 14);
       ctx.closePath();
       ctx.fill();
 
-      // Bullets
-      ctx.fillStyle = '#7ef9b4';
-      bullets.forEach(b => ctx.fillRect(b.x - 2.5, b.y - 8, 5, 12));
+      ctx.fillStyle = '#8efac0';
+      shots.forEach((s) => ctx.fillRect(s.x - 2.5, s.y - 8, 5, 13));
 
-      // Enemies
-      ctx.fillStyle = '#ef4444';
-      enemies.forEach(en => {
+      ctx.fillStyle = '#f43f5e';
+      drones.forEach((d) => {
         ctx.beginPath();
-        ctx.arc(en.x, en.y, en.r, 0, Math.PI * 2);
+        ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
         ctx.fill();
       });
 
-      document.getElementById('scoreHud').textContent = 'SCORE: ' + score;
-      document.getElementById('livesHud').textContent = 'SHIELD: ' + Math.max(0, lives);
+      document.getElementById('scoreDisp').textContent = 'SCORE: ' + score;
+      document.getElementById('shieldDisp').textContent = 'SHIELD: ' + Math.max(0, shield);
 
-      if (gameOver) {
-        ctx.fillStyle = 'rgba(0,0,0,0.65)';
+      if (over) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.72)';
         ctx.fillRect(0, 0, w, h);
         ctx.fillStyle = '#ffffff';
         ctx.font = '800 32px Inter, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('HULL BREACHED', w / 2, h / 2 - 14);
+        ctx.fillText('ORBIT LOST', w * 0.5, h * 0.5 - 14);
         ctx.font = '600 16px Inter, sans-serif';
         ctx.fillStyle = '#16c86a';
-        ctx.fillText('Final Score: ' + score + ' — Press SPACE to relaunch', w / 2, h / 2 + 22);
+        ctx.fillText('Score: ' + score + ' — Press SPACE to relaunch', w * 0.5, h * 0.5 + 22);
       }
 
       requestAnimationFrame(loop);
@@ -896,108 +1347,371 @@
 </html>`
       },
       {
-        id: "neon-pulse-dodger",
-        name: "Neon Pulse Dodger",
-        description: "Weave through shifting energy gates and collect core orbs for bonus points.",
-        icon: "⚡",
-        color: "#1b1f38",
+        id: "polaris-neon-breaker",
+        name: "Neon Breaker",
+        description: "Bounce the energy core and shatter every brick grid. Move paddle with Arrow keys, A/D, or mouse.",
+        icon: "🧱",
+        color: "#152438",
         installSeconds: 2,
         cover: "",
         published: true,
         createdAt: 1735776000000,
         code: `<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <style>
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #07090e; color: #f4f7f5; font-family: Inter, system-ui, sans-serif; overflow: hidden; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #070a0e;
+      color: #f4f7f5;
+      font-family: Inter, system-ui, sans-serif;
+      overflow: hidden;
+    }
     canvas { display: block; width: 100%; height: 100%; }
-    .top { position: fixed; top: 14px; left: 16px; background: rgba(15,20,30,0.85); border: 1px solid rgba(255,255,255,0.12); padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 14px; }
+    .hud {
+      position: fixed;
+      top: 16px;
+      right: 18px;
+      background: rgba(15, 22, 30, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 13px;
+    }
   </style>
 </head>
 <body>
-  <div class="top" id="pts">POINTS: 0</div>
-  <canvas id="c"></canvas>
+  <div class="hud" id="brkScore">SCORE: 0</div>
+  <canvas id="brkCanvas"></canvas>
   <script>
-    const canvas = document.getElementById('c');
+    const canvas = document.getElementById('brkCanvas');
     const ctx = canvas.getContext('2d');
     let w = canvas.width = window.innerWidth;
     let h = canvas.height = window.innerHeight;
-    window.addEventListener('resize', () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; });
 
     const keys = {};
-    window.addEventListener('keydown', e => keys[e.code] = true);
-    window.addEventListener('keyup', e => keys[e.code] = false);
+    window.addEventListener('keydown', (e) => { keys[e.code] = true; });
+    window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
-    let orb = { x: w / 2, y: h * 0.75, r: 12, speed: 430 };
-    let blocks = [], gems = [], points = 0, spawnB = 0, spawnG = 0, dead = false, prev = performance.now();
+    let paddle = { w: 128, h: 14, x: w * 0.5 - 64, y: h - 46, speed: 560 };
+    let ball = { x: w * 0.5, y: h - 70, r: 9, vx: 290, vy: -340 };
+    let bricks = [];
+    let score = 0;
+    let status = 'playing';
+    let last = performance.now();
 
-    function restart() {
-      orb.x = w / 2; orb.y = h * 0.75; blocks = []; gems = []; points = 0; dead = false;
+    function buildBricks() {
+      bricks = [];
+      const cols = Math.max(5, Math.min(10, Math.floor((w - 80) / 96)));
+      const rows = 4;
+      const gap = 10;
+      const bw = (w - 80 - gap * (cols - 1)) / cols;
+      const bh = 22;
+      const palette = ['#16c86a', '#38bdf8', '#a78bfa', '#f59e0b'];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          bricks.push({
+            x: 40 + c * (bw + gap),
+            y: 68 + r * (bh + gap),
+            w: bw,
+            h: bh,
+            color: palette[r % palette.length],
+            alive: true
+          });
+        }
+      }
     }
-    window.addEventListener('keydown', e => { if (dead && e.code === 'Space') restart(); });
 
-    function tick(now) {
-      const dt = Math.min(0.05, (now - prev) / 1000);
-      prev = now;
-      ctx.fillStyle = '#07090e';
+    function resetBoard() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+      paddle.w = 128;
+      paddle.x = w * 0.5 - paddle.w * 0.5;
+      paddle.y = h - 46;
+      ball = { x: w * 0.5, y: h - 72, r: 9, vx: 295 * (Math.random() > 0.5 ? 1 : -1), vy: -340 };
+      score = 0;
+      status = 'playing';
+      buildBricks();
+    }
+
+    window.addEventListener('resize', () => {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+      paddle.y = h - 46;
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      paddle.x = Math.max(12, Math.min(w - paddle.w - 12, e.clientX - paddle.w * 0.5));
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (status !== 'playing' && (e.code === 'Space' || e.code === 'Enter')) {
+        resetBoard();
+      }
+    });
+
+    buildBricks();
+
+    function step(now) {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+
+      ctx.fillStyle = '#070a0e';
       ctx.fillRect(0, 0, w, h);
 
-      if (!dead) {
-        if (keys['ArrowLeft'] || keys['KeyA']) orb.x -= orb.speed * dt;
-        if (keys['ArrowRight'] || keys['KeyD']) orb.x += orb.speed * dt;
-        if (keys['ArrowUp'] || keys['KeyW']) orb.y -= orb.speed * dt;
-        if (keys['ArrowDown'] || keys['KeyS']) orb.y += orb.speed * dt;
-        orb.x = Math.max(18, Math.min(w - 18, orb.x));
-        orb.y = Math.max(40, Math.min(h - 18, orb.y));
+      if (status === 'playing') {
+        if (keys['ArrowLeft'] || keys['KeyA']) paddle.x -= paddle.speed * dt;
+        if (keys['ArrowRight'] || keys['KeyD']) paddle.x += paddle.speed * dt;
+        paddle.x = Math.max(12, Math.min(w - paddle.w - 12, paddle.x));
 
-        spawnB -= dt;
-        if (spawnB <= 0) {
-          const bw = 45 + Math.random() * 90;
-          blocks.push({ x: Math.random() * Math.max(20, w - bw), y: -24, w: bw, h: 18, vy: 190 + points * 0.6 });
-          spawnB = Math.max(0.24, 0.62 - points * 0.0012);
+        ball.x += ball.vx * dt;
+        ball.y += ball.vy * dt;
+
+        if (ball.x - ball.r < 0) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); }
+        if (ball.x + ball.r > w) { ball.x = w - ball.r; ball.vx = -Math.abs(ball.vx); }
+        if (ball.y - ball.r < 44) { ball.y = 44 + ball.r; ball.vy = Math.abs(ball.vy); }
+
+        if (
+          ball.y + ball.r >= paddle.y &&
+          ball.y - ball.r <= paddle.y + paddle.h &&
+          ball.x >= paddle.x - 4 &&
+          ball.x <= paddle.x + paddle.w + 4 &&
+          ball.vy > 0
+        ) {
+          const hitOffset = ((ball.x - (paddle.x + paddle.w * 0.5)) / (paddle.w * 0.5));
+          ball.vx = hitOffset * 420;
+          ball.vy = -Math.abs(ball.vy) * 1.02;
         }
 
-        spawnG -= dt;
-        if (spawnG <= 0) {
-          gems.push({ x: 30 + Math.random() * (w - 60), y: -16, r: 9, vy: 150 });
-          spawnG = 1.4;
-        }
-
-        for (let i = blocks.length - 1; i >= 0; i--) {
-          const b = blocks[i];
-          b.y += b.vy * dt;
-          const closestX = Math.max(b.x, Math.min(orb.x, b.x + b.w));
-          const closestY = Math.max(b.y, Math.min(orb.y, b.y + b.h));
-          if (Math.hypot(orb.x - closestX, orb.y - closestY) < orb.r) {
-            dead = true;
-          }
-          if (b.y > h + 40) {
-            blocks.splice(i, 1);
-            if (!dead) points += 10;
+        for (const br of bricks) {
+          if (!br.alive) continue;
+          if (
+            ball.x + ball.r > br.x &&
+            ball.x - ball.r < br.x + br.w &&
+            ball.y + ball.r > br.y &&
+            ball.y - ball.r < br.y + br.h
+          ) {
+            br.alive = false;
+            ball.vy = -ball.vy;
+            score += 50;
           }
         }
 
-        for (let i = gems.length - 1; i >= 0; i--) {
-          const g = gems[i];
-          g.y += g.vy * dt;
-          if (Math.hypot(orb.x - g.x, orb.y - g.y) < orb.r + g.r + 4) {
-            gems.splice(i, 1);
-            points += 35;
-            continue;
-          }
-          if (g.y > h + 30) gems.splice(i, 1);
+        if (bricks.every((b) => !b.alive)) {
+          status = 'won';
+        } else if (ball.y - ball.r > h) {
+          status = 'lost';
         }
       }
 
-      gems.forEach(g => {
-        ctx.fillStyle = '#38bdf8';
+      bricks.forEach((br) => {
+        if (!br.alive) return;
+        ctx.fillStyle = br.color;
         ctx.beginPath();
-        ctx.arc(g.x, g.y, g.r, 0, Math.PI * 2);
+        ctx.roundRect(br.x, br.y, br.w, br.h, 6);
         ctx.fill();
       });
 
-      blocks.forEach(b => {
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.roundRect(paddle.x, paddle.y, paddle.w, paddle.h, 7);
+      ctx.fill();
+
+      ctx.fillStyle = '#16c86a';
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+      ctx.fill();
+
+      document.getElementById('brkScore').textContent = 'SCORE: ' + score;
+
+      if (status !== 'playing') {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.72)';
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '800 32px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(status === 'won' ? 'SECTOR CLEARED' : 'CORE MISSED', w * 0.5, h * 0.5 - 14);
+        ctx.font = '600 16px Inter, sans-serif';
+        ctx.fillStyle = '#16c86a';
+        ctx.fillText('Score: ' + score + ' — Press SPACE to play again', w * 0.5, h * 0.5 + 22);
+      }
+
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  <\/script>
+</body>
+</html>`
+      },
+      {
+        id: "polaris-grid-runner",
+        name: "Grid Runner",
+        description: "Dodge incoming grid surges and collect data shards in 2D. Move with WASD or Arrow keys.",
+        icon: "⚡",
+        color: "#241936",
+        installSeconds: 2,
+        cover: "",
+        published: true,
+        createdAt: 1735862400000,
+        code: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #08090d;
+      color: #f4f7f5;
+      font-family: Inter, system-ui, sans-serif;
+      overflow: hidden;
+    }
+    canvas { display: block; width: 100%; height: 100%; }
+    .hud {
+      position: fixed;
+      top: 16px;
+      right: 18px;
+      background: rgba(16, 18, 28, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="hud" id="gridPts">POINTS: 0</div>
+  <canvas id="gridCanvas"></canvas>
+  <script>
+    const canvas = document.getElementById('gridCanvas');
+    const ctx = canvas.getContext('2d');
+    let w = canvas.width = window.innerWidth;
+    let h = canvas.height = window.innerHeight;
+    window.addEventListener('resize', () => {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    });
+
+    const keys = {};
+    window.addEventListener('keydown', (e) => { keys[e.code] = true; });
+    window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+    let runner = { x: w * 0.5, y: h * 0.72, r: 13, speed: 440 };
+    let barriers = [];
+    let shards = [];
+    let points = 0;
+    let bTimer = 0;
+    let sTimer = 0;
+    let crashed = false;
+    let prev = performance.now();
+
+    function resetRunner() {
+      runner.x = w * 0.5;
+      runner.y = h * 0.72;
+      barriers = [];
+      shards = [];
+      points = 0;
+      bTimer = 0;
+      sTimer = 0;
+      crashed = false;
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (crashed && (e.code === 'Space' || e.code === 'Enter')) {
+        resetRunner();
+      }
+    });
+
+    function renderGrid(now) {
+      const dt = Math.min(0.05, (now - prev) / 1000);
+      prev = now;
+
+      ctx.fillStyle = '#08090d';
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx.lineWidth = 1;
+      for (let gx = 0; gx < w; gx += 48) {
+        ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke();
+      }
+      for (let gy = 0; gy < h; gy += 48) {
+        ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke();
+      }
+
+      if (!crashed) {
+        if (keys['ArrowLeft'] || keys['KeyA']) runner.x -= runner.speed * dt;
+        if (keys['ArrowRight'] || keys['KeyD']) runner.x += runner.speed * dt;
+        if (keys['ArrowUp'] || keys['KeyW']) runner.y -= runner.speed * dt;
+        if (keys['ArrowDown'] || keys['KeyS']) runner.y += runner.speed * dt;
+        runner.x = Math.max(20, Math.min(w - 20, runner.x));
+        runner.y = Math.max(46, Math.min(h - 20, runner.y));
+
+        bTimer -= dt;
+        if (bTimer <= 0) {
+          const bw = 50 + Math.random() * 96;
+          barriers.push({
+            x: Math.random() * Math.max(20, w - bw),
+            y: -24,
+            w: bw,
+            h: 18,
+            vy: 200 + points * 0.65
+          });
+          bTimer = Math.max(0.24, 0.62 - points * 0.0012);
+        }
+
+        sTimer -= dt;
+        if (sTimer <= 0) {
+          shards.push({
+            x: 34 + Math.random() * Math.max(20, w - 68),
+            y: -16,
+            r: 9,
+            vy: 155
+          });
+          sTimer = 1.3;
+        }
+
+        for (let i = barriers.length - 1; i >= 0; i--) {
+          const b = barriers[i];
+          b.y += b.vy * dt;
+          const cx = Math.max(b.x, Math.min(runner.x, b.x + b.w));
+          const cy = Math.max(b.y, Math.min(runner.y, b.y + b.h));
+          if (Math.hypot(runner.x - cx, runner.y - cy) < runner.r) {
+            crashed = true;
+          }
+          if (b.y > h + 40) {
+            barriers.splice(i, 1);
+            if (!crashed) points += 10;
+          }
+        }
+
+        for (let i = shards.length - 1; i >= 0; i--) {
+          const s = shards[i];
+          s.y += s.vy * dt;
+          if (Math.hypot(runner.x - s.x, runner.y - s.y) < runner.r + s.r + 4) {
+            shards.splice(i, 1);
+            points += 35;
+            continue;
+          }
+          if (s.y > h + 30) shards.splice(i, 1);
+        }
+      }
+
+      shards.forEach((s) => {
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      barriers.forEach((b) => {
         ctx.fillStyle = '#f43f5e';
         ctx.beginPath();
         ctx.roundRect(b.x, b.y, b.w, b.h, 6);
@@ -1006,26 +1720,26 @@
 
       ctx.fillStyle = '#16c86a';
       ctx.beginPath();
-      ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
+      ctx.arc(runner.x, runner.y, runner.r, 0, Math.PI * 2);
       ctx.fill();
 
-      document.getElementById('pts').textContent = 'POINTS: ' + points;
+      document.getElementById('gridPts').textContent = 'POINTS: ' + points;
 
-      if (dead) {
-        ctx.fillStyle = 'rgba(0,0,0,0.68)';
+      if (crashed) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.72)';
         ctx.fillRect(0, 0, w, h);
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = '#ffffff';
         ctx.font = '800 32px Inter, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('SIGNAL LOST', w / 2, h / 2 - 12);
+        ctx.fillText('LINK INTERRUPTED', w * 0.5, h * 0.5 - 12);
         ctx.font = '600 16px Inter, sans-serif';
         ctx.fillStyle = '#16c86a';
-        ctx.fillText('Score: ' + points + ' — Press SPACE to retry', w / 2, h / 2 + 22);
+        ctx.fillText('Points: ' + points + ' — Press SPACE to retry', w * 0.5, h * 0.5 + 22);
       }
 
-      requestAnimationFrame(tick);
+      requestAnimationFrame(renderGrid);
     }
-    requestAnimationFrame(tick);
+    requestAnimationFrame(renderGrid);
   <\/script>
 </body>
 </html>`
@@ -1033,24 +1747,24 @@
     ];
 
     /* =========================================================================
-       STATE, STORAGE & P2P MESH (GLOBAL CHAT + FRIENDS + DMs + GAMES)
+       2. APPLICATION STATE, STORAGE & P2P MESH
        ========================================================================= */
-    const DB_NAME = "PolarisXboxMeshDB";
+    const DB_NAME = "PolarisCloudMeshDB";
     const CHANNEL_NAME = "polaris_p2p_network_v1";
 
     let dbInstance = null;
     let syncedGames = [];
-    let installedIds = JSON.parse(localStorage.getItem("polaris_installed_v1") || '["polaris-starfighter-arcade"]');
-    let friendsList = JSON.parse(localStorage.getItem("polaris_friends_v1") || "[]");
-    let bannedNames = JSON.parse(localStorage.getItem("polaris_banned_names_v1") || "[]");
-    let claimedRegistry = JSON.parse(localStorage.getItem("polaris_claimed_names_v1") || "{}");
-    let dmThreads = JSON.parse(localStorage.getItem("polaris_dm_threads_v1") || "{}");
-    let globalChatMessages = JSON.parse(localStorage.getItem("polaris_global_chat_v1") || "[]");
+    let installedIds = safeJsonParse(localStorage.getItem("polaris_installed_v1"), ["polaris-orbital-drift"]);
+    let friendsList = safeJsonParse(localStorage.getItem("polaris_friends_v1"), []);
+    let bannedNames = safeJsonParse(localStorage.getItem("polaris_banned_names_v1"), []);
+    let claimedRegistry = safeJsonParse(localStorage.getItem("polaris_claimed_names_v1"), {});
+    let dmThreads = safeJsonParse(localStorage.getItem("polaris_dm_threads_v1"), {});
+    let globalChatMessages = safeJsonParse(localStorage.getItem("polaris_global_chat_v1"), []);
 
-    const nodeId = localStorage.getItem("polaris_node_id_v1") || ("peer-" + crypto.randomUUID().slice(0, 8));
+    const nodeId = localStorage.getItem("polaris_node_id_v1") || ("peer-" + generateId().slice(0, 8));
     localStorage.setItem("polaris_node_id_v1", nodeId);
 
-    const savedProfile = JSON.parse(localStorage.getItem("polaris_profile_v1") || "{}");
+    const savedProfile = safeJsonParse(localStorage.getItem("polaris_profile_v1"), {});
     const localState = {
       nodeId,
       username: savedProfile.username || "Player",
@@ -1070,11 +1784,35 @@
     };
 
     const peersMap = new Map();
-    const meshChannel = new BroadcastChannel(CHANNEL_NAME);
+    let meshChannel = null;
+    try {
+      if ("BroadcastChannel" in window) {
+        meshChannel = new BroadcastChannel(CHANNEL_NAME);
+      }
+    } catch (_) {
+      meshChannel = null;
+    }
+
+    function safeJsonParse(raw, fallback) {
+      try {
+        const parsed = JSON.parse(raw);
+        return parsed !== null && parsed !== undefined ? parsed : fallback;
+      } catch (_) {
+        return fallback;
+      }
+    }
+
+    function generateId() {
+      if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        return window.crypto.randomUUID();
+      }
+      return "id-" + Math.random().toString(36).slice(2, 11) + "-" + Date.now().toString(36);
+    }
 
     function showToast(message) {
       const banner = document.getElementById("toastBanner");
       const textEl = document.getElementById("toastText");
+      if (!banner || !textEl) return;
       textEl.textContent = message;
       banner.classList.add("show");
       clearTimeout(showToast._timer);
@@ -1084,25 +1822,29 @@
     }
 
     function openModal(id) {
-      document.getElementById(id).classList.remove("hidden");
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove("hidden");
       refreshFocusableElements();
     }
 
     function closeModal(id) {
-      document.getElementById(id).classList.add("hidden");
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add("hidden");
       refreshFocusableElements();
     }
 
     function getInitials(name, explicitInitials) {
-      if (explicitInitials && explicitInitials.trim()) {
-        return explicitInitials.trim().slice(0, 2).toUpperCase();
+      if (explicitInitials && String(explicitInitials).trim()) {
+        return String(explicitInitials).trim().slice(0, 2).toUpperCase();
       }
-      const clean = (name || "P").trim();
-      return clean.slice(0, 2).toUpperCase();
+      const clean = String(name || "P").trim();
+      return (clean.slice(0, 2) || "PL").toUpperCase();
     }
 
     function applyAvatarToElement(el, userObj, sizeClass = "") {
-      if (!el) return;
+      if (!el || !userObj) return;
       el.className = `avatar-box rounded-full ${sizeClass}`.trim();
       el.style.backgroundColor = userObj.color || "#16c86a";
       el.innerHTML = "";
@@ -1130,18 +1872,21 @@
         localStorage.setItem("polaris_banned_names_v1", JSON.stringify(bannedNames));
         localStorage.setItem("polaris_claimed_names_v1", JSON.stringify(claimedRegistry));
         localStorage.setItem("polaris_dm_threads_v1", JSON.stringify(dmThreads));
-        localStorage.setItem("polaris_global_chat_v1", JSON.stringify(globalChatMessages.slice(-120)));
+        localStorage.setItem("polaris_global_chat_v1", JSON.stringify(globalChatMessages.slice(-150)));
       } catch (_) {
-        // Ignore quota errors in restricted storage contexts
+        // Ignore quota limits
       }
     }
 
     /* =========================================================================
-       INDEXEDDB FOR GAMES
+       3. INDEXEDDB STORAGE FOR GAMES
        ========================================================================= */
     function initDatabase() {
       return new Promise((resolve, reject) => {
-        if (!("indexedDB" in window)) return reject(new Error("IndexedDB unavailable"));
+        if (!("indexedDB" in window)) {
+          reject(new Error("IndexedDB unavailable"));
+          return;
+        }
         const req = indexedDB.open(DB_NAME, 1);
         req.onupgradeneeded = () => {
           const db = req.result;
@@ -1155,67 +1900,72 @@
     }
 
     function fetchAllGames() {
-      return new Promise((resolve) => {
-        if (!dbInstance) return resolve([...STARTER_GAMES]);
+      return new Promise((resolve, reject) => {
+        if (!dbInstance) {
+          resolve([]);
+          return;
+        }
         const tx = dbInstance.transaction("games", "readonly");
         const req = tx.objectStore("games").getAll();
         req.onsuccess = () => resolve(req.result || []);
-        req.onerror = () => resolve([...STARTER_GAMES]);
+        req.onerror = () => reject(req.error);
       });
     }
 
     function putGameRecord(game) {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         if (!dbInstance) {
           const idx = syncedGames.findIndex((g) => g.id === game.id);
-          if (idx >= 0) syncedGames[idx] = game;
-          else syncedGames.push(game);
-          return resolve();
+          if (idx === -1) syncedGames.push(game);
+          else syncedGames[idx] = game;
+          resolve();
+          return;
         }
         const tx = dbInstance.transaction("games", "readwrite");
         tx.objectStore("games").put(game);
         tx.oncomplete = () => resolve();
-        tx.onerror = () => resolve();
+        tx.onerror = () => reject(req.error);
       });
     }
 
     function removeGameRecord(gameId) {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         if (!dbInstance) {
           syncedGames = syncedGames.filter((g) => g.id !== gameId);
-          return resolve();
+          resolve();
+          return;
         }
         const tx = dbInstance.transaction("games", "readwrite");
         tx.objectStore("games").delete(gameId);
         tx.oncomplete = () => resolve();
-        tx.onerror = () => resolve();
+        tx.onerror = () => reject(req.error);
       });
     }
 
     async function seedStarterGamesIfEmpty() {
-      const seededFlag = localStorage.getItem("polaris_seeded_starter_v1");
-      if (!seededFlag && syncedGames.length === 0) {
-        for (const sg of STARTER_GAMES) {
-          await putGameRecord(sg);
+      if (!Array.isArray(syncedGames) || syncedGames.length === 0) {
+        for (const starter of STARTER_GAMES) {
+          await putGameRecord(starter);
         }
-        localStorage.setItem("polaris_seeded_starter_v1", "1");
         syncedGames = await fetchAllGames();
-      } else if (syncedGames.length === 0) {
-        syncedGames = [...STARTER_GAMES];
+        if (!syncedGames.length) {
+          syncedGames = [...STARTER_GAMES];
+        }
       }
     }
 
     /* =========================================================================
-       P2P BROADCASTCHANNEL SYNC (PRESENCE, GLOBAL CHAT, DMs, FRIENDS, GAMES)
+       4. P2P BROADCASTCHANNEL SYNC (GLOBAL CHAT, DMs, FRIENDS, PRESENCE, GAMES)
        ========================================================================= */
     function sendMeshPacket(payload) {
+      if (!meshChannel) return;
       try {
         meshChannel.postMessage({
           ...payload,
           senderId: localState.nodeId
         });
       } catch (_) {
-        // Ignore if channel closed
+        // Ignore channel errors
       }
     }
 
@@ -1235,166 +1985,165 @@
       });
     }
 
-    meshChannel.onmessage = async (event) => {
-      const msg = event.data;
-      if (!msg || !msg.senderId || msg.senderId === localState.nodeId) return;
+    if (meshChannel) {
+      meshChannel.onmessage = async (event) => {
+        const msg = event.data;
+        if (!msg || !msg.senderId || msg.senderId === localState.nodeId) return;
 
-      if (msg.type === "PRESENCE" || msg.type === "PRESENCE_ACK") {
-        if (msg.profile) {
-          peersMap.set(msg.senderId, {
-            ...msg.profile,
-            lastSeen: Date.now()
-          });
-        }
-        if (msg.claims) {
-          Object.entries(msg.claims).forEach(([key, claim]) => {
-            if (!claimedRegistry[key]) {
-              claimedRegistry[key] = claim;
-            }
-          });
-        }
-        if (Array.isArray(msg.bannedNames)) {
-          msg.bannedNames.forEach((bn) => {
-            if (!bannedNames.includes(bn)) bannedNames.push(bn);
-          });
-        }
-        persistLocalState();
-        renderSocialView();
-        renderDashboard();
+        if (msg.type === "PRESENCE" || msg.type === "PRESENCE_ACK") {
+          if (msg.profile) {
+            peersMap.set(msg.senderId, {
+              ...msg.profile,
+              lastSeen: Date.now()
+            });
+          }
+          if (msg.claims) {
+            Object.entries(msg.claims).forEach(([key, claim]) => {
+              if (!claimedRegistry[key]) {
+                claimedRegistry[key] = claim;
+              }
+            });
+          }
+          if (Array.isArray(msg.bannedNames)) {
+            msg.bannedNames.forEach((bn) => {
+              if (!bannedNames.includes(bn)) bannedNames.push(bn);
+            });
+          }
+          persistLocalState();
+          renderSocialView();
+          renderDashboard();
 
-        if (msg.type === "PRESENCE") {
-          sendMeshPacket({
-            type: "PRESENCE_ACK",
-            profile: {
-              peerId: localState.nodeId,
-              username: localState.username,
-              lockedUsername: localState.lockedUsername,
-              initials: localState.initials,
-              color: localState.color,
-              avatar: localState.avatar
-            },
-            claims: claimedRegistry,
-            bannedNames
-          });
+          if (msg.type === "PRESENCE") {
+            sendMeshPacket({
+              type: "PRESENCE_ACK",
+              profile: {
+                peerId: localState.nodeId,
+                username: localState.username,
+                lockedUsername: localState.lockedUsername,
+                initials: localState.initials,
+                color: localState.color,
+                avatar: localState.avatar
+              },
+              claims: claimedRegistry,
+              bannedNames
+            });
+          }
         }
-      }
 
-      if (msg.type === "CLAIM_USERNAME") {
-        const key = (msg.username || "").trim().toLowerCase();
-        if (!key) return;
-        const existing = claimedRegistry[key];
-        if (!existing || existing.ownerId === msg.senderId) {
-          claimedRegistry[key] = {
-            ownerId: msg.senderId,
-            username: msg.username.trim(),
-            lockedAt: Date.now()
+        if (msg.type === "CLAIM_USERNAME") {
+          const key = (msg.username || "").trim().toLowerCase();
+          if (!key) return;
+          const existing = claimedRegistry[key];
+          if (!existing || existing.ownerId === msg.senderId) {
+            claimedRegistry[key] = {
+              ownerId: msg.senderId,
+              username: msg.username.trim(),
+              lockedAt: Date.now()
+            };
+            persistLocalState();
+            renderSocialView();
+          }
+        }
+
+        if (msg.type === "RELEASE_USERNAME") {
+          const key = (msg.username || "").trim().toLowerCase();
+          if (claimedRegistry[key] && claimedRegistry[key].ownerId === msg.senderId) {
+            delete claimedRegistry[key];
+            persistLocalState();
+            renderSocialView();
+          }
+        }
+
+        if (msg.type === "FRIEND_CONNECT") {
+          const peerInfo = peersMap.get(msg.senderId) || {
+            peerId: msg.senderId,
+            username: msg.fromName || "Peer",
+            initials: "",
+            color: "#16c86a",
+            avatar: ""
           };
+          peersMap.set(msg.senderId, { ...peerInfo, lastSeen: Date.now() });
+
+          if (!friendsList.some((f) => f.peerId === msg.senderId)) {
+            friendsList.push({
+              peerId: msg.senderId,
+              username: peerInfo.username,
+              initials: peerInfo.initials,
+              color: peerInfo.color,
+              avatar: peerInfo.avatar
+            });
+          }
+          if (!dmThreads[msg.senderId]) {
+            dmThreads[msg.senderId] = [];
+          }
           persistLocalState();
+          showToast(`${peerInfo.username} connected as a friend`);
           renderSocialView();
+          renderDashboard();
         }
-      }
 
-      if (msg.type === "RELEASE_USERNAME") {
-        const key = (msg.username || "").trim().toLowerCase();
-        if (claimedRegistry[key] && claimedRegistry[key].ownerId === msg.senderId) {
-          delete claimedRegistry[key];
-          persistLocalState();
-          renderSocialView();
+        if (msg.type === "GLOBAL_CHAT_MESSAGE") {
+          const entry = {
+            id: msg.id || generateId(),
+            fromId: msg.senderId,
+            fromName: msg.fromName || "Peer",
+            color: msg.color || "#16c86a",
+            avatar: msg.avatar || "",
+            text: msg.text,
+            ts: msg.ts || Date.now()
+          };
+          if (!globalChatMessages.some((m) => m.id === entry.id)) {
+            globalChatMessages.push(entry);
+            globalChatMessages = globalChatMessages.slice(-150);
+            persistLocalState();
+
+            if (localState.currentRoute === "social" && localState.chatMode === "global") {
+              renderChatThread();
+            } else {
+              localState.unreadCount += 1;
+              updateUnreadBadge();
+              showToast(`Global Chat: ${entry.fromName}`);
+            }
+          }
         }
-      }
 
-      if (msg.type === "GLOBAL_MESSAGE") {
-        const senderPeer = peersMap.get(msg.senderId);
-        const entry = {
-          id: msg.id || crypto.randomUUID(),
-          fromId: msg.senderId,
-          fromName: msg.fromName || senderPeer?.username || "Peer",
-          color: msg.color || senderPeer?.color || "#16c86a",
-          avatar: msg.avatar || senderPeer?.avatar || "",
-          initials: msg.initials || senderPeer?.initials || "",
-          text: msg.text,
-          ts: msg.ts || Date.now()
-        };
-        if (!globalChatMessages.some((m) => m.id === entry.id)) {
-          globalChatMessages.push(entry);
-          globalChatMessages = globalChatMessages.slice(-120);
+        if (msg.type === "DIRECT_MESSAGE") {
+          const fromId = msg.senderId;
+          if (!dmThreads[fromId]) dmThreads[fromId] = [];
+          dmThreads[fromId].push({
+            id: msg.id || generateId(),
+            fromId,
+            fromName: msg.fromName || "Peer",
+            text: msg.text,
+            ts: msg.ts || Date.now()
+          });
           persistLocalState();
 
-          if (localState.currentRoute === "social" && localState.chatMode === "global") {
+          if (localState.currentRoute === "social" && localState.chatMode === "dm" && localState.selectedChatPeerId === fromId) {
             renderChatThread();
           } else {
             localState.unreadCount += 1;
             updateUnreadBadge();
+            showToast(`Direct message from ${msg.fromName || "Peer"}`);
           }
         }
-      }
 
-      if (msg.type === "FRIEND_CONNECT") {
-        const peerInfo = peersMap.get(msg.senderId) || {
-          peerId: msg.senderId,
-          username: msg.fromName || "Peer",
-          initials: "",
-          color: "#16c86a",
-          avatar: ""
-        };
-        peersMap.set(msg.senderId, { ...peerInfo, lastSeen: Date.now() });
+        if (msg.type === "GAME_SYNC" && msg.game) {
+          await putGameRecord(msg.game);
+          syncedGames = await fetchAllGames();
+          renderDashboard();
+          showToast(`Synced game: ${msg.game.name}`);
+        }
 
-        if (!friendsList.some((f) => f.peerId === msg.senderId)) {
-          friendsList.push({
-            peerId: msg.senderId,
-            username: peerInfo.username,
-            initials: peerInfo.initials,
-            color: peerInfo.color,
-            avatar: peerInfo.avatar
-          });
+        if (msg.type === "GAME_DELETE" && msg.gameId) {
+          await removeGameRecord(msg.gameId);
+          installedIds = installedIds.filter((id) => id !== msg.gameId);
           persistLocalState();
+          syncedGames = await fetchAllGames();
+          renderDashboard();
         }
-
-        if (!dmThreads[msg.senderId]) {
-          dmThreads[msg.senderId] = [];
-          persistLocalState();
-        }
-
-        showToast(`${peerInfo.username} connected as a friend`);
-        renderSocialView();
-        renderDashboard();
-      }
-
-      if (msg.type === "DIRECT_MESSAGE") {
-        const fromId = msg.senderId;
-        if (!dmThreads[fromId]) dmThreads[fromId] = [];
-        dmThreads[fromId].push({
-          fromId,
-          fromName: msg.fromName || "Peer",
-          text: msg.text,
-          ts: Date.now()
-        });
-        persistLocalState();
-
-        if (localState.currentRoute === "social" && localState.chatMode === "dm" && localState.selectedChatPeerId === fromId) {
-          renderChatThread();
-        } else {
-          localState.unreadCount += 1;
-          updateUnreadBadge();
-          showToast(`New DM from ${msg.fromName || "Peer"}`);
-        }
-      }
-
-      if (msg.type === "GAME_SYNC" && msg.game) {
-        await putGameRecord(msg.game);
-        syncedGames = await fetchAllGames();
-        renderDashboard();
-        showToast(`Synced game: ${msg.game.name}`);
-      }
-
-      if (msg.type === "GAME_DELETE" && msg.gameId) {
-        await removeGameRecord(msg.gameId);
-        installedIds = installedIds.filter((id) => id !== msg.gameId);
-        persistLocalState();
-        syncedGames = await fetchAllGames();
-        renderDashboard();
-      }
-    };
+      };
+    }
 
     setInterval(() => {
       const now = Date.now();
@@ -1414,28 +2163,35 @@
     setInterval(broadcastPresence, 3500);
 
     /* =========================================================================
-       PROFILE CUSTOMIZATION & USERNAME CLAIM/LOCK RULES
+       5. PROFILE CUSTOMIZATION & USERNAME CLAIM/LOCK RULES
        ========================================================================= */
     function syncThemeAndHeader() {
-      document.documentElement.style.setProperty("--accent-bright", localState.color || "#16c86a");
-      document.getElementById("topUsername").textContent = localState.username || "Player";
+      const accentHex = localState.color || "#16c86a";
+      document.documentElement.style.setProperty("--accent-bright", accentHex);
+      const topName = document.getElementById("topUsername");
+      if (topName) topName.textContent = localState.username || "Player";
       applyAvatarToElement(document.getElementById("topAvatar"), localState, "w-8 h-8 text-xs");
       applyAvatarToElement(document.getElementById("profilePreviewAvatar"), localState, "w-24 h-24 text-3xl");
 
       const lockNote = document.getElementById("usernameLockNote");
-      if (localState.lockedUsername) {
-        lockNote.textContent = `Username "${localState.lockedUsername}" is claimed and locked to your node.`;
-        lockNote.className = "text-[11px] text-[var(--accent-bright)] mt-1";
-      } else {
-        lockNote.textContent = "Saving claims and locks your username so other peers cannot take it.";
-        lockNote.className = "text-[11px] text-[#8f9b92] mt-1";
+      if (lockNote) {
+        if (localState.lockedUsername) {
+          lockNote.textContent = `Username "${localState.lockedUsername}" is claimed and locked to your node.`;
+          lockNote.className = "text-[11px] text-[var(--accent-bright)] mt-1";
+        } else {
+          lockNote.textContent = "Saving claims and locks your username so other peers cannot take it.";
+          lockNote.className = "text-[11px] text-[#8f9b92] mt-1";
+        }
       }
     }
 
     function loadProfileForm() {
-      document.getElementById("profileUsernameInput").value = localState.username || "Player";
-      document.getElementById("profileInitialsInput").value = localState.initials || "";
-      document.getElementById("profileColorInput").value = localState.color || "#16c86a";
+      const uInp = document.getElementById("profileUsernameInput");
+      const iInp = document.getElementById("profileInitialsInput");
+      const cInp = document.getElementById("profileColorInput");
+      if (uInp) uInp.value = localState.username || "Player";
+      if (iInp) iInp.value = localState.initials || "";
+      if (cInp) cInp.value = localState.color || "#16c86a";
       syncThemeAndHeader();
     }
 
@@ -1457,6 +2213,7 @@
         syncThemeAndHeader();
         broadcastPresence();
         renderSocialView();
+        renderDashboard();
         showToast("Profile picture updated");
       };
       reader.readAsDataURL(file);
@@ -1469,11 +2226,12 @@
       syncThemeAndHeader();
       broadcastPresence();
       renderSocialView();
+      renderDashboard();
       showToast("Switched back to initials");
     }
 
     function saveProfileChanges() {
-      const desiredName = (document.getElementById("profileUsernameInput").value || "").trim() || "Player";
+      const desiredName = (document.getElementById("profileUsernameInput")?.value || "").trim() || "Player";
       const desiredKey = desiredName.toLowerCase();
 
       if (bannedNames.includes(desiredKey)) {
@@ -1497,8 +2255,8 @@
 
       localState.username = desiredName;
       localState.lockedUsername = desiredName;
-      localState.initials = (document.getElementById("profileInitialsInput").value || "").trim().slice(0, 2).toUpperCase();
-      localState.color = document.getElementById("profileColorInput").value || "#16c86a";
+      localState.initials = (document.getElementById("profileInitialsInput")?.value || "").trim().slice(0, 2).toUpperCase();
+      localState.color = document.getElementById("profileColorInput")?.value || "#16c86a";
 
       claimedRegistry[desiredKey] = {
         ownerId: localState.nodeId,
@@ -1534,9 +2292,10 @@
     }
 
     /* =========================================================================
-       PLAYER CARDS, FRIENDS, GLOBAL CHAT & DIRECT MESSAGES
+       6. PLAYER CARDS, GLOBAL CHAT, FRIENDS & DIRECT MESSAGES
        ========================================================================= */
     function getPlayerById(targetId) {
+      if (!targetId) return null;
       if (targetId === localState.nodeId) {
         return {
           peerId: localState.nodeId,
@@ -1556,7 +2315,15 @@
       if (friendObj) {
         return { ...friendObj, isSelf: false, isOnline: false };
       }
-      return null;
+      return {
+        peerId: targetId,
+        username: "Peer Player",
+        initials: "PP",
+        color: "#16c86a",
+        avatar: "",
+        isSelf: false,
+        isOnline: false
+      };
     }
 
     function openPlayerCardById(targetId) {
@@ -1565,9 +2332,9 @@
 
       applyAvatarToElement(document.getElementById("playerCardAvatar"), player, "w-24 h-24 text-3xl");
       document.getElementById("playerCardName").textContent = player.username;
-      document.getElementById("playerCardStatus").textContent = player.isOnline ? "Online on P2P Network" : "Offline (Saved Friend)";
+      document.getElementById("playerCardStatus").textContent = player.isOnline ? "Online on P2P Network" : "Saved Peer / Offline";
       document.getElementById("playerCardRole").textContent = player.isSelf
-        ? "Your local node identity"
+        ? "Your local Polaris node identity"
         : `Peer ID: ${player.peerId.slice(0, 12)}`;
 
       const actionsEl = document.getElementById("playerCardActions");
@@ -1576,7 +2343,7 @@
       if (player.isSelf) {
         const editBtn = document.createElement("button");
         editBtn.type = "button";
-        editBtn.className = "nav-focusable w-full py-2.5 rounded-xl text-xs font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition";
+        editBtn.className = "nav-focusable w-full py-2.5 rounded-xl text-xs font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition cursor-pointer";
         editBtn.textContent = "Edit Profile & Avatar";
         editBtn.onclick = () => {
           closeModal("playerCardModal");
@@ -1589,15 +2356,15 @@
         const friendBtn = document.createElement("button");
         friendBtn.type = "button";
         friendBtn.className = alreadyFriend
-          ? "nav-focusable w-full py-2.5 rounded-xl text-xs font-bold bg-white/[0.08] text-white hover:bg-white/[0.14] transition"
-          : "nav-focusable w-full py-2.5 rounded-xl text-xs font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition";
+          ? "nav-focusable w-full py-2.5 rounded-xl text-xs font-bold bg-white/[0.08] text-white hover:bg-white/[0.14] transition cursor-pointer"
+          : "nav-focusable w-full py-2.5 rounded-xl text-xs font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition cursor-pointer";
         friendBtn.textContent = alreadyFriend ? "Connected Friend" : "Add Friend & Auto-Connect";
         friendBtn.onclick = () => connectFriendPeer(player);
         actionsEl.appendChild(friendBtn);
 
         const dmBtn = document.createElement("button");
         dmBtn.type = "button";
-        dmBtn.className = "nav-focusable w-full py-2.5 rounded-xl text-xs font-bold bg-white/[0.09] hover:bg-white/[0.16] text-white transition";
+        dmBtn.className = "nav-focusable w-full py-2.5 rounded-xl text-xs font-bold bg-white/[0.09] hover:bg-white/[0.16] text-white transition cursor-pointer";
         dmBtn.textContent = "Open Direct Message";
         dmBtn.onclick = () => {
           connectFriendPeer(player, true);
@@ -1610,7 +2377,7 @@
         if (localState.publisherUnlocked) {
           const banBtn = document.createElement("button");
           banBtn.type = "button";
-          banBtn.className = "nav-focusable w-full py-2 rounded-xl text-xs font-semibold bg-red-500/15 hover:bg-red-500/25 text-red-300 transition";
+          banBtn.className = "nav-focusable w-full py-2 rounded-xl text-xs font-semibold bg-red-500/15 hover:bg-red-500/25 text-red-300 transition cursor-pointer";
           banBtn.textContent = "Ban Username on Network";
           banBtn.onclick = () => {
             const key = (player.username || "").toLowerCase();
@@ -1666,6 +2433,7 @@
 
     function updateUnreadBadge() {
       const badge = document.getElementById("unreadBadge");
+      if (!badge) return;
       if (localState.unreadCount > 0) {
         badge.textContent = String(localState.unreadCount);
         badge.classList.remove("hidden");
@@ -1702,94 +2470,105 @@
       const globalBtn = document.getElementById("globalChannelBtn");
 
       const livePeers = Array.from(peersMap.values()).filter((p) => p.peerId !== localState.nodeId);
-      document.getElementById("peerListCount").textContent = String(livePeers.length);
-      document.getElementById("friendsListCount").textContent = String(friendsList.length);
-      const onlineEl = document.getElementById("socialOnlineCount");
-      if (onlineEl) onlineEl.textContent = String(livePeers.length + 1);
+      const onlineCountEl = document.getElementById("socialOnlineCount");
+      if (onlineCountEl) onlineCountEl.textContent = String(livePeers.length + 1);
+
+      const peerCntEl = document.getElementById("peerListCount");
+      const friendCntEl = document.getElementById("friendsListCount");
+      if (peerCntEl) peerCntEl.textContent = String(livePeers.length);
+      if (friendCntEl) friendCntEl.textContent = String(friendsList.length);
 
       if (globalBtn) {
-        globalBtn.className = localState.chatMode === "global"
-          ? "nav-focusable w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left transition bg-[var(--accent-bright)]/15 border border-[var(--accent-bright)]/45 text-white"
-          : "nav-focusable w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left transition bg-[#0b0e0c] hover:bg-[#171e19] border border-white/[0.06] text-white";
+        if (localState.chatMode === "global") {
+          globalBtn.className = "nav-focusable w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left transition bg-[var(--accent-bright)]/15 border border-[var(--accent-bright)]/45 text-white cursor-pointer";
+        } else {
+          globalBtn.className = "nav-focusable w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left transition bg-[#0b0e0c] hover:bg-[#171e19] border border-white/[0.06] text-white cursor-pointer";
+        }
       }
 
-      peersContainer.innerHTML = "";
-      if (!livePeers.length) {
-        peersContainer.innerHTML = `<div class="text-xs text-[#768279] py-3 text-center">Open another Polaris tab or connect on your local network to see live peers.</div>`;
-      } else {
-        livePeers.forEach((peer) => {
-          const row = document.createElement("div");
-          row.className = "flex items-center justify-between gap-2 p-2.5 rounded-xl bg-[#0b0e0c] hover:bg-[#171e19] transition";
+      if (peersContainer) {
+        peersContainer.innerHTML = "";
+        if (!livePeers.length) {
+          peersContainer.innerHTML = `<div class="text-xs text-[#768279] py-3 text-center">No other peers detected yet. Open another tab or join on the local mesh to see live peers.</div>`;
+        } else {
+          livePeers.forEach((peer) => {
+            const row = document.createElement("div");
+            row.className = "flex items-center justify-between gap-2 p-2.5 rounded-xl bg-[#0b0e0c] hover:bg-[#171e19] transition";
 
-          const left = document.createElement("button");
-          left.type = "button";
-          left.className = "nav-focusable flex items-center gap-2.5 text-left min-w-0 flex-1";
-          left.onclick = () => openPlayerCardById(peer.peerId);
-          const av = document.createElement("span");
-          applyAvatarToElement(av, peer, "w-8 h-8 text-xs");
-          const nameSpan = document.createElement("span");
-          nameSpan.className = "text-xs font-bold text-white truncate";
-          nameSpan.textContent = peer.username;
-          left.append(av, nameSpan);
+            const left = document.createElement("button");
+            left.type = "button";
+            left.className = "nav-focusable flex items-center gap-2.5 text-left min-w-0 flex-1 cursor-pointer";
+            left.onclick = () => openPlayerCardById(peer.peerId);
 
-          const addBtn = document.createElement("button");
-          addBtn.type = "button";
-          const isFriend = friendsList.some((f) => f.peerId === peer.peerId);
-          addBtn.className = isFriend
-            ? "nav-focusable px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white/[0.08] text-white"
-            : "nav-focusable px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[var(--accent-bright)] text-[#061309]";
-          addBtn.textContent = isFriend ? "DM" : "Add";
-          addBtn.onclick = () => {
-            connectFriendPeer(peer, true);
-            selectDmPeer(peer.peerId);
-          };
+            const av = document.createElement("span");
+            applyAvatarToElement(av, peer, "w-8 h-8 text-xs");
 
-          row.append(left, addBtn);
-          peersContainer.appendChild(row);
-        });
+            const nameSpan = document.createElement("span");
+            nameSpan.className = "text-xs font-bold text-white truncate";
+            nameSpan.textContent = peer.username;
+            left.append(av, nameSpan);
+
+            const addBtn = document.createElement("button");
+            addBtn.type = "button";
+            const isFriend = friendsList.some((f) => f.peerId === peer.peerId);
+            addBtn.className = isFriend
+              ? "nav-focusable px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white/[0.08] text-white cursor-pointer"
+              : "nav-focusable px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[var(--accent-bright)] text-[#061309] cursor-pointer";
+            addBtn.textContent = isFriend ? "DM" : "Add";
+            addBtn.onclick = () => {
+              connectFriendPeer(peer, true);
+              selectDmPeer(peer.peerId);
+            };
+
+            row.append(left, addBtn);
+            peersContainer.appendChild(row);
+          });
+        }
       }
 
-      friendsContainer.innerHTML = "";
-      if (!friendsList.length) {
-        friendsContainer.innerHTML = `<div class="text-xs text-[#768279] py-3 text-center">No friends added yet. Click a peer to connect.</div>`;
-      } else {
-        friendsList.forEach((friend) => {
-          const isSelected = localState.chatMode === "dm" && localState.selectedChatPeerId === friend.peerId;
-          const row = document.createElement("div");
-          row.className = `flex items-center justify-between gap-2 p-2.5 rounded-xl transition ${
-            isSelected ? "bg-[var(--accent-bright)]/15 border border-[var(--accent-bright)]/40" : "bg-[#0b0e0c] hover:bg-[#171e19]"
-          }`;
+      if (friendsContainer) {
+        friendsContainer.innerHTML = "";
+        if (!friendsList.length) {
+          friendsContainer.innerHTML = `<div class="text-xs text-[#768279] py-3 text-center">No friends added yet. Click a peer above to add and message privately.</div>`;
+        } else {
+          friendsList.forEach((friend) => {
+            const isSelected = localState.chatMode === "dm" && localState.selectedChatPeerId === friend.peerId;
+            const row = document.createElement("div");
+            row.className = `flex items-center justify-between gap-2 p-2.5 rounded-xl transition ${
+              isSelected ? "bg-[var(--accent-bright)]/15 border border-[var(--accent-bright)]/40" : "bg-[#0b0e0c] hover:bg-[#171e19]"
+            }`;
 
-          const selectBtn = document.createElement("button");
-          selectBtn.type = "button";
-          selectBtn.className = "nav-focusable flex items-center gap-2.5 text-left min-w-0 flex-1";
-          selectBtn.onclick = () => selectDmPeer(friend.peerId);
+            const selectBtn = document.createElement("button");
+            selectBtn.type = "button";
+            selectBtn.className = "nav-focusable flex items-center gap-2.5 text-left min-w-0 flex-1 cursor-pointer";
+            selectBtn.onclick = () => selectDmPeer(friend.peerId);
 
-          const av = document.createElement("span");
-          applyAvatarToElement(av, friend, "w-8 h-8 text-xs");
+            const av = document.createElement("span");
+            applyAvatarToElement(av, friend, "w-8 h-8 text-xs");
 
-          const info = document.createElement("div");
-          info.className = "min-w-0";
-          const nm = document.createElement("div");
-          nm.className = "text-xs font-bold text-white truncate";
-          nm.textContent = friend.username;
-          const online = peersMap.has(friend.peerId);
-          const st = document.createElement("div");
-          st.className = `text-[10px] ${online ? "text-[var(--accent-bright)]" : "text-[#7c887f]"}`;
-          st.textContent = online ? "Online • Direct DM" : "Saved friend";
-          info.append(nm, st);
+            const info = document.createElement("div");
+            info.className = "min-w-0";
+            const nm = document.createElement("div");
+            nm.className = "text-xs font-bold text-white truncate";
+            nm.textContent = friend.username;
+            const online = peersMap.has(friend.peerId);
+            const st = document.createElement("div");
+            st.className = `text-[10px] ${online ? "text-[var(--accent-bright)]" : "text-[#7c887f]"}`;
+            st.textContent = online ? "Online • Auto-connected" : "Saved friend";
+            info.append(nm, st);
 
-          selectBtn.append(av, info);
+            selectBtn.append(av, info);
 
-          const cardBtn = document.createElement("button");
-          cardBtn.type = "button";
-          cardBtn.className = "nav-focusable px-2 py-1 rounded-lg text-[11px] font-semibold bg-white/[0.07] hover:bg-white/[0.14] text-[#cbd5ce]";
-          cardBtn.textContent = "Profile";
-          cardBtn.onclick = () => openPlayerCardById(friend.peerId);
+            const cardBtn = document.createElement("button");
+            cardBtn.type = "button";
+            cardBtn.className = "nav-focusable px-2 py-1 rounded-lg text-[11px] font-semibold bg-white/[0.07] hover:bg-white/[0.14] text-[#cbd5ce] cursor-pointer";
+            cardBtn.textContent = "Profile";
+            cardBtn.onclick = () => openPlayerCardById(friend.peerId);
 
-          row.append(selectBtn, cardBtn);
-          friendsContainer.appendChild(row);
-        });
+            row.append(selectBtn, cardBtn);
+            friendsContainer.appendChild(row);
+          });
+        }
       }
 
       renderChatThread();
@@ -1800,76 +2579,59 @@
       const headerName = document.getElementById("dmActiveName");
       const headerMeta = document.getElementById("dmActiveMeta");
       const inspectBtn = document.getElementById("dmInspectBtn");
-      const inputField = document.getElementById("dmInputField");
+      const inputEl = document.getElementById("dmInputField");
       const area = document.getElementById("dmMessagesArea");
 
+      if (!headerAvatar || !headerName || !headerMeta || !inspectBtn || !inputEl || !area) return;
+
       if (localState.chatMode === "global") {
-        headerAvatar.className = "avatar-box w-10 h-10 rounded-full text-sm font-black";
+        headerAvatar.className = "avatar-box w-10 h-10 rounded-full text-sm bg-[var(--accent-bright)] text-[#061309]";
         headerAvatar.style.backgroundColor = localState.color || "#16c86a";
         headerAvatar.innerHTML = "#";
         headerName.textContent = "Global Chat";
-        headerMeta.textContent = "Shared live room across connected Polaris tabs & peers";
+        headerMeta.textContent = "Broadcast room across all Polaris tabs & connected peers • Click any username to inspect";
         inspectBtn.classList.add("hidden");
-        inputField.placeholder = "Message Global Chat...";
+        inputEl.placeholder = `Message Global Chat as ${localState.username}...`;
 
         area.innerHTML = "";
         if (!globalChatMessages.length) {
-          area.innerHTML = `<div class="h-full flex items-center justify-center text-xs text-[#768279] text-center px-6">Global Chat is live. Send the first message to everyone on Polaris.</div>`;
+          area.innerHTML = `<div class="h-full flex items-center justify-center text-xs text-[#7c887f] text-center px-6">Global Chat is live. Send the first message below!</div>`;
           return;
         }
 
         globalChatMessages.forEach((m) => {
           const mine = m.fromId === localState.nodeId;
-          const row = document.createElement("div");
-          row.className = `flex items-start gap-2.5 ${mine ? "flex-row-reverse" : ""}`;
+          const wrap = document.createElement("div");
+          wrap.className = `flex flex-col ${mine ? "items-end" : "items-start"}`;
 
-          const avBtn = document.createElement("button");
-          avBtn.type = "button";
-          avBtn.className = "nav-focusable mt-0.5";
-          avBtn.onclick = () => openPlayerCardById(m.fromId);
-          const av = document.createElement("span");
-          applyAvatarToElement(av, {
-            username: m.fromName,
-            color: m.color,
-            avatar: m.avatar,
-            initials: m.initials
-          }, "w-8 h-8 text-xs");
-          avBtn.appendChild(av);
-
-          const col = document.createElement("div");
-          col.className = `flex flex-col max-w-[78%] ${mine ? "items-end" : "items-start"}`;
-
-          const authorRow = document.createElement("div");
-          authorRow.className = "flex items-center gap-1.5 text-[11px] text-[#9aa69d] mb-1 px-1";
-          const authorName = document.createElement("button");
-          authorName.type = "button";
-          authorName.className = "font-bold text-white hover:underline";
-          authorName.textContent = mine ? `${m.fromName} (You)` : m.fromName;
-          authorName.onclick = () => openPlayerCardById(m.fromId);
-
-          const timeSpan = document.createElement("span");
-          timeSpan.className = "text-[10px] text-[#6f7b72]";
-          timeSpan.textContent = new Date(m.ts || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-          authorRow.append(authorName, timeSpan);
+          const senderBtn = document.createElement("button");
+          senderBtn.type = "button";
+          senderBtn.className = "text-[11px] font-bold text-[#9fb0a4] hover:text-[var(--accent-bright)] mb-1 px-1 cursor-pointer";
+          senderBtn.textContent = mine ? `${m.fromName} (You)` : m.fromName;
+          senderBtn.onclick = () => openPlayerCardById(m.fromId);
 
           const bubble = document.createElement("div");
-          bubble.className = `px-3.5 py-2 rounded-2xl text-sm break-words ${
+          bubble.className = `max-w-[80%] px-3.5 py-2 rounded-2xl text-sm break-words ${
             mine
-              ? "bg-[var(--accent-bright)] text-[#061309] font-medium"
-              : "bg-[#1b231d] text-white border border-white/[0.06]"
+              ? "bg-[var(--accent-bright)] text-[#061309] font-semibold"
+              : "bg-[#1b241e] border border-white/[0.06] text-white"
           }`;
           bubble.textContent = m.text;
 
-          col.append(authorRow, bubble);
-          row.append(avBtn, col);
-          area.appendChild(row);
+          const timeLabel = document.createElement("span");
+          timeLabel.className = "text-[10px] text-[#727f76] mt-1 px-1";
+          const timeStr = new Date(m.ts || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          timeLabel.textContent = timeStr;
+
+          wrap.append(senderBtn, bubble, timeLabel);
+          area.appendChild(wrap);
         });
 
         area.scrollTop = area.scrollHeight;
         return;
       }
 
-      // Direct Message mode
+      // Direct Message Thread Mode
       const peerId = localState.selectedChatPeerId;
       const target = peerId ? getPlayerById(peerId) : null;
       if (!target) {
@@ -1879,14 +2641,14 @@
 
       applyAvatarToElement(headerAvatar, target, "w-10 h-10 text-sm");
       headerName.textContent = `DM • ${target.username}`;
-      headerMeta.textContent = target.isOnline ? "Connected on local P2P channel" : "Peer offline • messages stored locally";
+      headerMeta.textContent = target.isOnline ? "Connected on local P2P channel" : "Peer offline • messages saved locally";
       inspectBtn.classList.remove("hidden");
-      inputField.placeholder = `Message ${target.username}...`;
+      inputEl.placeholder = `Direct message ${target.username}...`;
 
       const messages = dmThreads[peerId] || [];
       area.innerHTML = "";
       if (!messages.length) {
-        area.innerHTML = `<div class="h-full flex items-center justify-center text-xs text-[#768279]">No direct messages yet with ${target.username}. Say hello below.</div>`;
+        area.innerHTML = `<div class="h-full flex items-center justify-center text-xs text-[#7c887f] text-center px-6">No direct messages with ${target.username} yet. Say hello below.</div>`;
         return;
       }
 
@@ -1896,15 +2658,15 @@
         wrap.className = `flex flex-col ${mine ? "items-end" : "items-start"}`;
 
         const bubble = document.createElement("div");
-        bubble.className = `max-w-[78%] px-3.5 py-2 rounded-2xl text-sm break-words ${
+        bubble.className = `max-w-[80%] px-3.5 py-2 rounded-2xl text-sm break-words ${
           mine
-            ? "bg-[var(--accent-bright)] text-[#061309] font-medium"
-            : "bg-[#1b231d] text-white border border-white/[0.06]"
+            ? "bg-[var(--accent-bright)] text-[#061309] font-semibold"
+            : "bg-[#1b241e] border border-white/[0.06] text-white"
         }`;
         bubble.textContent = m.text;
 
         const timeLabel = document.createElement("span");
-        timeLabel.className = "text-[10px] text-[#7c887f] mt-1 px-1";
+        timeLabel.className = "text-[10px] text-[#727f76] mt-1 px-1";
         const timeStr = new Date(m.ts || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
         timeLabel.textContent = `${m.fromName} • ${timeStr}`;
 
@@ -1918,27 +2680,35 @@
     function handleSendChatMessage(event) {
       event.preventDefault();
       const input = document.getElementById("dmInputField");
+      if (!input) return;
       const text = (input.value || "").trim();
       if (!text) return;
 
+      const msgId = generateId();
+      const timestamp = Date.now();
+
       if (localState.chatMode === "global") {
         const entry = {
-          id: crypto.randomUUID(),
+          id: msgId,
           fromId: localState.nodeId,
           fromName: localState.username || "Player",
           color: localState.color || "#16c86a",
           avatar: localState.avatar || "",
-          initials: localState.initials || "",
           text,
-          ts: Date.now()
+          ts: timestamp
         };
         globalChatMessages.push(entry);
-        globalChatMessages = globalChatMessages.slice(-120);
+        globalChatMessages = globalChatMessages.slice(-150);
         persistLocalState();
 
         sendMeshPacket({
-          type: "GLOBAL_MESSAGE",
-          ...entry
+          type: "GLOBAL_CHAT_MESSAGE",
+          id: msgId,
+          fromName: localState.username || "Player",
+          color: localState.color || "#16c86a",
+          avatar: localState.avatar || "",
+          text,
+          ts: timestamp
         });
 
         input.value = "";
@@ -1953,20 +2723,22 @@
       }
 
       if (!dmThreads[targetId]) dmThreads[targetId] = [];
-      const entry = {
+      dmThreads[targetId].push({
+        id: msgId,
         fromId: localState.nodeId,
-        fromName: localState.username,
+        fromName: localState.username || "Player",
         text,
-        ts: Date.now()
-      };
-      dmThreads[targetId].push(entry);
+        ts: timestamp
+      });
       persistLocalState();
 
       sendMeshPacket({
         type: "DIRECT_MESSAGE",
+        id: msgId,
         targetId,
-        fromName: localState.username,
-        text
+        fromName: localState.username || "Player",
+        text,
+        ts: timestamp
       });
 
       input.value = "";
@@ -1974,28 +2746,34 @@
     }
 
     /* =========================================================================
-       PUBLISHER STUDIO
+       7. PUBLISHER STUDIO & GAME UPLOAD/EDIT
        ========================================================================= */
     function openPublisherEntry() {
       if (localState.publisherUnlocked) {
         renderPublisherList();
         openModal("pubManagerModal");
       } else {
-        document.getElementById("pubCodeInput").value = "";
-        document.getElementById("pubCodeError").textContent = "";
+        const codeInput = document.getElementById("pubCodeInput");
+        const errEl = document.getElementById("pubCodeError");
+        if (codeInput) codeInput.value = "";
+        if (errEl) errEl.textContent = "";
         openModal("pubAuthModal");
+        setTimeout(() => codeInput && codeInput.focus(), 60);
       }
     }
 
     function verifyPublisherCode() {
-      const code = document.getElementById("pubCodeInput").value;
+      const code = (document.getElementById("pubCodeInput")?.value || "").trim();
+      const errEl = document.getElementById("pubCodeError");
       if (code === "1010") {
         localState.publisherUnlocked = true;
+        if (errEl) errEl.textContent = "";
         closeModal("pubAuthModal");
         renderPublisherList();
         openModal("pubManagerModal");
-      } else {
-        document.getElementById("pubCodeError").textContent = "Invalid access code.";
+        showToast("Publisher Studio unlocked");
+      } else if (errEl) {
+        errEl.textContent = "Invalid access code.";
       }
     }
 
@@ -2009,8 +2787,10 @@
       const reader = new FileReader();
       reader.onload = () => {
         localState.draftGameCover = reader.result;
-        document.getElementById("editorCoverImg").src = reader.result;
-        document.getElementById("editorCoverPreview").classList.remove("hidden");
+        const imgEl = document.getElementById("editorCoverImg");
+        const prevBox = document.getElementById("editorCoverPreview");
+        if (imgEl) imgEl.src = reader.result;
+        if (prevBox) prevBox.classList.remove("hidden");
       };
       reader.readAsDataURL(file);
     }
@@ -2021,10 +2801,14 @@
       const reader = new FileReader();
       reader.onload = () => {
         localState.draftGameCode = String(reader.result || "");
-        document.getElementById("editorPackageStatus").textContent = `Loaded package: ${file.name}`;
-        document.getElementById("editorPackageStatus").className = "text-xs text-[var(--accent-bright)] font-semibold";
-        if (!document.getElementById("editorTitle").value.trim()) {
-          document.getElementById("editorTitle").value = file.name.replace(/\.(html|htm)$/i, "");
+        const statusEl = document.getElementById("editorPackageStatus");
+        if (statusEl) {
+          statusEl.textContent = `Loaded package: ${file.name}`;
+          statusEl.className = "text-xs text-[var(--accent-bright)] font-semibold";
+        }
+        const titleEl = document.getElementById("editorTitle");
+        if (titleEl && !titleEl.value.trim()) {
+          titleEl.value = file.name.replace(/\.(html|htm)$/i, "");
         }
       };
       reader.readAsText(file);
@@ -2042,7 +2826,11 @@
         document.getElementById("editorTime").value = existingGame.installSeconds || 2;
         localState.draftGameCode = existingGame.code || "";
         localState.draftGameCover = existingGame.cover || "";
-        document.getElementById("editorPackageStatus").textContent = existingGame.code ? "Game package attached" : "No game file loaded yet.";
+        const statusEl = document.getElementById("editorPackageStatus");
+        if (statusEl) {
+          statusEl.textContent = existingGame.code ? "Game package attached" : "No game file loaded yet.";
+          statusEl.className = existingGame.code ? "text-xs text-[var(--accent-bright)] font-semibold" : "text-xs text-[#8f9b92]";
+        }
         if (existingGame.cover) {
           document.getElementById("editorCoverImg").src = existingGame.cover;
           document.getElementById("editorCoverPreview").classList.remove("hidden");
@@ -2060,8 +2848,11 @@
         document.getElementById("editorGameFile").value = "";
         document.getElementById("editorCoverFile").value = "";
         document.getElementById("editorCoverPreview").classList.add("hidden");
-        document.getElementById("editorPackageStatus").textContent = "No game file loaded yet.";
-        document.getElementById("editorPackageStatus").className = "text-xs text-[#8f9b92]";
+        const statusEl = document.getElementById("editorPackageStatus");
+        if (statusEl) {
+          statusEl.textContent = "No game file loaded yet.";
+          statusEl.className = "text-xs text-[#8f9b92]";
+        }
         localState.draftGameCode = "";
         localState.draftGameCover = "";
       }
@@ -2069,7 +2860,7 @@
     }
 
     async function savePublishedGame() {
-      const title = (document.getElementById("editorTitle").value || "").trim();
+      const title = (document.getElementById("editorTitle")?.value || "").trim();
       if (!title) {
         showToast("Please enter a game title.");
         return;
@@ -2079,16 +2870,16 @@
         return;
       }
 
-      const editId = document.getElementById("editGameId").value;
+      const editId = document.getElementById("editGameId")?.value || "";
       const existing = syncedGames.find((g) => g.id === editId);
 
       const gameRecord = {
-        id: editId || crypto.randomUUID(),
+        id: editId || generateId(),
         name: title,
-        description: (document.getElementById("editorDesc").value || "").trim(),
-        icon: (document.getElementById("editorIcon").value || "🎮").trim(),
-        color: document.getElementById("editorColor").value || "#173822",
-        installSeconds: Math.max(1, Math.min(120, Number(document.getElementById("editorTime").value) || 2)),
+        description: (document.getElementById("editorDesc")?.value || "").trim(),
+        icon: (document.getElementById("editorIcon")?.value || "🎮").trim(),
+        color: document.getElementById("editorColor")?.value || "#173822",
+        installSeconds: Math.max(1, Math.min(120, Number(document.getElementById("editorTime")?.value) || 2)),
         cover: localState.draftGameCover || "",
         code: localState.draftGameCode,
         published: existing ? existing.published !== false : true,
@@ -2097,6 +2888,7 @@
 
       await putGameRecord(gameRecord);
       syncedGames = await fetchAllGames();
+      if (!syncedGames.length) syncedGames = [gameRecord];
       sendMeshPacket({ type: "GAME_SYNC", game: gameRecord });
 
       closeModal("gameEditorModal");
@@ -2108,10 +2900,11 @@
 
     function renderPublisherList() {
       const container = document.getElementById("pubGamesList");
+      if (!container) return;
       container.innerHTML = "";
 
       if (!syncedGames.length) {
-        container.innerHTML = `<div class="text-center text-sm text-[#8f9b92] py-10">No games uploaded yet. Click "+ Add Game" to upload one.</div>`;
+        container.innerHTML = `<div class="text-center text-sm text-[#8f9b92] py-10">No games in catalog yet. Click "+ Add Game" to upload one.</div>`;
         return;
       }
 
@@ -2127,6 +2920,7 @@
         if (g.cover) {
           const img = document.createElement("img");
           img.src = g.cover;
+          img.alt = g.name;
           img.className = "w-full h-full object-cover";
           thumb.appendChild(img);
         } else {
@@ -2149,7 +2943,7 @@
 
         const toggleBtn = document.createElement("button");
         toggleBtn.type = "button";
-        toggleBtn.className = "nav-focusable px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.08] hover:bg-white/[0.14] text-white";
+        toggleBtn.className = "nav-focusable px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.08] hover:bg-white/[0.14] text-white cursor-pointer";
         toggleBtn.textContent = g.published !== false ? "Hide" : "Publish";
         toggleBtn.onclick = async () => {
           g.published = !(g.published !== false);
@@ -2162,13 +2956,13 @@
 
         const editBtn = document.createElement("button");
         editBtn.type = "button";
-        editBtn.className = "nav-focusable px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.08] hover:bg-white/[0.14] text-white";
+        editBtn.className = "nav-focusable px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.08] hover:bg-white/[0.14] text-white cursor-pointer";
         editBtn.textContent = "Edit";
         editBtn.onclick = () => openGameEditor(g);
 
         const delBtn = document.createElement("button");
         delBtn.type = "button";
-        delBtn.className = "nav-focusable px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-red-500/15 hover:bg-red-500/25 text-red-300";
+        delBtn.className = "nav-focusable px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-red-500/15 hover:bg-red-500/25 text-red-300 cursor-pointer";
         delBtn.textContent = "Delete";
         delBtn.onclick = async () => {
           await removeGameRecord(g.id);
@@ -2188,14 +2982,14 @@
     }
 
     /* =========================================================================
-       DOWNLOAD PROGRESS, POLARIS STAR LAUNCH & IN-GAME MENU
+       8. INSTALL PROGRESS, HORIZONTAL JET BOOT & IN-GAME GUIDE SIDEBAR
        ========================================================================= */
     let activeDownloadLock = false;
 
     function startGameInstall(game) {
       if (!game) return;
       if (installedIds.includes(game.id)) {
-        launchGameWithStar(game);
+        launchGameWithJet(game);
         return;
       }
       if (activeDownloadLock) return;
@@ -2207,7 +3001,7 @@
       document.getElementById("dlPercentText").textContent = "0%";
       openModal("downloadModal");
 
-      const totalMs = Math.max(700, Math.min(4500, (game.installSeconds || 2) * 800));
+      const totalMs = Math.max(700, Math.min(3500, (game.installSeconds || 2) * 750));
       const started = performance.now();
 
       const interval = setInterval(() => {
@@ -2218,7 +3012,7 @@
 
         if (pct >= 100) {
           clearInterval(interval);
-          document.getElementById("dlStatusText").textContent = "Installed — ready to play";
+          document.getElementById("dlStatusText").textContent = "Installed — ready to launch";
           if (!installedIds.includes(game.id)) {
             installedIds.push(game.id);
             persistLocalState();
@@ -2228,12 +3022,12 @@
             activeDownloadLock = false;
             renderDashboard();
             showToast(`${game.name} installed to My Games`);
-          }, 260);
+          }, 240);
         }
-      }, 50);
+      }, 45);
     }
 
-    function launchGameWithStar(game) {
+    function launchGameWithJet(game) {
       if (!game || !game.code) {
         showToast("This game package has no runnable content.");
         return;
@@ -2246,27 +3040,38 @@
 
       localState.activeGame = game;
       localState.inGameMenuOpen = false;
-      document.getElementById("inGameMenu").classList.remove("open");
+      const drawerEl = document.getElementById("inGameMenu");
+      if (drawerEl) drawerEl.classList.remove("open");
 
-      const overlay = document.getElementById("starOverlay");
-      document.getElementById("starGameName").textContent = game.name;
-      overlay.classList.add("active");
+      const overlay = document.getElementById("jetBootOverlay");
+      const nameEl = document.getElementById("jetBootGameName");
+      if (nameEl) nameEl.textContent = game.name;
+      if (overlay) overlay.classList.add("active");
 
       setTimeout(() => {
         const bridgeScript = `<script>
           (function(){
             let lastCtrl = 0;
+            function sendGuideToggle() {
+              try {
+                if (window.parent && window.parent !== window) {
+                  window.parent.postMessage({ type: 'POLARIS_TOGGLE_MENU' }, '*');
+                }
+              } catch (_) {}
+            }
             window.addEventListener('keydown', function(e){
               if (e.key === 'Control') {
                 const now = Date.now();
-                if (now - lastCtrl < 420) {
-                  parent.postMessage({ type: 'POLARIS_TOGGLE_MENU' }, '*');
+                if (now - lastCtrl < 460) {
+                  e.preventDefault();
+                  sendGuideToggle();
                 }
                 lastCtrl = now;
-              } else if (e.key === 'Escape') {
-                parent.postMessage({ type: 'POLARIS_TOGGLE_MENU' }, '*');
+              } else if (e.key === 'Escape' || (e.altKey && e.key && e.key.toLowerCase() === 'g')) {
+                e.preventDefault();
+                sendGuideToggle();
               }
-            });
+            }, true);
           })();
         <\/script>`;
 
@@ -2279,16 +3084,18 @@
 
         const player = document.getElementById("gameSessionPlayer");
         const iframe = document.getElementById("gameSandboxFrame");
-        iframe.srcdoc = htmlDoc;
-        player.classList.remove("hidden");
-        document.getElementById("inGameTitle").textContent = game.name;
+        const titleEl = document.getElementById("inGameTitle");
+        if (iframe) iframe.srcdoc = htmlDoc;
+        if (titleEl) titleEl.textContent = game.name;
+        if (player) player.classList.remove("hidden");
+        if (overlay) overlay.classList.remove("active");
 
-        overlay.classList.remove("active");
-        if (player.requestFullscreen) {
+        if (player && player.requestFullscreen) {
           player.requestFullscreen().catch(() => {});
         }
+        window.focus();
         refreshFocusableElements();
-      }, 950);
+      }, 900);
     }
 
     function toggleInGameMenu(forceState) {
@@ -2296,12 +3103,29 @@
       const next = typeof forceState === "boolean" ? forceState : !localState.inGameMenuOpen;
       localState.inGameMenuOpen = next;
       const drawer = document.getElementById("inGameMenu");
+      if (!drawer) return;
+
       if (next) {
         drawer.classList.add("open");
+        window.focus();
+        refreshFocusableElements();
+        const resumeBtn = document.getElementById("resumeGameBtn");
+        if (resumeBtn) {
+          clearPadFocus();
+          focusIndex = 0;
+          resumeBtn.classList.add("pad-focused");
+          resumeBtn.focus();
+        }
       } else {
         drawer.classList.remove("open");
+        refreshFocusableElements();
+        const iframe = document.getElementById("gameSandboxFrame");
+        if (iframe && iframe.contentWindow) {
+          try {
+            iframe.contentWindow.focus();
+          } catch (_) {}
+        }
       }
-      refreshFocusableElements();
     }
 
     function resumeGameSession() {
@@ -2310,13 +3134,13 @@
 
     function restartGameSession() {
       if (localState.activeGame) {
-        launchGameWithStar(localState.activeGame);
+        launchGameWithJet(localState.activeGame);
       }
     }
 
     function togglePlayerFullscreen() {
       const player = document.getElementById("gameSessionPlayer");
-      if (!document.fullscreenElement && player.requestFullscreen) {
+      if (!document.fullscreenElement && player && player.requestFullscreen) {
         player.requestFullscreen().catch(() => {});
       } else if (document.fullscreenElement && document.exitFullscreen) {
         document.exitFullscreen().catch(() => {});
@@ -2326,34 +3150,44 @@
     function exitGameSession() {
       localState.inGameMenuOpen = false;
       localState.activeGame = null;
-      document.getElementById("inGameMenu").classList.remove("open");
-      document.getElementById("gameSandboxFrame").srcdoc = "";
-      document.getElementById("gameSessionPlayer").classList.add("hidden");
+      const drawer = document.getElementById("inGameMenu");
+      const iframe = document.getElementById("gameSandboxFrame");
+      const player = document.getElementById("gameSessionPlayer");
+      if (drawer) drawer.classList.remove("open");
+      if (iframe) iframe.srcdoc = "";
+      if (player) player.classList.add("hidden");
       if (document.fullscreenElement && document.exitFullscreen) {
         document.exitFullscreen().catch(() => {});
       }
+      window.focus();
       refreshFocusableElements();
       renderDashboard();
+      showToast("Exited to Polaris dashboard");
     }
 
     window.addEventListener("message", (event) => {
-      if (event.data && event.data.type === "POLARIS_TOGGLE_MENU") {
+      if (!event || !event.data) return;
+      if (event.data.type === "POLARIS_TOGGLE_MENU") {
         toggleInGameMenu();
+      } else if (event.data.type === "POLARIS_EXIT_GAME") {
+        exitGameSession();
       }
     });
 
     /* =========================================================================
-       NAVIGATION & DASHBOARD RENDERING
+       9. NAVIGATION & DASHBOARD RENDERING
        ========================================================================= */
     function navigateTo(routeName) {
+      if (!routeName) return;
       localState.currentRoute = routeName;
+
       document.querySelectorAll(".page-view").forEach((sec) => {
         sec.classList.toggle("hidden", sec.id !== `view-${routeName}`);
       });
 
       document.querySelectorAll(".top-nav-btn, .mobile-nav-btn").forEach((btn) => {
         const active = btn.dataset.route === routeName;
-        btn.classList.toggle("bg-white/[0.1]", active);
+        btn.classList.toggle("nav-active", active);
         btn.classList.toggle("text-white", active);
       });
 
@@ -2371,8 +3205,10 @@
 
     function buildGameCard(game, isInstalled) {
       const card = document.createElement("div");
-      card.className = "tile-card nav-focusable w-full bg-[var(--bg-card)] rounded-2xl overflow-hidden flex flex-col justify-between cursor-pointer";
+      card.className = "tile-card nav-focusable w-full rounded-2xl overflow-hidden flex flex-col justify-between cursor-pointer";
       card.tabIndex = 0;
+      card.dataset.gameId = game.id;
+      card.dataset.installed = isInstalled ? "1" : "0";
 
       const art = document.createElement("div");
       art.className = "relative h-28 w-full flex items-center justify-center text-4xl overflow-hidden";
@@ -2410,28 +3246,12 @@
 
       const actionBtn = document.createElement("button");
       actionBtn.type = "button";
+      actionBtn.dataset.gameAction = isInstalled ? "play" : "install";
+      actionBtn.dataset.gameId = game.id;
       actionBtn.className = isInstalled
-        ? "nav-focusable w-full py-2 rounded-xl text-xs font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition"
-        : "nav-focusable w-full py-2 rounded-xl text-xs font-bold bg-white/[0.08] hover:bg-white/[0.15] text-white transition";
+        ? "nav-focusable w-full py-2 rounded-xl text-xs font-bold bg-[var(--accent-bright)] text-[#061309] hover:brightness-110 transition cursor-pointer"
+        : "nav-focusable w-full py-2 rounded-xl text-xs font-bold bg-white/[0.08] hover:bg-white/[0.15] text-white transition cursor-pointer";
       actionBtn.textContent = isInstalled ? "Play" : "Install";
-      actionBtn.onclick = (e) => {
-        e.stopPropagation();
-        if (isInstalled) launchGameWithStar(game);
-        else startGameInstall(game);
-      };
-
-      card.onclick = () => {
-        if (isInstalled) launchGameWithStar(game);
-        else startGameInstall(game);
-      };
-
-      card.onkeydown = (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          if (isInstalled) launchGameWithStar(game);
-          else startGameInstall(game);
-        }
-      };
 
       body.append(topInfo, actionBtn);
       card.append(art, body);
@@ -2444,7 +3264,7 @@
       el.innerHTML = "";
       if (!items.length) {
         const empty = document.createElement("div");
-        empty.className = "col-span-full py-8 px-6 rounded-2xl bg-[#121713] border border-white/[0.07] text-sm text-[#7c887f] text-center";
+        empty.className = "col-span-full py-8 px-6 rounded-2xl console-panel text-sm text-[#7c887f] text-center";
         empty.textContent = emptyText;
         el.appendChild(empty);
         return;
@@ -2462,7 +3282,7 @@
         return;
       }
       if (installedIds.includes(featured.id)) {
-        launchGameWithStar(featured);
+        launchGameWithJet(featured);
       } else {
         startGameInstall(featured);
       }
@@ -2488,50 +3308,55 @@
       const heroCta = document.getElementById("heroCtaBtn");
 
       if (heroFeatured) {
-        heroTitle.textContent = heroFeatured.name;
-        heroDesc.textContent = heroFeatured.description || "Ready to launch over your local Polaris network.";
-        heroBackdrop.style.backgroundImage = heroFeatured.cover ? `url("${heroFeatured.cover}")` : "none";
-        const isInst = installedIds.includes(heroFeatured.id);
-        heroCta.textContent = isInst ? `Play ${heroFeatured.name}` : `Install ${heroFeatured.name}`;
+        if (heroTitle) heroTitle.textContent = heroFeatured.name;
+        if (heroDesc) heroDesc.textContent = heroFeatured.description || "Ready to launch over your Polaris cloud mesh.";
+        if (heroBackdrop) heroBackdrop.style.backgroundImage = heroFeatured.cover ? `url("${heroFeatured.cover}")` : "none";
+        if (heroCta) {
+          const isInst = installedIds.includes(heroFeatured.id);
+          heroCta.textContent = isInst ? `Play ${heroFeatured.name}` : `Install ${heroFeatured.name}`;
+        }
       } else {
-        heroTitle.textContent = "Polaris Cloud Gaming";
-        heroDesc.textContent = "Upload your own games in Publisher Studio and sync them across connected peers.";
-        heroBackdrop.style.backgroundImage = "none";
-        heroCta.textContent = "Open Store";
+        if (heroTitle) heroTitle.textContent = "Polaris Cloud Gaming";
+        if (heroDesc) heroDesc.textContent = "Upload your own games in Publisher Studio and sync them across connected peers.";
+        if (heroBackdrop) heroBackdrop.style.backgroundImage = "none";
+        if (heroCta) heroCta.textContent = "Open Store";
       }
 
       const livePeerCount = Array.from(peersMap.values()).filter((p) => p.peerId !== localState.nodeId).length;
-      document.getElementById("homePeerCount").textContent = String(livePeerCount + 1);
+      const homePeerEl = document.getElementById("homePeerCount");
+      if (homePeerEl) homePeerEl.textContent = String(livePeerCount + 1);
 
-      renderGrid("jumpBackRow", matchingInstalled.slice(0, 5), "No installed games yet. Click Install on any game below.", true);
+      renderGrid("jumpBackRow", matchingInstalled.slice(0, 5), "No installed games yet. Click Install on any game below to add it.", true);
       renderGrid("recentGamesRow", newest.slice(0, 5), "No games available right now.");
 
       const peersRow = document.getElementById("homePeersRow");
-      peersRow.innerHTML = "";
-      const allKnownPlayers = [
-        {
-          peerId: localState.nodeId,
-          username: `${localState.username} (You)`,
-          initials: localState.initials,
-          color: localState.color,
-          avatar: localState.avatar
-        },
-        ...Array.from(peersMap.values()).filter((p) => p.peerId !== localState.nodeId)
-      ];
+      if (peersRow) {
+        peersRow.innerHTML = "";
+        const allKnownPlayers = [
+          {
+            peerId: localState.nodeId,
+            username: `${localState.username} (You)`,
+            initials: localState.initials,
+            color: localState.color,
+            avatar: localState.avatar
+          },
+          ...Array.from(peersMap.values()).filter((p) => p.peerId !== localState.nodeId)
+        ];
 
-      allKnownPlayers.forEach((p) => {
-        const chip = document.createElement("button");
-        chip.type = "button";
-        chip.className = "nav-focusable flex-shrink-0 flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] border border-white/[0.08] transition";
-        chip.onclick = () => openPlayerCardById(p.peerId);
-        const av = document.createElement("span");
-        applyAvatarToElement(av, p, "w-7 h-7 text-[11px]");
-        const nm = document.createElement("span");
-        nm.className = "text-xs font-bold text-white";
-        nm.textContent = p.username;
-        chip.append(av, nm);
-        peersRow.appendChild(chip);
-      });
+        allKnownPlayers.forEach((p) => {
+          const chip = document.createElement("button");
+          chip.type = "button";
+          chip.className = "nav-focusable flex-shrink-0 flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] border border-white/[0.08] transition cursor-pointer";
+          chip.onclick = () => openPlayerCardById(p.peerId);
+          const av = document.createElement("span");
+          applyAvatarToElement(av, p, "w-7 h-7 text-[11px]");
+          const nm = document.createElement("span");
+          nm.className = "text-xs font-bold text-white";
+          nm.textContent = p.username;
+          chip.append(av, nm);
+          peersRow.appendChild(chip);
+        });
+      }
 
       renderGrid("storeGrid", matching, "No games match your search.");
       renderGrid("libraryGrid", matchingInstalled, "No games installed yet.", true);
@@ -2540,7 +3365,153 @@
     }
 
     /* =========================================================================
-       KEYBOARD (DOUBLE CTRL / ESC) & GAMEPAD NAVIGATION ENGINE
+       10. CENTRALIZED RELIABLE EVENT WIRING (NEVER SWALLOWS POINTER CLICKS)
+       ========================================================================= */
+    function bindAllInteractiveControls() {
+      // Document click delegation for routes, modals, guide drawer, and game cards
+      document.addEventListener("click", (e) => {
+        const target = e.target instanceof Element ? e.target : null;
+        if (!target) return;
+
+        // Close modal buttons
+        const closeBtn = target.closest("[data-close-modal]");
+        if (closeBtn) {
+          const modalId = closeBtn.getAttribute("data-close-modal");
+          if (modalId) closeModal(modalId);
+          return;
+        }
+
+        // Backdrop click for in-game Guide menu
+        const guideBackdrop = target.closest("#inGameMenu");
+        if (guideBackdrop && target === guideBackdrop) {
+          toggleInGameMenu(false);
+          return;
+        }
+
+        // Navigation buttons
+        const navBtn = target.closest("[data-action='navigate']");
+        if (navBtn) {
+          const route = navBtn.getAttribute("data-route");
+          if (route) navigateTo(route);
+          return;
+        }
+
+        // Action triggers
+        const actionEl = target.closest("[data-action]");
+        if (actionEl) {
+          const act = actionEl.getAttribute("data-action");
+          if (act === "hero-primary") {
+            handleHeroAction();
+            return;
+          }
+          if (act === "open-publisher") {
+            openPublisherEntry();
+            return;
+          }
+          if (act === "open-self-card") {
+            openPlayerCardById(localState.nodeId);
+            return;
+          }
+          if (act === "select-global-chat") {
+            selectGlobalChat();
+            return;
+          }
+          if (act === "inspect-active-peer") {
+            inspectActiveChatPeer();
+            return;
+          }
+        }
+
+        // Game Install / Play button or Game Card click
+        const gameBtn = target.closest("[data-game-action]");
+        if (gameBtn) {
+          const gameId = gameBtn.getAttribute("data-game-id");
+          const gameObj = syncedGames.find((g) => g.id === gameId);
+          if (!gameObj) return;
+          if (installedIds.includes(gameObj.id) || gameBtn.getAttribute("data-game-action") === "play") {
+            launchGameWithJet(gameObj);
+          } else {
+            startGameInstall(gameObj);
+          }
+          return;
+        }
+
+        const cardEl = target.closest(".tile-card[data-game-id]");
+        if (cardEl) {
+          const gameId = cardEl.getAttribute("data-game-id");
+          const gameObj = syncedGames.find((g) => g.id === gameId);
+          if (!gameObj) return;
+          if (installedIds.includes(gameObj.id)) {
+            launchGameWithJet(gameObj);
+          } else {
+            startGameInstall(gameObj);
+          }
+        }
+      });
+
+      // Direct explicit button bindings for Guide & Controls
+      document.getElementById("guideTriggerBtn")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleInGameMenu(true);
+      });
+
+      document.getElementById("closeGuideDrawerBtn")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        resumeGameSession();
+      });
+
+      document.getElementById("resumeGameBtn")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        resumeGameSession();
+      });
+
+      document.getElementById("restartGameBtn")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        restartGameSession();
+      });
+
+      document.getElementById("toggleFullscreenBtn")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        togglePlayerFullscreen();
+      });
+
+      document.getElementById("exitToDashboardBtn")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        exitGameSession();
+      });
+
+      // Chat form & search input
+      document.getElementById("chatComposerForm")?.addEventListener("submit", handleSendChatMessage);
+      document.getElementById("searchBox")?.addEventListener("input", renderDashboard);
+
+      // Profile buttons & file inputs
+      document.getElementById("triggerAvatarUploadBtn")?.addEventListener("click", () => {
+        document.getElementById("avatarUploadInput")?.click();
+      });
+      document.getElementById("avatarUploadInput")?.addEventListener("change", handleAvatarFile);
+      document.getElementById("clearAvatarBtn")?.addEventListener("click", clearProfileAvatar);
+      document.getElementById("saveProfileBtn")?.addEventListener("click", saveProfileChanges);
+      document.getElementById("releaseUsernameBtn")?.addEventListener("click", releaseClaimedUsername);
+
+      // Publisher studio bindings
+      document.getElementById("verifyPubCodeBtn")?.addEventListener("click", verifyPublisherCode);
+      document.getElementById("pubCodeInput")?.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") verifyPublisherCode();
+      });
+      document.getElementById("openAddGameEditorBtn")?.addEventListener("click", () => openGameEditor(null));
+      document.getElementById("editorCoverFile")?.addEventListener("change", handleCoverFile);
+      document.getElementById("editorGameFile")?.addEventListener("change", handleGamePackageFile);
+      document.getElementById("savePublishedGameBtn")?.addEventListener("click", savePublishedGame);
+    }
+
+    /* =========================================================================
+       11. KEYBOARD (DOUBLE CTRL / ESC / ALT+G) & GAMEPAD NAVIGATION ENGINE
        ========================================================================= */
     let lastCtrlTimestamp = 0;
     let focusableList = [];
@@ -2551,8 +3522,9 @@
     window.addEventListener("keydown", (e) => {
       if (e.key === "Control") {
         const now = Date.now();
-        if (now - lastCtrlTimestamp < 420) {
+        if (now - lastCtrlTimestamp < 460) {
           if (localState.activeGame) {
+            e.preventDefault();
             toggleInGameMenu();
           }
         }
@@ -2560,8 +3532,17 @@
         return;
       }
 
+      if (e.altKey && e.key && e.key.toLowerCase() === "g") {
+        if (localState.activeGame) {
+          e.preventDefault();
+          toggleInGameMenu();
+          return;
+        }
+      }
+
       if (e.key === "Escape") {
         if (localState.activeGame) {
+          e.preventDefault();
           toggleInGameMenu();
           return;
         }
@@ -2588,9 +3569,9 @@
     function refreshFocusableElements() {
       if (localState.activeGame) {
         if (localState.inGameMenuOpen) {
-          focusableList = Array.from(document.querySelectorAll("#inGameMenu .nav-focusable"));
+          focusableList = Array.from(document.querySelectorAll("#inGameMenu .nav-focusable")).filter((el) => el.offsetParent !== null);
         } else {
-          focusableList = [];
+          focusableList = Array.from(document.querySelectorAll("#guideTriggerBtn")).filter((el) => el.offsetParent !== null);
         }
         return;
       }
@@ -2640,8 +3621,9 @@
 
     window.addEventListener("gamepadconnected", (e) => {
       gamepadConnected = true;
-      document.getElementById("controllerPromptBar").classList.remove("hidden");
-      document.getElementById("gamepadNameLabel").textContent = e.gamepad.id || "Xbox Controller Connected";
+      document.getElementById("controllerPromptBar")?.classList.remove("hidden");
+      const labelEl = document.getElementById("gamepadNameLabel");
+      if (labelEl) labelEl.textContent = e.gamepad.id || "Wireless Controller Connected";
       movePadFocus(0);
       showToast("Controller connected");
     });
@@ -2651,7 +3633,7 @@
       if (!pads.length) {
         gamepadConnected = false;
         clearPadFocus();
-        document.getElementById("controllerPromptBar").classList.add("hidden");
+        document.getElementById("controllerPromptBar")?.classList.add("hidden");
       }
     });
 
@@ -2661,8 +3643,9 @@
       if (pads.length > 0) {
         if (!gamepadConnected) {
           gamepadConnected = true;
-          document.getElementById("controllerPromptBar").classList.remove("hidden");
-          document.getElementById("gamepadNameLabel").textContent = pads[0].id || "Xbox Controller Connected";
+          document.getElementById("controllerPromptBar")?.classList.remove("hidden");
+          const labelEl = document.getElementById("gamepadNameLabel");
+          if (labelEl) labelEl.textContent = pads[0].id || "Wireless Controller Connected";
         }
 
         const pad = pads[0];
@@ -2679,7 +3662,7 @@
         const btnB = Boolean(pad.buttons[1]?.pressed);
         const btnStart = Boolean(pad.buttons[9]?.pressed);
 
-        if (!localState.activeGame && now - lastPadNavAt > 165) {
+        if ((!localState.activeGame || localState.inGameMenuOpen) && now - lastPadNavAt > 165) {
           if (dpadRight || dpadDown || axesX > 0.55 || axesY > 0.55) {
             movePadFocus(1);
             lastPadNavAt = now;
@@ -2690,9 +3673,7 @@
         }
 
         if (btnA && !prevButtonsState[0]) {
-          if (!localState.activeGame) {
-            triggerFocusedElement();
-          } else if (localState.inGameMenuOpen) {
+          if (!localState.activeGame || localState.inGameMenuOpen) {
             triggerFocusedElement();
           }
         }
@@ -2720,21 +3701,23 @@
     }
 
     /* =========================================================================
-       STARTUP INITIALIZATION
+       12. STARTUP INITIALIZATION
        ========================================================================= */
     (async function bootPolaris() {
+      bindAllInteractiveControls();
+
       try {
         dbInstance = await initDatabase();
         syncedGames = await fetchAllGames();
         await seedStarterGamesIfEmpty();
-      } catch (err) {
+      } catch (_) {
         syncedGames = [...STARTER_GAMES];
       }
 
       syncThemeAndHeader();
       updateUnreadBadge();
       renderSocialView();
-      renderDashboard();
+      navigateTo("home");
       broadcastPresence();
       requestAnimationFrame(pollGamepadLoop);
     })();
