@@ -2845,7 +2845,7 @@
       "use strict";
 
       /* -------------------------------------------------------------------
-         CONSTANTS & PROTECTED IN-MEMORY CATALOG
+         CONSTANTS & AUTHORITATIVE ANTI-WIPE CATALOG STATE
          ------------------------------------------------------------------- */
       const STORAGE_KEYS = {
         CATALOG: "polaris_blue_catalog_v1",
@@ -2914,38 +2914,62 @@
         return `${prefix}-${Math.random().toString(36).slice(2, 11)}-${Date.now().toString(36)}`;
       }
 
+      function isValidGameRecord(item) {
+        return Boolean(
+          item &&
+          typeof item === "object" &&
+          typeof item.id === "string" &&
+          item.id.trim().length > 0 &&
+          typeof item.name === "string" &&
+          item.name.trim().length > 0
+        );
+      }
+
       /* -------------------------------------------------------------------
-         PROTECTED CATALOG STATE (ZERO DEMO GAMES ON LOAD; NEVER WIPED)
+         AUTHORITATIVE IN-MEMORY CATALOG & SINGLE-SOURCE-OF-TRUTH COMMIT
          ------------------------------------------------------------------- */
       let idbDatabase = null;
 
-      // Primary catalog array: immune to accidental wipes on random clicks or errors
-      let catalogGames = safeJsonParse(safeLocalStorageGet(STORAGE_KEYS.CATALOG), []);
-      if (!Array.isArray(catalogGames)) {
-        catalogGames = [];
-      } else {
-        catalogGames = catalogGames.filter((item) => item && typeof item === "object" && item.id && item.name);
-      }
+      // Authoritative in-memory array: never overwritten by empty arrays or failed syncs
+      let catalogGames = [];
 
-      let installedGameIds = safeJsonParse(safeLocalStorageGet(STORAGE_KEYS.INSTALLED), []);
-      if (!Array.isArray(installedGameIds)) {
-        installedGameIds = [];
-      }
+      // Hydrate initial catalog safely from localStorage on boot
+      (function seedCatalogFromLocalStorage() {
+        const parsed = safeJsonParse(safeLocalStorageGet(STORAGE_KEYS.CATALOG), []);
+        if (Array.isArray(parsed)) {
+          catalogGames = parsed.filter(isValidGameRecord).map((g) => ({ ...g }));
+        }
+      })();
 
-      let friendsRoster = safeJsonParse(safeLocalStorageGet(STORAGE_KEYS.FRIENDS), []);
-      if (!Array.isArray(friendsRoster)) friendsRoster = [];
+      let installedGameIds = (() => {
+        const parsed = safeJsonParse(safeLocalStorageGet(STORAGE_KEYS.INSTALLED), []);
+        return Array.isArray(parsed) ? parsed.filter((id) => typeof id === "string" && id.length > 0) : [];
+      })();
 
-      let bannedUsernames = safeJsonParse(safeLocalStorageGet(STORAGE_KEYS.BANNED_NAMES), []);
-      if (!Array.isArray(bannedUsernames)) bannedUsernames = [];
+      let friendsRoster = (() => {
+        const parsed = safeJsonParse(safeLocalStorageGet(STORAGE_KEYS.FRIENDS), []);
+        return Array.isArray(parsed) ? parsed : [];
+      })();
 
-      let claimedUsernameMap = safeJsonParse(safeLocalStorageGet(STORAGE_KEYS.CLAIMED_NAMES), {});
-      if (!claimedUsernameMap || typeof claimedUsernameMap !== "object") claimedUsernameMap = {};
+      let bannedUsernames = (() => {
+        const parsed = safeJsonParse(safeLocalStorageGet(STORAGE_KEYS.BANNED_NAMES), []);
+        return Array.isArray(parsed) ? parsed : [];
+      })();
 
-      let globalChatHistory = safeJsonParse(safeLocalStorageGet(STORAGE_KEYS.GLOBAL_CHAT), []);
-      if (!Array.isArray(globalChatHistory)) globalChatHistory = [];
+      let claimedUsernameMap = (() => {
+        const parsed = safeJsonParse(safeLocalStorageGet(STORAGE_KEYS.CLAIMED_NAMES), {});
+        return parsed && typeof parsed === "object" ? parsed : {};
+      })();
 
-      let directMessageThreads = safeJsonParse(safeLocalStorageGet(STORAGE_KEYS.DM_THREADS), {});
-      if (!directMessageThreads || typeof directMessageThreads !== "object") directMessageThreads = {};
+      let globalChatHistory = (() => {
+        const parsed = safeJsonParse(safeLocalStorageGet(STORAGE_KEYS.GLOBAL_CHAT), []);
+        return Array.isArray(parsed) ? parsed : [];
+      })();
+
+      let directMessageThreads = (() => {
+        const parsed = safeJsonParse(safeLocalStorageGet(STORAGE_KEYS.DM_THREADS), {});
+        return parsed && typeof parsed === "object" ? parsed : {};
+      })();
 
       const deviceNodeId =
         safeLocalStorageGet(STORAGE_KEYS.NODE_ID) ||
@@ -2989,56 +3013,8 @@
       }
 
       /* -------------------------------------------------------------------
-         PERSISTENCE HELPERS (LOCALSTORAGE + INDEXEDDB + TAB BROADCAST)
+         INDEXEDDB SAFE ACCESSORS (NON-DESTRUCTIVE ON PERMISSION/QUOTA ERRORS)
          ------------------------------------------------------------------- */
-      function persistCatalogMirror() {
-        const serialized = JSON.stringify(catalogGames);
-        const savedFull = safeLocalStorageSet(STORAGE_KEYS.CATALOG, serialized);
-        if (!savedFull) {
-          // If large HTML packages exceed localStorage quota, store metadata index while IDB holds full bundles
-          try {
-            const indexOnly = catalogGames.map(({ code, cover, ...meta }) => ({
-              ...meta,
-              _hasCode: Boolean(code),
-              _hasCover: Boolean(cover)
-            }));
-            safeLocalStorageSet(STORAGE_KEYS.CATALOG, JSON.stringify(indexOnly));
-          } catch (_) {}
-        }
-        safeLocalStorageSet(STORAGE_KEYS.INSTALLED, JSON.stringify(installedGameIds));
-        updateTelemetryCounters();
-      }
-
-      function persistAllConsoleState() {
-        persistCatalogMirror();
-        safeLocalStorageSet(
-          STORAGE_KEYS.PROFILE,
-          JSON.stringify({
-            username: consoleState.username,
-            lockedUsername: consoleState.lockedUsername,
-            initials: consoleState.initials,
-            accentColor: consoleState.accentColor,
-            avatarDataUrl: consoleState.avatarDataUrl
-          })
-        );
-        safeLocalStorageSet(STORAGE_KEYS.FRIENDS, JSON.stringify(friendsRoster));
-        safeLocalStorageSet(STORAGE_KEYS.BANNED_NAMES, JSON.stringify(bannedUsernames));
-        safeLocalStorageSet(STORAGE_KEYS.CLAIMED_NAMES, JSON.stringify(claimedUsernameMap));
-        safeLocalStorageSet(STORAGE_KEYS.GLOBAL_CHAT, JSON.stringify(globalChatHistory.slice(-250)));
-        safeLocalStorageSet(STORAGE_KEYS.DM_THREADS, JSON.stringify(directMessageThreads));
-      }
-
-      function broadcastTabEvent(payload) {
-        if (!tabChannel) return;
-        try {
-          tabChannel.postMessage({
-            ...payload,
-            originNodeId: consoleState.nodeId,
-            sentAt: Date.now()
-          });
-        } catch (_) {}
-      }
-
       function openIndexedDbSafe() {
         return new Promise((resolve) => {
           try {
@@ -3075,6 +3051,8 @@
             const req = tx.objectStore(IDB_CONFIG.STORE_GAMES).getAll();
             req.onsuccess = () => resolve(Array.isArray(req.result) ? req.result : []);
             req.onerror = () => resolve([]);
+            tx.onabort = () => resolve([]);
+            tx.onerror = () => resolve([]);
           } catch (_) {
             resolve([]);
           }
@@ -3082,10 +3060,12 @@
       }
 
       function writeGameToIdb(gameObj) {
-        if (!idbDatabase || !gameObj || !gameObj.id) return;
+        if (!idbDatabase || !isValidGameRecord(gameObj)) return;
         try {
           const tx = idbDatabase.transaction(IDB_CONFIG.STORE_GAMES, "readwrite");
           tx.objectStore(IDB_CONFIG.STORE_GAMES).put(gameObj);
+          tx.onerror = () => {};
+          tx.onabort = () => {};
         } catch (_) {}
       }
 
@@ -3094,68 +3074,191 @@
         try {
           const tx = idbDatabase.transaction(IDB_CONFIG.STORE_GAMES, "readwrite");
           tx.objectStore(IDB_CONFIG.STORE_GAMES).delete(gameId);
+          tx.onerror = () => {};
+          tx.onabort = () => {};
         } catch (_) {}
       }
 
-      /* Protected Catalog Mutations */
-      function upsertGameRecord(incomingGame) {
-        if (!incomingGame || typeof incomingGame !== "object") return null;
-        const cleanId = String(incomingGame.id || "").trim();
-        const cleanName = String(incomingGame.name || "").trim();
-        if (!cleanId || !cleanName) return null;
+      /* -------------------------------------------------------------------
+         SINGLE-SOURCE-OF-TRUTH CATALOG COMMIT & SYNC FUNCTION
+         Never wipes or overwrites existing games with empty arrays or errors.
+         ------------------------------------------------------------------- */
+      function commitCatalogState(options = {}) {
+        const {
+          upsertGames = null,
+          mergeGames = null,
+          deleteGameId = null,
+          setInstalledIds = null,
+          addInstalledId = null
+        } = options;
 
-        const existingIndex = catalogGames.findIndex((g) => g.id === cleanId);
-        let merged;
+        try {
+          // 1. Apply explicit single-game deletion only when explicitly requested
+          if (typeof deleteGameId === "string" && deleteGameId.length > 0) {
+            catalogGames = catalogGames.filter((g) => isValidGameRecord(g) && g.id !== deleteGameId);
+            installedGameIds = installedGameIds.filter((id) => id !== deleteGameId);
+            deleteGameFromIdb(deleteGameId);
+          }
 
-        if (existingIndex === -1) {
-          merged = {
-            id: cleanId,
-            name: cleanName,
-            description: String(incomingGame.description || ""),
-            icon: String(incomingGame.icon || "✦"),
-            color: String(incomingGame.color || "#122854"),
-            installSeconds: Math.max(1, Math.min(120, Number(incomingGame.installSeconds) || 2)),
-            cover: String(incomingGame.cover || ""),
-            code: String(incomingGame.code || ""),
-            published: incomingGame.published !== false,
-            updatedBy: String(incomingGame.updatedBy || "Polaris Publisher"),
-            createdAt: Number(incomingGame.createdAt) || Date.now(),
-            updatedAt: Number(incomingGame.updatedAt) || Date.now()
-          };
-          catalogGames.push(merged);
-        } else {
-          const prev = catalogGames[existingIndex];
-          merged = {
-            ...prev,
-            name: cleanName,
-            description: incomingGame.description !== undefined ? String(incomingGame.description) : prev.description,
-            icon: incomingGame.icon !== undefined ? String(incomingGame.icon) : prev.icon,
-            color: incomingGame.color !== undefined ? String(incomingGame.color) : prev.color,
-            installSeconds:
-              incomingGame.installSeconds !== undefined
-                ? Math.max(1, Math.min(120, Number(incomingGame.installSeconds) || 2))
-                : prev.installSeconds,
-            cover: incomingGame.cover !== undefined ? String(incomingGame.cover) : prev.cover,
-            code: incomingGame.code ? String(incomingGame.code) : prev.code,
-            published: incomingGame.published !== undefined ? Boolean(incomingGame.published) : prev.published,
-            updatedBy: incomingGame.updatedBy ? String(incomingGame.updatedBy) : prev.updatedBy,
-            createdAt: prev.createdAt || Number(incomingGame.createdAt) || Date.now(),
-            updatedAt: Date.now()
-          };
-          catalogGames[existingIndex] = merged;
+          // 2. Apply explicit single or batch upserts (user add/edit or live tab broadcast)
+          const incomingList = Array.isArray(upsertGames)
+            ? upsertGames
+            : isValidGameRecord(upsertGames)
+            ? [upsertGames]
+            : [];
+
+          incomingList.forEach((incoming) => {
+            if (!isValidGameRecord(incoming)) return;
+            const cleanId = incoming.id.trim();
+            const cleanName = incoming.name.trim();
+            const idx = catalogGames.findIndex((g) => g.id === cleanId);
+
+            if (idx === -1) {
+              const created = {
+                id: cleanId,
+                name: cleanName,
+                description: String(incoming.description || ""),
+                icon: String(incoming.icon || "✦"),
+                color: String(incoming.color || "#122854"),
+                installSeconds: Math.max(1, Math.min(120, Number(incoming.installSeconds) || 2)),
+                cover: String(incoming.cover || ""),
+                code: String(incoming.code || ""),
+                published: incoming.published !== false,
+                updatedBy: String(incoming.updatedBy || consoleState.username || "Publisher"),
+                createdAt: Number(incoming.createdAt) || Date.now(),
+                updatedAt: Number(incoming.updatedAt) || Date.now()
+              };
+              catalogGames.push(created);
+              writeGameToIdb(created);
+            } else {
+              const prev = catalogGames[idx];
+              const nextUpdatedAt = Number(incoming.updatedAt) || Date.now();
+              const updated = {
+                ...prev,
+                name: cleanName,
+                description: incoming.description !== undefined ? String(incoming.description) : prev.description,
+                icon: incoming.icon !== undefined ? String(incoming.icon) : prev.icon,
+                color: incoming.color !== undefined ? String(incoming.color) : prev.color,
+                installSeconds:
+                  incoming.installSeconds !== undefined
+                    ? Math.max(1, Math.min(120, Number(incoming.installSeconds) || 2))
+                    : prev.installSeconds,
+                cover: incoming.cover ? String(incoming.cover) : prev.cover,
+                code: incoming.code ? String(incoming.code) : prev.code,
+                published: incoming.published !== undefined ? Boolean(incoming.published) : prev.published,
+                updatedBy: incoming.updatedBy ? String(incoming.updatedBy) : prev.updatedBy,
+                createdAt: prev.createdAt || Number(incoming.createdAt) || Date.now(),
+                updatedAt: Math.max(prev.updatedAt || 0, nextUpdatedAt)
+              };
+              catalogGames[idx] = updated;
+              writeGameToIdb(updated);
+            }
+          });
+
+          // 3. Non-destructive hydration merge (e.g., from IndexedDB on startup/sync)
+          // Never removes games already in catalogGames; only adds missing or newer records
+          if (Array.isArray(mergeGames) && mergeGames.length > 0) {
+            mergeGames.forEach((candidate) => {
+              if (!isValidGameRecord(candidate)) return;
+              const cleanId = candidate.id.trim();
+              const idx = catalogGames.findIndex((g) => g.id === cleanId);
+              if (idx === -1) {
+                catalogGames.push({
+                  id: cleanId,
+                  name: candidate.name.trim(),
+                  description: String(candidate.description || ""),
+                  icon: String(candidate.icon || "✦"),
+                  color: String(candidate.color || "#122854"),
+                  installSeconds: Math.max(1, Math.min(120, Number(candidate.installSeconds) || 2)),
+                  cover: String(candidate.cover || ""),
+                  code: String(candidate.code || ""),
+                  published: candidate.published !== false,
+                  updatedBy: String(candidate.updatedBy || "Polaris Publisher"),
+                  createdAt: Number(candidate.createdAt) || Date.now(),
+                  updatedAt: Number(candidate.updatedAt) || Date.now()
+                });
+              } else {
+                const current = catalogGames[idx];
+                const candTime = Number(candidate.updatedAt) || 0;
+                const currTime = Number(current.updatedAt) || 0;
+                catalogGames[idx] = {
+                  ...current,
+                  code: current.code || String(candidate.code || ""),
+                  cover: current.cover || String(candidate.cover || ""),
+                  description: current.description || String(candidate.description || ""),
+                  name: candTime > currTime ? candidate.name.trim() : current.name,
+                  published: candTime > currTime && candidate.published !== undefined ? Boolean(candidate.published) : current.published,
+                  updatedAt: Math.max(currTime, candTime)
+                };
+              }
+            });
+          }
+
+          // Guard against accidental empty replacement when prior games exist
+          catalogGames = catalogGames.filter(isValidGameRecord);
+
+          // 4. Update installed IDs safely without wiping existing IDs on empty inputs
+          if (Array.isArray(setInstalledIds) && setInstalledIds.length > 0) {
+            installedGameIds = Array.from(
+              new Set([...installedGameIds, ...setInstalledIds.filter((id) => typeof id === "string")])
+            );
+          }
+          if (typeof addInstalledId === "string" && addInstalledId.length > 0) {
+            if (!installedGameIds.includes(addInstalledId)) {
+              installedGameIds.push(addInstalledId);
+            }
+          }
+
+          // 5. Mirror authoritative catalog & installed state to localStorage
+          const serialized = JSON.stringify(catalogGames);
+          const wroteFull = safeLocalStorageSet(STORAGE_KEYS.CATALOG, serialized);
+          if (!wroteFull) {
+            try {
+              const metadataOnly = catalogGames.map(({ code, cover, ...rest }) => ({
+                ...rest,
+                _hasCode: Boolean(code),
+                _hasCover: Boolean(cover)
+              }));
+              safeLocalStorageSet(STORAGE_KEYS.CATALOG, JSON.stringify(metadataOnly));
+            } catch (_) {}
+          }
+          safeLocalStorageSet(STORAGE_KEYS.INSTALLED, JSON.stringify(installedGameIds));
+        } catch (err) {
+          console.warn("[Polaris] commitCatalogState guard preserved existing catalog:", err?.message || err);
         }
 
-        persistCatalogMirror();
-        writeGameToIdb(merged);
-        return merged;
+        updateTelemetryCounters();
+        return catalogGames;
       }
 
-      function removeGameRecord(gameId) {
-        if (!gameId) return;
-        catalogGames = catalogGames.filter((g) => g.id !== gameId);
-        installedGameIds = installedGameIds.filter((id) => id !== gameId);
-        persistCatalogMirror();
-        deleteGameFromIdb(gameId);
+      function persistAllConsoleState() {
+        commitCatalogState();
+        safeLocalStorageSet(
+          STORAGE_KEYS.PROFILE,
+          JSON.stringify({
+            username: consoleState.username,
+            lockedUsername: consoleState.lockedUsername,
+            initials: consoleState.initials,
+            accentColor: consoleState.accentColor,
+            avatarDataUrl: consoleState.avatarDataUrl
+          })
+        );
+        safeLocalStorageSet(STORAGE_KEYS.FRIENDS, JSON.stringify(friendsRoster));
+        safeLocalStorageSet(STORAGE_KEYS.BANNED_NAMES, JSON.stringify(bannedUsernames));
+        safeLocalStorageSet(STORAGE_KEYS.CLAIMED_NAMES, JSON.stringify(claimedUsernameMap));
+        safeLocalStorageSet(STORAGE_KEYS.GLOBAL_CHAT, JSON.stringify(globalChatHistory.slice(-250)));
+        safeLocalStorageSet(STORAGE_KEYS.DM_THREADS, JSON.stringify(directMessageThreads));
+      }
+
+      function broadcastTabEvent(payload) {
+        if (!tabChannel) return;
+        try {
+          tabChannel.postMessage({
+            ...payload,
+            originNodeId: consoleState.nodeId,
+            sentAt: Date.now()
+          });
+        } catch (_) {}
       }
 
       /* -------------------------------------------------------------------
@@ -3228,7 +3331,7 @@
 
       function updateTelemetryCounters() {
         try {
-          const publishedGames = catalogGames.filter((g) => g && g.published !== false);
+          const publishedGames = catalogGames.filter((g) => isValidGameRecord(g) && g.published !== false);
           const catEl = document.getElementById("catalogCountLabel");
           const instEl = document.getElementById("installedCountLabel");
           const ledEl = document.getElementById("syncStatusLed");
@@ -3360,7 +3463,7 @@
         }
 
         items.forEach((game) => {
-          if (!game || !game.id || !game.name) return;
+          if (!isValidGameRecord(game)) return;
           const installed = forceInstalled || installedGameIds.includes(game.id);
           container.appendChild(createGameTileElement(game, installed));
         });
@@ -3369,7 +3472,7 @@
       function renderAllViews() {
         try {
           const searchTerm = String(document.getElementById("searchBox")?.value || "").trim().toLowerCase();
-          const publishedGames = catalogGames.filter((g) => g && g.published !== false);
+          const publishedGames = catalogGames.filter((g) => isValidGameRecord(g) && g.published !== false);
 
           const filteredPublished = searchTerm
             ? publishedGames.filter((g) =>
@@ -3379,7 +3482,7 @@
 
           const newestFirst = [...filteredPublished].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
-          const installedList = catalogGames.filter((g) => g && installedGameIds.includes(g.id));
+          const installedList = catalogGames.filter((g) => isValidGameRecord(g) && installedGameIds.includes(g.id));
           const filteredInstalled = searchTerm
             ? installedList.filter((g) =>
                 `${g.name} ${g.description || ""}`.toLowerCase().includes(searchTerm)
@@ -3599,11 +3702,10 @@
           if (pct >= 100) {
             clearInterval(timer);
             if (statusEl) statusEl.textContent = "Saved offline — ready in My Games";
-            upsertGameRecord(game);
-            if (!installedGameIds.includes(game.id)) {
-              installedGameIds.push(game.id);
-              persistCatalogMirror();
-            }
+            commitCatalogState({
+              upsertGames: game,
+              addInstalledId: game.id
+            });
             setTimeout(() => {
               closeModalById("installProgressModal");
               installInFlight = false;
@@ -3623,11 +3725,10 @@
           return;
         }
 
-        if (!installedGameIds.includes(game.id)) {
-          installedGameIds.push(game.id);
-          persistCatalogMirror();
-        }
-        upsertGameRecord(game);
+        commitCatalogState({
+          upsertGames: game,
+          addInstalledId: game.id
+        });
 
         consoleState.activeSessionGame = game;
         consoleState.guideDrawerOpen = false;
@@ -3941,36 +4042,34 @@
           return;
         }
 
-        const record = upsertGameRecord({
+        const draftPayload = {
           id: isEdit && existingRecord ? existingRecord.id : createUniqueId("game"),
           name: title,
           description: String(document.getElementById("editorDescInput")?.value || "").trim(),
           icon: String(document.getElementById("editorIconInput")?.value || "✦").trim() || "✦",
           color: document.getElementById("editorColorInput")?.value || "#122854",
           installSeconds: Number(document.getElementById("editorTimeInput")?.value) || 2,
-          cover: consoleState.draftGameCover,
+          cover: consoleState.draftGameCover || (existingRecord && existingRecord.cover) || "",
           code: finalCode,
           published: existingRecord ? existingRecord.published !== false : true,
           updatedBy: consoleState.username || "Publisher",
           createdAt: existingRecord ? existingRecord.createdAt : Date.now(),
           updatedAt: Date.now()
-        });
+        };
 
-        if (!record) {
-          showToast("Could not save game record.");
-          return;
-        }
+        commitCatalogState({ upsertGames: draftPayload });
+        const committedRecord = catalogGames.find((g) => g.id === draftPayload.id) || draftPayload;
 
-        broadcastTabEvent({ type: "GAME_UPSERT", game: record });
+        broadcastTabEvent({ type: "GAME_UPSERT", game: committedRecord });
         consoleState.editingGameId = null;
         closeModalById("gameEditorModal");
         renderStudioGamesManager();
         openModalById("studioManagerModal");
         renderAllViews();
-        if (consoleState.currentRoute === "game-details" && consoleState.activeDetailsGameId === record.id) {
-          renderGameDetailsPage(record.id);
+        if (consoleState.currentRoute === "game-details" && consoleState.activeDetailsGameId === committedRecord.id) {
+          renderGameDetailsPage(committedRecord.id);
         }
-        showToast(isEdit ? `Updated "${record.name}"` : `Added "${record.name}"`);
+        showToast(isEdit ? `Updated "${committedRecord.name}"` : `Added "${committedRecord.name}"`);
       }
 
       function renderStudioGamesManager() {
@@ -4530,12 +4629,12 @@
               activePeersMap.set(msg.peer.peerId, { ...msg.peer, lastSeen: Date.now() });
               renderSocialHub();
               renderAllViews();
-            } else if (msg.type === "GAME_UPSERT" && msg.game) {
-              upsertGameRecord(msg.game);
+            } else if (msg.type === "GAME_UPSERT" && isValidGameRecord(msg.game)) {
+              commitCatalogState({ upsertGames: msg.game });
               renderAllViews();
               if (consoleState.studioUnlocked) renderStudioGamesManager();
-            } else if (msg.type === "GAME_DELETE" && msg.gameId) {
-              removeGameRecord(msg.gameId);
+            } else if (msg.type === "GAME_DELETE" && typeof msg.gameId === "string" && msg.gameId) {
+              commitCatalogState({ deleteGameId: msg.gameId });
               renderAllViews();
               if (consoleState.studioUnlocked) renderStudioGamesManager();
             } else if (msg.type === "GLOBAL_MSG" && msg.entry) {
@@ -4581,7 +4680,7 @@
       }
 
       /* -------------------------------------------------------------------
-         CENTRALIZED EVENT DELEGATION & DIRECT CONTROLS
+         SAFE DOCUMENT CLICK ROUTING (EMPTY SPACE NEVER MUTATES OR DELETES)
          ------------------------------------------------------------------- */
       function bindEventListeners() {
         document.addEventListener("click", (ev) => {
@@ -4589,18 +4688,27 @@
             const el = ev.target instanceof Element ? ev.target : null;
             if (!el) return;
 
+            // 1. Explicit modal close controls
             const closeModalTrigger = el.closest("[data-close-modal]");
             if (closeModalTrigger) {
               closeModalById(closeModalTrigger.getAttribute("data-close-modal"));
               return;
             }
 
-            const drawerBackdrop = el.closest("#inGameGuideDrawer");
-            if (drawerBackdrop && ev.target === drawerBackdrop) {
+            // 2. Clicking directly on a modal backdrop closes that modal only
+            if (el.classList.contains("modal-backdrop")) {
+              if (el.id === "installProgressModal") return;
+              closeModalById(el.id);
+              return;
+            }
+
+            // 3. Clicking directly on the guide drawer backdrop closes the drawer only
+            if (el.id === "inGameGuideDrawer") {
               setGuideDrawerState(false);
               return;
             }
 
+            // 4. Route navigation controls
             const routeTrigger = el.closest("[data-route]");
             if (routeTrigger) {
               const route = routeTrigger.getAttribute("data-route");
@@ -4608,6 +4716,7 @@
               return;
             }
 
+            // 5. Publisher Studio & Game CRUD controls
             const studioTrigger = el.closest("[data-open-studio]");
             if (studioTrigger) {
               openPublisherStudio();
@@ -4625,8 +4734,9 @@
               const gid = togglePubTrigger.getAttribute("data-toggle-publish-id");
               const found = catalogGames.find((g) => g.id === gid);
               if (found) {
-                const updated = upsertGameRecord({ ...found, published: !(found.published !== false) });
-                if (updated) broadcastTabEvent({ type: "GAME_UPSERT", game: updated });
+                const updatedObj = { ...found, published: !(found.published !== false), updatedAt: Date.now() };
+                commitCatalogState({ upsertGames: updatedObj });
+                broadcastTabEvent({ type: "GAME_UPSERT", game: updatedObj });
                 renderStudioGamesManager();
                 renderAllViews();
               }
@@ -4637,7 +4747,7 @@
             if (delTrigger) {
               const gid = delTrigger.getAttribute("data-delete-game-id");
               const found = catalogGames.find((g) => g.id === gid);
-              removeGameRecord(gid);
+              commitCatalogState({ deleteGameId: gid });
               broadcastTabEvent({ type: "GAME_DELETE", gameId: gid });
               renderStudioGamesManager();
               renderAllViews();
@@ -4648,6 +4758,7 @@
               return;
             }
 
+            // 6. Social & Player card controls
             const peerTrigger = el.closest("[data-inspect-peer-id]");
             if (peerTrigger) {
               openPlayerCardModal(peerTrigger.getAttribute("data-inspect-peer-id"));
@@ -4660,6 +4771,7 @@
               return;
             }
 
+            // 7. Game actions (Play / Install / Details)
             const gameActionTrigger = el.closest("[data-game-action]");
             if (gameActionTrigger) {
               const gid = gameActionTrigger.getAttribute("data-game-id");
@@ -4677,12 +4789,16 @@
               return;
             }
 
+            // 8. Clicking a game tile card opens its details page
             const tileCard = el.closest(".game-tile[data-game-id]");
             if (tileCard && !el.closest("button")) {
               openGameDetailsPage(tileCard.getAttribute("data-game-id"));
+              return;
             }
+
+            // 9. Clicking empty space on the screen is a safe no-op (never deletes or mutates games)
           } catch (err) {
-            console.warn("[Polaris] Event guard caught error:", err?.message || err);
+            console.warn("[Polaris] Event guard caught error (catalog preserved):", err?.message || err);
           }
         });
 
@@ -4701,6 +4817,7 @@
 
         document.getElementById("syncRefreshBtn")?.addEventListener("click", () => {
           publishPeerPresence();
+          commitCatalogState();
           renderAllViews();
           showToast("Console state synchronized");
         });
@@ -4943,14 +5060,14 @@
       switchRoute("home");
       setBootIndicator(65, "Restoring catalog & player profile...");
 
-      // Hydrate from IndexedDB asynchronously without blocking first paint
+      // Hydrate from IndexedDB non-destructively without ever wiping existing games
       openIndexedDbSafe()
         .then(async (db) => {
           if (!db) return;
           idbDatabase = db;
           const storedGames = await readAllGamesFromIdb(db);
           if (Array.isArray(storedGames) && storedGames.length > 0) {
-            storedGames.forEach((g) => upsertGameRecord(g));
+            commitCatalogState({ mergeGames: storedGames });
           } else if (catalogGames.length > 0) {
             catalogGames.forEach((g) => writeGameToIdb(g));
           }
