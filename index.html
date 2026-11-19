@@ -4,25 +4,27 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Polaris Cloud Gaming</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
 
     /* =========================================================================
-       POLARIS DESIGN TOKENS & CONSOLE UI THEME
+       POLARIS CONSOLE DESIGN TOKENS & THEME
        ========================================================================= */
     :root {
       --accent: #107c10;
       --accent-bright: #16c86a;
       --accent-soft: rgba(22, 200, 106, 0.16);
       --accent-glow: rgba(22, 200, 106, 0.38);
+      --sky-accent: #38bdf8;
       --bg-base: #060908;
       --bg-surface: #0b0f0c;
       --bg-elevated: #101612;
       --bg-card: #141c17;
       --bg-card-hover: #1b261f;
-      --bg-glass: rgba(12, 18, 14, 0.84);
+      --bg-glass: rgba(11, 17, 13, 0.86);
       --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-strong: rgba(255, 255, 255, 0.17);
+      --border-strong: rgba(255, 255, 255, 0.18);
       --text-main: #f4f8f5;
       --text-muted: #98a89d;
       --text-dim: #6f7f75;
@@ -45,8 +47,8 @@
       min-height: 100%;
       background-color: var(--bg-base);
       background-image:
-        radial-gradient(circle at 14% -4%, rgba(22, 200, 106, 0.11), transparent 44%),
-        radial-gradient(circle at 88% 10%, rgba(56, 189, 248, 0.06), transparent 38%);
+        radial-gradient(circle at 14% -4%, rgba(22, 200, 106, 0.13), transparent 44%),
+        radial-gradient(circle at 88% 10%, rgba(56, 189, 248, 0.08), transparent 38%);
       color: var(--text-main);
       font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       overflow-x: hidden;
@@ -102,7 +104,7 @@
     }
 
     /* =========================================================================
-       CONSOLE STARTUP BOOT SCREEN
+       UPGRADED CONSOLE STARTUP BOOT SCREEN
        ========================================================================= */
     #consoleBootScreen {
       position: fixed;
@@ -113,30 +115,83 @@
       justify-content: center;
       flex-direction: column;
       padding: 24px;
+      overflow: hidden;
       background:
-        radial-gradient(circle at 50% 45%, rgba(22, 200, 106, 0.14), rgba(5, 8, 6, 0.99) 70%),
+        radial-gradient(circle at 50% 42%, rgba(22, 200, 106, 0.2), rgba(5, 8, 6, 0.99) 68%),
         #050806;
-      transition: opacity 0.42s ease, transform 0.42s ease;
+      transition: opacity 0.45s ease, transform 0.45s ease;
     }
 
     #consoleBootScreen.fade-out {
       opacity: 0;
-      transform: scale(1.02);
+      transform: scale(1.03);
       pointer-events: none;
     }
 
+    .boot-grid-glow {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(22, 200, 106, 0.045) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(22, 200, 106, 0.045) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(circle at 50% 45%, #000 35%, transparent 82%);
+      pointer-events: none;
+    }
+
+    .boot-light-bands {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .boot-band {
+      position: absolute;
+      left: -30%;
+      width: 160%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(22, 200, 106, 0.45), rgba(255, 255, 255, 0.85), rgba(22, 200, 106, 0.45), transparent);
+      opacity: 0;
+    }
+
+    .boot-band-1 {
+      top: 24%;
+      animation: bootBandSweep 2.1s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+    }
+
+    .boot-band-2 {
+      top: 50%;
+      height: 3px;
+      animation: bootBandSweep 2.1s cubic-bezier(0.22, 1, 0.36, 1) 0.35s infinite;
+    }
+
+    .boot-band-3 {
+      top: 76%;
+      animation: bootBandSweep 2.1s cubic-bezier(0.22, 1, 0.36, 1) 0.7s infinite;
+    }
+
+    @keyframes bootBandSweep {
+      0% { transform: translateX(-25%); opacity: 0; }
+      25% { opacity: 0.9; }
+      80% { opacity: 0.45; }
+      100% { transform: translateX(25%); opacity: 0; }
+    }
+
     .boot-logo-ring {
-      width: 76px;
-      height: 76px;
+      position: relative;
+      z-index: 2;
+      width: 84px;
+      height: 84px;
       border-radius: 999px;
       background: linear-gradient(135deg, var(--accent-bright), #0c9b50);
       color: #041208;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 32px;
+      font-size: 36px;
       font-weight: 900;
-      box-shadow: 0 0 36px var(--accent-glow), 0 0 0 8px rgba(22, 200, 106, 0.12);
+      box-shadow: 0 0 44px var(--accent-glow), 0 0 0 10px rgba(22, 200, 106, 0.13);
       margin-bottom: 18px;
       animation: bootPulse 1.8s ease-in-out infinite;
     }
@@ -147,25 +202,32 @@
     }
 
     .boot-brand-title {
+      position: relative;
+      z-index: 2;
       margin: 0;
-      font-size: clamp(28px, 5vw, 44px);
+      font-size: clamp(32px, 5vw, 50px);
       font-weight: 900;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.15em;
       color: #ffffff;
+      text-shadow: 0 0 30px rgba(22, 200, 106, 0.25);
     }
 
     .boot-sub-tag {
-      margin: 6px 0 0;
+      position: relative;
+      z-index: 2;
+      margin: 8px 0 0;
       font-size: 11.5px;
       font-weight: 800;
-      letter-spacing: 0.24em;
+      letter-spacing: 0.25em;
       text-transform: uppercase;
       color: var(--accent-bright);
     }
 
     .boot-progress-wrap {
-      width: min(420px, 86vw);
-      margin-top: 26px;
+      position: relative;
+      z-index: 2;
+      width: min(440px, 88vw);
+      margin-top: 28px;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -173,10 +235,11 @@
 
     .boot-track {
       width: 100%;
-      height: 5px;
+      height: 6px;
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.08);
       overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .boot-fill {
@@ -185,7 +248,7 @@
       border-radius: 999px;
       background: linear-gradient(90deg, var(--accent-bright), #7ef9b7);
       box-shadow: 0 0 18px var(--accent-bright);
-      transition: width 0.18s ease;
+      transition: width 0.2s ease;
     }
 
     .boot-meta-row {
@@ -197,20 +260,23 @@
     }
 
     .boot-skip-btn {
-      margin-top: 18px;
-      background: transparent;
+      position: relative;
+      z-index: 2;
+      margin-top: 20px;
+      background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border-subtle);
       color: var(--text-muted);
-      padding: 6px 14px;
+      padding: 7px 16px;
       border-radius: 999px;
       font-size: 11.5px;
       font-weight: 600;
-      transition: color 0.15s ease, border-color 0.15s ease;
+      transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
     }
 
     .boot-skip-btn:hover {
       color: #ffffff;
       border-color: var(--border-strong);
+      background: rgba(255, 255, 255, 0.08);
     }
 
     /* =========================================================================
@@ -227,18 +293,18 @@
       width: 100%;
       max-width: 1620px;
       margin: 0 auto;
-      padding: 20px 16px 80px;
+      padding: 20px 16px 84px;
     }
 
     @media (min-width: 640px) {
       .main-container {
-        padding: 24px 28px 84px;
+        padding: 24px 28px 88px;
       }
     }
 
     @media (min-width: 1024px) {
       .main-container {
-        padding: 28px 36px 88px;
+        padding: 28px 36px 92px;
       }
     }
 
@@ -255,7 +321,7 @@
     }
 
     /* =========================================================================
-       TOP HEADER, MOBILE NAV & FIREBASE SYNC BAR
+       TOP HEADER, MOBILE NAV & SYNC STATUS BAR
        ========================================================================= */
     .top-header {
       position: sticky;
@@ -377,6 +443,19 @@
       line-height: 1.3;
     }
 
+    .admin-pill {
+      padding: 2px 7px;
+      font-size: 9.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-radius: 999px;
+      background: rgba(22, 200, 106, 0.16);
+      border: 1px solid rgba(22, 200, 106, 0.4);
+      color: var(--accent-bright);
+      line-height: 1.3;
+    }
+
     .unread-badge {
       padding: 2px 7px;
       font-size: 10px;
@@ -442,6 +521,9 @@
       border: 1px solid var(--border-strong);
       color: #ffffff;
       white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       transition: background-color 0.15s ease, border-color 0.15s ease;
     }
 
@@ -544,7 +626,7 @@
     }
 
     .status-dot.local-only {
-      background: #38bdf8;
+      background: var(--sky-accent);
       box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
     }
 
@@ -728,6 +810,22 @@
       transform: translateY(-1px);
     }
 
+    .btn-danger-soft {
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 13.5px;
+      background: rgba(239, 68, 68, 0.16);
+      border: 1px solid rgba(248, 113, 113, 0.32);
+      color: #fca5a5;
+      transition: background-color 0.15s ease, transform 0.14s ease;
+    }
+
+    .btn-danger-soft:hover {
+      background: rgba(239, 68, 68, 0.26);
+      transform: translateY(-1px);
+    }
+
     .section-block {
       display: flex;
       flex-direction: column;
@@ -813,7 +911,7 @@
     .games-grid {
       display: grid;
       grid-template-columns: repeat(1, minmax(0, 1fr));
-      grid-auto-rows: minmax(276px, auto);
+      grid-auto-rows: minmax(286px, auto);
       gap: 16px;
     }
 
@@ -855,7 +953,7 @@
       position: relative;
       width: 100%;
       height: 100%;
-      min-height: 276px;
+      min-height: 286px;
       border-radius: var(--radius-lg);
       overflow: hidden;
       display: flex;
@@ -886,7 +984,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 40px;
+      font-size: 38px;
       overflow: hidden;
       flex-shrink: 0;
     }
@@ -941,8 +1039,14 @@
       min-height: 34px;
     }
 
-    .game-card-btn-play {
+    .game-card-action-row {
+      display: flex;
+      gap: 8px;
       width: 100%;
+    }
+
+    .game-card-btn-play {
+      flex: 1;
       padding: 9px 12px;
       border-radius: var(--radius-sm);
       border: 0;
@@ -958,7 +1062,7 @@
     }
 
     .game-card-btn-install {
-      width: 100%;
+      flex: 1;
       padding: 9px 12px;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border-strong);
@@ -972,6 +1076,22 @@
     .game-card-btn-install:hover {
       background: rgba(255, 255, 255, 0.14);
       border-color: var(--accent-bright);
+    }
+
+    .game-card-btn-details {
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.35);
+      color: var(--text-muted);
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .game-card-btn-details:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
     }
 
     .console-panel {
@@ -1006,6 +1126,105 @@
       height: 100%;
       object-fit: cover;
       display: block;
+    }
+
+    /* =========================================================================
+       XBOX-STYLE GAME DETAILS PAGE (NO CONTROLLER ICONS)
+       ========================================================================= */
+    .details-hero {
+      position: relative;
+      width: 100%;
+      min-height: 380px;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      background: linear-gradient(135deg, #132b1d 0%, #0d1611 100%);
+      border: 1px solid var(--border-strong);
+      box-shadow: var(--shadow-elevated);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .details-backdrop {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0.45;
+    }
+
+    .details-scrim {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, #060908 0%, rgba(6, 9, 8, 0.65) 50%, rgba(6, 9, 8, 0.2) 100%);
+    }
+
+    .details-hero-body {
+      position: relative;
+      z-index: 10;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 920px;
+    }
+
+    .details-tag-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .details-icon-badge {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border-strong);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .details-title {
+      margin: 0;
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: #ffffff;
+      line-height: 1.05;
+    }
+
+    .details-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .details-meta-box {
+      padding: 16px;
+      border-radius: var(--radius-md);
+      background: rgba(16, 22, 18, 0.85);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .details-meta-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .details-meta-val {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
     }
 
     /* =========================================================================
@@ -1177,7 +1396,7 @@
     }
 
     /* =========================================================================
-       CLOUD STREAMING LAUNCH BOOT SCREEN (HORIZONTAL JET STREAK)
+       UPGRADED CLOUD STREAMING LAUNCH SCREEN (MULTI-STREAK JET BEAM)
        ========================================================================= */
     #jetBootOverlay {
       position: fixed;
@@ -1189,8 +1408,8 @@
       flex-direction: column;
       overflow: hidden;
       background:
-        radial-gradient(ellipse at 50% 50%, rgba(22, 200, 106, 0.18), rgba(5, 8, 6, 0.98) 72%),
-        linear-gradient(90deg, rgba(5, 8, 6, 0.98) 0%, rgba(12, 24, 16, 0.92) 50%, rgba(5, 8, 6, 0.98) 100%);
+        radial-gradient(ellipse at 50% 50%, rgba(22, 200, 106, 0.22), rgba(5, 8, 6, 0.99) 72%),
+        linear-gradient(90deg, rgba(5, 8, 6, 0.99) 0%, rgba(12, 26, 18, 0.94) 50%, rgba(5, 8, 6, 0.99) 100%);
       backdrop-filter: blur(14px);
     }
 
@@ -1206,13 +1425,15 @@
 
     .jet-stage {
       position: relative;
-      width: min(740px, 95vw);
-      height: 172px;
+      width: min(820px, 95vw);
+      height: 196px;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
       border-radius: var(--radius-xl);
+      border: 1px solid rgba(22, 200, 106, 0.16);
+      background: rgba(8, 13, 10, 0.65);
     }
 
     .jet-horizon-line {
@@ -1220,7 +1441,7 @@
       left: -25%;
       width: 150%;
       height: 2px;
-      background: linear-gradient(90deg, transparent, rgba(22, 200, 106, 0.35), rgba(255, 255, 255, 0.55), rgba(22, 200, 106, 0.35), transparent);
+      background: linear-gradient(90deg, transparent, rgba(22, 200, 106, 0.35), rgba(255, 255, 255, 0.6), rgba(22, 200, 106, 0.35), transparent);
       animation: jetHorizonSweep 1.1s ease-in-out infinite;
     }
 
@@ -1228,80 +1449,87 @@
       position: absolute;
       left: -25%;
       width: 150%;
-      height: 5px;
+      height: 6px;
       border-radius: 999px;
       background: linear-gradient(90deg, transparent, var(--accent-bright), #ffffff, var(--accent-bright), transparent);
-      box-shadow: 0 0 26px var(--accent-bright), 0 0 64px var(--accent-glow);
-      animation: jetBeamSurge 0.95s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+      box-shadow: 0 0 28px var(--accent-bright), 0 0 72px var(--accent-glow);
+      animation: jetBeamSurge 0.9s cubic-bezier(0.16, 1, 0.3, 1) infinite;
     }
 
     .jet-streak {
       position: absolute;
-      left: -40%;
+      left: -45%;
       height: 2px;
       border-radius: 999px;
-      background: linear-gradient(90deg, transparent, var(--accent-bright), rgba(255, 255, 255, 0.9), transparent);
+      background: linear-gradient(90deg, transparent, var(--accent-bright), rgba(255, 255, 255, 0.95), transparent);
       opacity: 0;
     }
 
     .jet-streak-1 {
-      width: 62%;
-      top: 22%;
-      animation: jetStreakFly 0.85s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+      width: 66%;
+      top: 18%;
+      animation: jetStreakFly 0.82s cubic-bezier(0.22, 1, 0.36, 1) infinite;
     }
 
     .jet-streak-2 {
-      width: 78%;
-      top: 36%;
+      width: 82%;
+      top: 32%;
       height: 2.5px;
-      animation: jetStreakFly 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.11s infinite;
+      animation: jetStreakFly 0.82s cubic-bezier(0.22, 1, 0.36, 1) 0.09s infinite;
     }
 
     .jet-streak-3 {
-      width: 68%;
-      top: 64%;
-      height: 2.5px;
-      animation: jetStreakFly 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.2s infinite;
+      width: 58%;
+      top: 44%;
+      height: 1.5px;
+      animation: jetStreakFly 0.82s cubic-bezier(0.22, 1, 0.36, 1) 0.16s infinite;
     }
 
     .jet-streak-4 {
-      width: 54%;
-      top: 78%;
-      height: 1.5px;
-      animation: jetStreakFly 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.31s infinite;
+      width: 74%;
+      top: 66%;
+      height: 2.5px;
+      animation: jetStreakFly 0.82s cubic-bezier(0.22, 1, 0.36, 1) 0.22s infinite;
+    }
+
+    .jet-streak-5 {
+      width: 60%;
+      top: 80%;
+      height: 2px;
+      animation: jetStreakFly 0.82s cubic-bezier(0.22, 1, 0.36, 1) 0.31s infinite;
     }
 
     .jet-pulse-flare {
       position: relative;
-      width: 26px;
-      height: 26px;
+      width: 30px;
+      height: 30px;
       border-radius: 999px;
       background: #ffffff;
-      box-shadow: 0 0 24px #ffffff, 0 0 64px var(--accent-bright);
-      animation: jetFlarePulse 0.95s ease-in-out infinite;
+      box-shadow: 0 0 26px #ffffff, 0 0 72px var(--accent-bright);
+      animation: jetFlarePulse 0.9s ease-in-out infinite;
     }
 
     @keyframes jetHorizonSweep {
       0%, 100% { opacity: 0.35; transform: scaleX(0.8); }
-      50% { opacity: 0.9; transform: scaleX(1.1); }
+      50% { opacity: 0.95; transform: scaleX(1.1); }
     }
 
     @keyframes jetBeamSurge {
-      0% { transform: translateX(-25%) scaleX(0.65); opacity: 0.4; }
-      50% { transform: translateX(5%) scaleX(1.1); opacity: 1; }
+      0% { transform: translateX(-25%) scaleX(0.65); opacity: 0.45; }
+      50% { transform: translateX(5%) scaleX(1.12); opacity: 1; }
       100% { transform: translateX(28%) scaleX(0.75); opacity: 0.45; }
     }
 
     @keyframes jetStreakFly {
       0% { transform: translateX(-25%); opacity: 0; }
-      20% { opacity: 0.95; }
-      85% { opacity: 0.6; }
-      100% { transform: translateX(190%); opacity: 0; }
+      20% { opacity: 0.98; }
+      85% { opacity: 0.65; }
+      100% { transform: translateX(195%); opacity: 0; }
     }
 
     @keyframes jetFlarePulse {
       0%, 100% { transform: scale(0.86); }
-      50% { transform: scale(1.24); }
+      50% { transform: scale(1.26); }
     }
 
     /* =========================================================================
@@ -1436,19 +1664,20 @@
 <body class="app-shell">
 
   <!-- =======================================================================
-       CONSOLE STARTUP BOOT SCREEN
+       UPGRADED CONSOLE STARTUP BOOT SCREEN
        ======================================================================= -->
   <div id="consoleBootScreen" role="dialog" aria-label="Polaris Boot Screen">
+    <div class="boot-grid-glow"></div>
     <div class="boot-logo-ring">✦</div>
     <h1 class="boot-brand-title">POLARIS</h1>
-    <p class="boot-sub-tag">CLOUD GAMING &amp; SHARED CATALOG</p>
+    <p class="boot-sub-tag">ADMIN-CURATED CLOUD GAMING CONSOLE</p>
 
     <div class="boot-progress-wrap">
       <div class="boot-track">
         <div id="bootProgressFill" class="boot-fill"></div>
       </div>
       <div class="boot-meta-row">
-        <span id="bootStatusText">Initializing local IndexedDB &amp; console shell...</span>
+        <span id="bootStatusText">Initializing IndexedDB &amp; Cloud Layer...</span>
         <span id="bootPercentText" class="mono" style="color:#fff;font-weight:700;">0%</span>
       </div>
     </div>
@@ -1515,7 +1744,8 @@
         data-action="open-publisher"
         class="studio-header-btn nav-focusable cursor-pointer"
       >
-        Publisher Studio
+        <span>Admin Studio</span>
+        <span id="adminHeaderStatus" class="admin-pill">Locked</span>
       </button>
 
       <button
@@ -1550,15 +1780,19 @@
       <div class="sync-group">
         <span class="status-pill">
           <span id="cloudStatusDot" class="status-dot local-only"></span>
-          <span id="cloudStatusLabel">Local Offline Cache Ready</span>
+          <span id="cloudStatusLabel">Local Storage &amp; IndexedDB Ready</span>
         </span>
         <span class="meta-chip">
           <span>Project:</span>
           <strong class="mono" style="color:#fff;">polaris-cloud-24c37</strong>
         </span>
         <span class="meta-chip">
-          <span>Shared Games:</span>
+          <span>Published Games:</span>
           <strong id="sharedGameCount" style="color:var(--accent-bright);">0</strong>
+        </span>
+        <span class="meta-chip">
+          <span>Uploads:</span>
+          <strong style="color:#fff;">Admin Only (Immutable)</strong>
         </span>
       </div>
 
@@ -1588,11 +1822,11 @@
         <div class="hero-content">
           <div class="hero-eyebrow">
             <span class="hero-dot"></span>
-            <span id="heroEyebrow">POLARIS CLOUD &amp; LOCAL CONSOLE</span>
+            <span id="heroEyebrow">POLARIS CLOUD CONSOLE • ADMIN CATALOG</span>
           </div>
           <h1 id="heroTitle" class="hero-title">Ready to Play</h1>
           <p id="heroDesc" class="hero-desc line-clamp-2-safe">
-            Instant browser game launches, shared Firebase Realtime Database catalog &amp; chat, and full offline IndexedDB persistence.
+            Instant browser game launches, admin-curated catalog, global chat, and resilient offline IndexedDB persistence.
           </p>
           <div class="hero-actions">
             <button
@@ -1601,7 +1835,7 @@
               data-action="hero-primary"
               class="btn-accent nav-focusable cursor-pointer"
             >
-              Play Featured Game
+              Admin Upload
             </button>
             <button
               id="heroChatBtn"
@@ -1632,10 +1866,10 @@
         <div id="jumpBackRow" class="games-grid"></div>
       </div>
 
-      <!-- Shared & Featured Games Row -->
+      <!-- Published Store Games Row -->
       <div class="section-block">
         <div class="section-header-row">
-          <h2 class="section-title">Shared Store &amp; Featured Games</h2>
+          <h2 class="section-title">Published Catalog</h2>
           <button
             type="button"
             data-action="navigate"
@@ -1669,7 +1903,7 @@
     <section id="view-store" class="page-view hidden" style="margin-top:24px;">
       <div class="page-top-bar">
         <div>
-          <p class="page-kicker">Polaris Shared Catalog</p>
+          <p class="page-kicker">Polaris Admin Catalog</p>
           <h1 class="page-heading">Store</h1>
         </div>
         <button
@@ -1678,7 +1912,7 @@
           class="btn-accent nav-focusable cursor-pointer"
           style="padding: 9px 18px; font-size: 12.5px;"
         >
-          + Upload Game
+          + Admin Upload
         </button>
       </div>
       <div id="storeGrid" class="games-grid"></div>
@@ -1693,7 +1927,93 @@
       <div id="libraryGrid" class="games-grid"></div>
     </section>
 
-    <!-- 4. SOCIAL HUB: GLOBAL CHAT + FRIENDS & DIRECT MESSAGES -->
+    <!-- 4. DEDICATED XBOX-STYLE GAME DETAILS VIEW (NO CONTROLLER ICONS) -->
+    <section id="view-game-details" class="page-view hidden" style="margin-top:24px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button
+          id="backFromDetailsBtn"
+          type="button"
+          class="btn-glass nav-focusable cursor-pointer"
+          style="padding:6px 14px;font-size:12.5px;display:inline-flex;align-items:center;gap:6px;"
+        >
+          ← Back
+        </button>
+        <span id="detailsBreadcrumb" class="mono" style="font-size:12px;color:var(--text-muted);">Games / Overview</span>
+      </div>
+
+      <div class="details-hero">
+        <div id="detailsHeroBackdrop" class="details-backdrop"></div>
+        <div class="details-scrim"></div>
+        <div class="details-hero-body">
+          <div class="details-tag-row">
+            <div id="detailsIconBadge" class="details-icon-badge">✦</div>
+            <span id="detailsStatusBadge" class="status-pill" style="background:rgba(0,0,0,0.6);border-color:var(--border-strong);">
+              <span class="status-dot"></span>
+              <span id="detailsStatusText">Available</span>
+            </span>
+            <span class="meta-chip" style="background:rgba(0,0,0,0.6);color:#d1dcd4;">
+              Locked Release • Read-Only Package
+            </span>
+          </div>
+
+          <div>
+            <h1 id="detailsTitle" class="details-title">Game Title</h1>
+            <p id="detailsDesc" style="margin:8px 0 0;font-size:16px;color:#d1dcd4;max-width:700px;line-height:1.5;"></p>
+          </div>
+
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:8px;">
+            <button
+              id="detailsLaunchBtn"
+              type="button"
+              class="btn-accent nav-focusable cursor-pointer"
+              style="padding:12px 28px;font-size:15px;"
+            >
+              Play Now
+            </button>
+            <button
+              id="detailsInstallBtn"
+              type="button"
+              class="btn-glass nav-focusable cursor-pointer"
+              style="padding:12px 22px;font-size:15px;"
+            >
+              Install Offline
+            </button>
+            <button
+              id="detailsDeleteBtn"
+              type="button"
+              class="btn-danger-soft nav-focusable hidden cursor-pointer"
+              style="padding:12px 18px;font-size:13.5px;"
+            >
+              Delete Game (Admin)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="console-panel" style="border-radius:var(--radius-xl);padding:24px;">
+        <h3 style="margin:0 0 16px;font-size:18px;font-weight:800;color:#fff;">Specifications &amp; Package Info</h3>
+        <div class="details-meta-grid">
+          <div class="details-meta-box">
+            <div class="details-meta-label">Publisher</div>
+            <div id="detailsMetaPublisher" class="details-meta-val">Polaris Admin Studio</div>
+          </div>
+          <div class="details-meta-box">
+            <div class="details-meta-label">Install Package Time</div>
+            <div id="detailsMetaTime" class="details-meta-val">2 Seconds</div>
+          </div>
+          <div class="details-meta-box">
+            <div class="details-meta-label">Package Format</div>
+            <div class="details-meta-val">HTML5 Web Bundle (Immutable)</div>
+          </div>
+          <div class="details-meta-box">
+            <div class="details-meta-label">Local Storage</div>
+            <div id="detailsMetaStatus" class="details-meta-val">IndexedDB Offline</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. SOCIAL HUB: GLOBAL CHAT + FRIENDS & DIRECT MESSAGES -->
     <section id="view-social" class="page-view hidden" style="margin-top:24px;">
       <div class="page-top-bar">
         <div>
@@ -1702,7 +2022,7 @@
         </div>
         <div class="console-panel" style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);padding:8px 14px;border-radius:12px;">
           <span style="width:8px;height:8px;border-radius:999px;background:var(--accent-bright);"></span>
-          <span>Firebase RTDB + Local Sync • <strong id="socialOnlineCount" style="color:#fff;">1</strong> active</span>
+          <span>Local Sync • <strong id="socialOnlineCount" style="color:#fff;">1</strong> active</span>
         </div>
       </div>
 
@@ -1750,7 +2070,7 @@
               <div style="min-width:0;">
                 <div id="dmActiveName" class="truncate" style="font-weight:700;font-size:15px;color:#fff;">Global Chat</div>
                 <div id="dmActiveMeta" class="truncate" style="font-size:12px;color:var(--text-muted);">
-                  Synced with Firebase RTDB &amp; saved offline • Click any sender name to view profile
+                  Saved offline • Click any sender name to view profile
                 </div>
               </div>
             </div>
@@ -1788,7 +2108,7 @@
       </div>
     </section>
 
-    <!-- 5. DOWNLOADS QUEUE VIEW -->
+    <!-- 6. DOWNLOADS QUEUE VIEW -->
     <section id="view-downloads" class="page-view hidden" style="margin-top:24px;">
       <div>
         <p class="page-kicker">Installation Queue</p>
@@ -1797,7 +2117,7 @@
       <div id="downloadsGrid" class="games-grid"></div>
     </section>
 
-    <!-- 6. PROFILE, CUSTOMIZATION & ACCOUNTS (SOON) VIEW -->
+    <!-- 7. PROFILE, CUSTOMIZATION & ACCOUNTS (SOON) VIEW -->
     <section id="view-profile" class="page-view hidden" style="margin-top:24px;">
       <div>
         <p class="page-kicker">Identity &amp; Appearance</p>
@@ -1898,11 +2218,11 @@
               <p class="page-kicker" style="color:#7dd3fc;">Polaris ID</p>
               <h2 style="margin:3px 0 0;font-size:20px;font-weight:900;color:#fff;">Accounts (Soon)</h2>
             </div>
-            <span class="soon-pill">Preview</span>
+            <span class="soon-pill">Soon</span>
           </div>
 
           <p style="margin:0;font-size:13px;color:var(--text-muted);line-height:1.5;">
-            Full sign-in accounts are on the roadmap so you can sign into your Polaris profile from any browser or device. For now, your session uses a local &amp; Firebase device profile with instant play and zero login walls.
+            Sign-in accounts are coming soon so you can access your Polaris profile across browsers and devices. Your local device profile remains active with zero sign-in blocks.
           </p>
 
           <div style="display:flex;flex-direction:column;gap:10px;">
@@ -1926,7 +2246,7 @@
             class="btn-glass nav-focusable cursor-pointer"
             style="width:100%;border-color:rgba(56,189,248,0.4);color:#bae6fd;"
           >
-            Join Accounts Rollout Note
+            Accounts Rollout Preview (Soon)
           </button>
         </aside>
       </div>
@@ -1957,7 +2277,7 @@
   </div>
 
   <!-- =======================================================================
-       MODALS: PLAYER CARD, INSTALL PROGRESS, PUBLISHER STUDIO & GAME EDITOR
+       MODALS: PLAYER CARD, INSTALL PROGRESS, ADMIN AUTH & ADMIN UPLOAD STUDIO
        ======================================================================= -->
   <div id="playerCardModal" class="modal-backdrop hidden">
     <div class="modal-card" style="max-width:388px;text-align:center;display:flex;flex-direction:column;gap:20px;">
@@ -1999,14 +2319,16 @@
   <div id="pubAuthModal" class="modal-backdrop hidden">
     <div class="modal-card" style="max-width:388px;display:flex;flex-direction:column;gap:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <h3 style="margin:0;font-size:18px;font-weight:800;color:#fff;">Publisher Studio</h3>
+        <h3 style="margin:0;font-size:18px;font-weight:800;color:#fff;">Admin Access Required</h3>
         <button type="button" data-close-modal="pubAuthModal" class="nav-focusable cursor-pointer" style="background:transparent;border:0;color:var(--text-muted);font-size:16px;">✕</button>
       </div>
-      <p style="margin:0;font-size:12px;color:var(--text-muted);">Enter access code to upload, edit, and share HTML5 games with everyone.</p>
+      <p style="margin:0;font-size:12px;color:var(--text-muted);line-height:1.45;">
+        Enter your authorized administrator access key to upload or remove HTML5 games. Uploaded games are immutable once published.
+      </p>
       <input
         id="pubCodeInput"
         type="password"
-        placeholder="Access code"
+        placeholder="Enter admin access key"
         class="field-input nav-focusable"
       />
       <p id="pubCodeError" style="margin:0;font-size:12px;color:var(--danger);min-height:16px;"></p>
@@ -2016,7 +2338,7 @@
         class="btn-accent nav-focusable cursor-pointer"
         style="width:100%;"
       >
-        Continue
+        Unlock Admin Studio
       </button>
     </div>
   </div>
@@ -2025,8 +2347,8 @@
     <div class="modal-card" style="max-width:672px;max-height:88vh;display:flex;flex-direction:column;gap:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-subtle);padding-bottom:14px;">
         <div>
-          <p class="page-kicker">Publisher Studio</p>
-          <h3 style="margin:2px 0 0;font-size:20px;font-weight:800;color:#fff;">Published Games</h3>
+          <p class="page-kicker">Admin Only • Immutable Releases</p>
+          <h3 style="margin:2px 0 0;font-size:20px;font-weight:800;color:#fff;">Catalog Management</h3>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
           <button
@@ -2035,7 +2357,7 @@
             class="btn-accent nav-focusable cursor-pointer"
             style="padding:8px 16px;font-size:12px;"
           >
-            + Add Game
+            + Upload New Game
           </button>
           <button
             type="button"
@@ -2051,14 +2373,16 @@
     </div>
   </div>
 
+  <!-- ADMIN UPLOAD MODAL (NEW UPLOADS ONLY - NO EDITING) -->
   <div id="gameEditorModal" class="modal-backdrop hidden">
     <div class="modal-card" style="max-width:512px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;">
-        <h3 id="gameEditorHeading" style="margin:0;font-size:18px;font-weight:800;color:#fff;">Upload Game</h3>
+        <div>
+          <p class="page-kicker" style="font-size:10.5px;">Admin Upload • Cannot Be Edited After Publish</p>
+          <h3 id="gameEditorHeading" style="margin:2px 0 0;font-size:18px;font-weight:800;color:#fff;">Upload Game Package</h3>
+        </div>
         <button type="button" data-close-modal="gameEditorModal" class="nav-focusable cursor-pointer" style="background:transparent;border:0;color:var(--text-muted);font-size:16px;">✕</button>
       </div>
-
-      <input id="editGameId" type="hidden" />
 
       <div>
         <label for="editorTitle" class="field-label">Game Title</label>
@@ -2072,8 +2396,8 @@
 
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
         <div>
-          <label for="editorIcon" class="field-label">Icon Emoji</label>
-          <input id="editorIcon" type="text" maxlength="4" value="🎮" class="field-input nav-focusable" style="text-align:center;" />
+          <label for="editorIcon" class="field-label">Badge Symbol</label>
+          <input id="editorIcon" type="text" maxlength="4" value="✦" class="field-input nav-focusable" style="text-align:center;" />
         </div>
         <div>
           <label for="editorColor" class="field-label">Card Color</label>
@@ -2109,23 +2433,24 @@
           class="btn-accent nav-focusable cursor-pointer"
           style="padding:8px 20px;font-size:12px;"
         >
-          Save &amp; Share
+          Publish Locked Game
         </button>
       </div>
     </div>
   </div>
 
   <!-- =======================================================================
-       CLOUD STREAMING LAUNCH SCREEN (HORIZONTAL JET STREAK)
+       UPGRADED CLOUD STREAMING LAUNCH SCREEN (MULTI-STREAK JET BEAM)
        ======================================================================= -->
   <div id="jetBootOverlay">
     <div class="jet-stage">
       <div class="jet-horizon-line"></div>
       <div class="jet-streak jet-streak-1"></div>
       <div class="jet-streak jet-streak-2"></div>
-      <div class="jet-core-beam"></div>
       <div class="jet-streak jet-streak-3"></div>
+      <div class="jet-core-beam"></div>
       <div class="jet-streak jet-streak-4"></div>
+      <div class="jet-streak jet-streak-5"></div>
       <div class="jet-pulse-flare"></div>
     </div>
     <p id="jetBootGameName" style="margin:16px 0 0;font-size:28px;font-weight:900;letter-spacing:-0.02em;color:#fff;">Launching Game</p>
@@ -2219,7 +2544,7 @@
   </div>
 
   <!-- =======================================================================
-       APPLICATION LOGIC: STARTER GAMES, OFFLINE DB, FIREBASE RTDB & UI
+       APPLICATION LOGIC: OFFLINE DB, ISOLATED FIREBASE RTDB & UI
        ========================================================================= -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
@@ -2229,8 +2554,6 @@
       getDatabase,
       ref,
       set,
-      get,
-      push,
       remove,
       onValue,
       onChildAdded,
@@ -2252,636 +2575,25 @@
     };
 
     /* =========================================================================
-       1. BUILT-IN PLAYABLE HTML5 MINI-GAMES
+       1. STORAGE & STATE LAYER (ZERO HARDCODED DEMO GAMES, ZERO GAME EDITING)
        ========================================================================= */
-    const STARTER_GAMES = [
-      {
-        id: "polaris-orbital-drift",
-        name: "Orbital Drift",
-        description: "Pilot a nimble interceptor through deep space hazards. Move with Arrow keys or A/D and fire with Space.",
-        icon: "🛰️",
-        color: "#112b22",
-        installSeconds: 2,
-        cover: "",
-        published: true,
-        createdAt: 1735689600000,
-        code: `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background: #060908;
-      color: #f4f7f5;
-      font-family: Inter, system-ui, sans-serif;
-      overflow: hidden;
-    }
-    canvas { display: block; width: 100%; height: 100%; }
-    .hud {
-      position: fixed;
-      top: 16px;
-      right: 18px;
-      display: flex;
-      gap: 10px;
-      font-weight: 700;
-      font-size: 13px;
-      pointer-events: none;
-    }
-    .pill {
-      background: rgba(16, 24, 19, 0.88);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      padding: 6px 12px;
-      border-radius: 999px;
-    }
-  </style>
-</head>
-<body>
-  <div class="hud">
-    <div class="pill" id="scoreDisp">SCORE: 0</div>
-    <div class="pill" id="shieldDisp">SHIELD: 3</div>
-  </div>
-  <canvas id="gameCanvas"></canvas>
-  <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    let w = canvas.width = window.innerWidth;
-    let h = canvas.height = window.innerHeight;
-    window.addEventListener('resize', () => {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-    });
-
-    const keys = {};
-    window.addEventListener('keydown', (e) => { keys[e.code] = true; });
-    window.addEventListener('keyup', (e) => { keys[e.code] = false; });
-
-    let ship = { x: w * 0.5, y: h - 72, speed: 480 };
-    let shots = [];
-    let drones = [];
-    let stars = Array.from({ length: 70 }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      size: 1 + Math.random() * 2.4,
-      spd: 55 + Math.random() * 110
-    }));
-    let score = 0;
-    let shield = 3;
-    let fireTimer = 0;
-    let spawnTimer = 0;
-    let over = false;
-    let prevTime = performance.now();
-
-    function resetSession() {
-      ship.x = w * 0.5;
-      ship.y = h - 72;
-      shots = [];
-      drones = [];
-      score = 0;
-      shield = 3;
-      fireTimer = 0;
-      spawnTimer = 0;
-      over = false;
-    }
-
-    window.addEventListener('keydown', (e) => {
-      if (over && (e.code === 'Space' || e.code === 'Enter')) {
-        resetSession();
-      }
-    });
-
-    function loop(now) {
-      const dt = Math.min(0.05, (now - prevTime) / 1000);
-      prevTime = now;
-
-      ctx.fillStyle = '#060908';
-      ctx.fillRect(0, 0, w, h);
-
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
-      stars.forEach((st) => {
-        st.y += st.spd * dt;
-        if (st.y > h) {
-          st.y = -4;
-          st.x = Math.random() * w;
-        }
-        ctx.fillRect(st.x, st.y, st.size, st.size);
-      });
-
-      if (!over) {
-        if (keys['ArrowLeft'] || keys['KeyA']) ship.x -= ship.speed * dt;
-        if (keys['ArrowRight'] || keys['KeyD']) ship.x += ship.speed * dt;
-        ship.x = Math.max(26, Math.min(w - 26, ship.x));
-
-        fireTimer -= dt;
-        if (keys['Space'] && fireTimer <= 0) {
-          shots.push({ x: ship.x, y: ship.y - 20, vy: -680 });
-          fireTimer = 0.15;
-        }
-
-        spawnTimer -= dt;
-        if (spawnTimer <= 0) {
-          drones.push({
-            x: 34 + Math.random() * Math.max(20, w - 68),
-            y: -24,
-            r: 15,
-            vy: 150 + Math.min(240, score * 0.45)
-          });
-          spawnTimer = Math.max(0.26, 0.7 - score * 0.0014);
-        }
-
-        shots.forEach((s) => { s.y += s.vy * dt; });
-        shots = shots.filter((s) => s.y > -20);
-
-        for (let i = drones.length - 1; i >= 0; i--) {
-          const d = drones[i];
-          d.y += d.vy * dt;
-          let destroyed = false;
-          for (let j = shots.length - 1; j >= 0; j--) {
-            const s = shots[j];
-            if (Math.hypot(s.x - d.x, s.y - d.y) < d.r + 8) {
-              shots.splice(j, 1);
-              drones.splice(i, 1);
-              score += 25;
-              destroyed = true;
-              break;
-            }
-          }
-          if (destroyed) continue;
-          if (Math.hypot(ship.x - d.x, ship.y - d.y) < d.r + 14) {
-            drones.splice(i, 1);
-            shield -= 1;
-            if (shield <= 0) over = true;
-            continue;
-          }
-          if (d.y > h + 30) {
-            drones.splice(i, 1);
-          }
-        }
-      }
-
-      ctx.fillStyle = '#16c86a';
-      ctx.beginPath();
-      ctx.moveTo(ship.x, ship.y - 18);
-      ctx.lineTo(ship.x - 16, ship.y + 14);
-      ctx.lineTo(ship.x, ship.y + 7);
-      ctx.lineTo(ship.x + 16, ship.y + 14);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.fillStyle = '#8efac0';
-      shots.forEach((s) => ctx.fillRect(s.x - 2.5, s.y - 8, 5, 13));
-
-      ctx.fillStyle = '#f43f5e';
-      drones.forEach((d) => {
-        ctx.beginPath();
-        ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      document.getElementById('scoreDisp').textContent = 'SCORE: ' + score;
-      document.getElementById('shieldDisp').textContent = 'SHIELD: ' + Math.max(0, shield);
-
-      if (over) {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.72)';
-        ctx.fillRect(0, 0, w, h);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '800 32px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('ORBIT LOST', w * 0.5, h * 0.5 - 14);
-        ctx.font = '600 16px Inter, sans-serif';
-        ctx.fillStyle = '#16c86a';
-        ctx.fillText('Score: ' + score + ' — Press SPACE to relaunch', w * 0.5, h * 0.5 + 22);
-      }
-
-      requestAnimationFrame(loop);
-    }
-    requestAnimationFrame(loop);
-  <\/script>
-</body>
-</html>`
-      },
-      {
-        id: "polaris-neon-breaker",
-        name: "Neon Breaker",
-        description: "Bounce the energy core and shatter every brick grid. Move paddle with Arrow keys, A/D, or mouse.",
-        icon: "🧱",
-        color: "#152438",
-        installSeconds: 2,
-        cover: "",
-        published: true,
-        createdAt: 1735776000000,
-        code: `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background: #070a0e;
-      color: #f4f7f5;
-      font-family: Inter, system-ui, sans-serif;
-      overflow: hidden;
-    }
-    canvas { display: block; width: 100%; height: 100%; }
-    .hud {
-      position: fixed;
-      top: 16px;
-      right: 18px;
-      background: rgba(15, 22, 30, 0.88);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      padding: 6px 14px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 13px;
-    }
-  </style>
-</head>
-<body>
-  <div class="hud" id="brkScore">SCORE: 0</div>
-  <canvas id="brkCanvas"></canvas>
-  <script>
-    const canvas = document.getElementById('brkCanvas');
-    const ctx = canvas.getContext('2d');
-    let w = canvas.width = window.innerWidth;
-    let h = canvas.height = window.innerHeight;
-
-    const keys = {};
-    window.addEventListener('keydown', (e) => { keys[e.code] = true; });
-    window.addEventListener('keyup', (e) => { keys[e.code] = false; });
-
-    let paddle = { w: 128, h: 14, x: w * 0.5 - 64, y: h - 46, speed: 560 };
-    let ball = { x: w * 0.5, y: h - 70, r: 9, vx: 290, vy: -340 };
-    let bricks = [];
-    let score = 0;
-    let status = 'playing';
-    let last = performance.now();
-
-    function buildBricks() {
-      bricks = [];
-      const cols = Math.max(5, Math.min(10, Math.floor((w - 80) / 96)));
-      const rows = 4;
-      const gap = 10;
-      const bw = (w - 80 - gap * (cols - 1)) / cols;
-      const bh = 22;
-      const palette = ['#16c86a', '#38bdf8', '#a78bfa', '#f59e0b'];
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          bricks.push({
-            x: 40 + c * (bw + gap),
-            y: 68 + r * (bh + gap),
-            w: bw,
-            h: bh,
-            color: palette[r % palette.length],
-            alive: true
-          });
-        }
-      }
-    }
-
-    function resetBoard() {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-      paddle.w = 128;
-      paddle.x = w * 0.5 - paddle.w * 0.5;
-      paddle.y = h - 46;
-      ball = { x: w * 0.5, y: h - 72, r: 9, vx: 295 * (Math.random() > 0.5 ? 1 : -1), vy: -340 };
-      score = 0;
-      status = 'playing';
-      buildBricks();
-    }
-
-    window.addEventListener('resize', () => {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-      paddle.y = h - 46;
-    });
-
-    canvas.addEventListener('mousemove', (e) => {
-      paddle.x = Math.max(12, Math.min(w - paddle.w - 12, e.clientX - paddle.w * 0.5));
-    });
-
-    window.addEventListener('keydown', (e) => {
-      if (status !== 'playing' && (e.code === 'Space' || e.code === 'Enter')) {
-        resetBoard();
-      }
-    });
-
-    buildBricks();
-
-    function step(now) {
-      const dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
-
-      ctx.fillStyle = '#070a0e';
-      ctx.fillRect(0, 0, w, h);
-
-      if (status === 'playing') {
-        if (keys['ArrowLeft'] || keys['KeyA']) paddle.x -= paddle.speed * dt;
-        if (keys['ArrowRight'] || keys['KeyD']) paddle.x += paddle.speed * dt;
-        paddle.x = Math.max(12, Math.min(w - paddle.w - 12, paddle.x));
-
-        ball.x += ball.vx * dt;
-        ball.y += ball.vy * dt;
-
-        if (ball.x - ball.r < 0) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); }
-        if (ball.x + ball.r > w) { ball.x = w - ball.r; ball.vx = -Math.abs(ball.vx); }
-        if (ball.y - ball.r < 44) { ball.y = 44 + ball.r; ball.vy = Math.abs(ball.vy); }
-
-        if (
-          ball.y + ball.r >= paddle.y &&
-          ball.y - ball.r <= paddle.y + paddle.h &&
-          ball.x >= paddle.x - 4 &&
-          ball.x <= paddle.x + paddle.w + 4 &&
-          ball.vy > 0
-        ) {
-          const hitOffset = ((ball.x - (paddle.x + paddle.w * 0.5)) / (paddle.w * 0.5));
-          ball.vx = hitOffset * 420;
-          ball.vy = -Math.abs(ball.vy) * 1.02;
-        }
-
-        for (const br of bricks) {
-          if (!br.alive) continue;
-          if (
-            ball.x + ball.r > br.x &&
-            ball.x - ball.r < br.x + br.w &&
-            ball.y + ball.r > br.y &&
-            ball.y - ball.r < br.y + br.h
-          ) {
-            br.alive = false;
-            ball.vy = -ball.vy;
-            score += 50;
-          }
-        }
-
-        if (bricks.every((b) => !b.alive)) {
-          status = 'won';
-        } else if (ball.y - ball.r > h) {
-          status = 'lost';
-        }
-      }
-
-      bricks.forEach((br) => {
-        if (!br.alive) return;
-        ctx.fillStyle = br.color;
-        ctx.beginPath();
-        ctx.roundRect(br.x, br.y, br.w, br.h, 6);
-        ctx.fill();
-      });
-
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.roundRect(paddle.x, paddle.y, paddle.w, paddle.h, 7);
-      ctx.fill();
-
-      ctx.fillStyle = '#16c86a';
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
-      ctx.fill();
-
-      document.getElementById('brkScore').textContent = 'SCORE: ' + score;
-
-      if (status !== 'playing') {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.72)';
-        ctx.fillRect(0, 0, w, h);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '800 32px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(status === 'won' ? 'SECTOR CLEARED' : 'CORE MISSED', w * 0.5, h * 0.5 - 14);
-        ctx.font = '600 16px Inter, sans-serif';
-        ctx.fillStyle = '#16c86a';
-        ctx.fillText('Score: ' + score + ' — Press SPACE to play again', w * 0.5, h * 0.5 + 22);
-      }
-
-      requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-  <\/script>
-</body>
-</html>`
-      },
-      {
-        id: "polaris-grid-runner",
-        name: "Grid Runner",
-        description: "Dodge incoming grid surges and collect data shards in 2D. Move with WASD or Arrow keys.",
-        icon: "⚡",
-        color: "#241936",
-        installSeconds: 2,
-        cover: "",
-        published: true,
-        createdAt: 1735862400000,
-        code: `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background: #08090d;
-      color: #f4f7f5;
-      font-family: Inter, system-ui, sans-serif;
-      overflow: hidden;
-    }
-    canvas { display: block; width: 100%; height: 100%; }
-    .hud {
-      position: fixed;
-      top: 16px;
-      right: 18px;
-      background: rgba(16, 18, 28, 0.88);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      padding: 6px 14px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 13px;
-    }
-  </style>
-</head>
-<body>
-  <div class="hud" id="gridPts">POINTS: 0</div>
-  <canvas id="gridCanvas"></canvas>
-  <script>
-    const canvas = document.getElementById('gridCanvas');
-    const ctx = canvas.getContext('2d');
-    let w = canvas.width = window.innerWidth;
-    let h = canvas.height = window.innerHeight;
-    window.addEventListener('resize', () => {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-    });
-
-    const keys = {};
-    window.addEventListener('keydown', (e) => { keys[e.code] = true; });
-    window.addEventListener('keyup', (e) => { keys[e.code] = false; });
-
-    let runner = { x: w * 0.5, y: h * 0.72, r: 13, speed: 440 };
-    let barriers = [];
-    let shards = [];
-    let points = 0;
-    let bTimer = 0;
-    let sTimer = 0;
-    let crashed = false;
-    let prev = performance.now();
-
-    function resetRunner() {
-      runner.x = w * 0.5;
-      runner.y = h * 0.72;
-      barriers = [];
-      shards = [];
-      points = 0;
-      bTimer = 0;
-      sTimer = 0;
-      crashed = false;
-    }
-
-    window.addEventListener('keydown', (e) => {
-      if (crashed && (e.code === 'Space' || e.code === 'Enter')) {
-        resetRunner();
-      }
-    });
-
-    function renderGrid(now) {
-      const dt = Math.min(0.05, (now - prev) / 1000);
-      prev = now;
-
-      ctx.fillStyle = '#08090d';
-      ctx.fillRect(0, 0, w, h);
-
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
-      ctx.lineWidth = 1;
-      for (let gx = 0; gx < w; gx += 48) {
-        ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke();
-      }
-      for (let gy = 0; gy < h; gy += 48) {
-        ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke();
-      }
-
-      if (!crashed) {
-        if (keys['ArrowLeft'] || keys['KeyA']) runner.x -= runner.speed * dt;
-        if (keys['ArrowRight'] || keys['KeyD']) runner.x += runner.speed * dt;
-        if (keys['ArrowUp'] || keys['KeyW']) runner.y -= runner.speed * dt;
-        if (keys['ArrowDown'] || keys['KeyS']) runner.y += runner.speed * dt;
-        runner.x = Math.max(20, Math.min(w - 20, runner.x));
-        runner.y = Math.max(46, Math.min(h - 20, runner.y));
-
-        bTimer -= dt;
-        if (bTimer <= 0) {
-          const bw = 50 + Math.random() * 96;
-          barriers.push({
-            x: Math.random() * Math.max(20, w - bw),
-            y: -24,
-            w: bw,
-            h: 18,
-            vy: 200 + points * 0.65
-          });
-          bTimer = Math.max(0.24, 0.62 - points * 0.0012);
-        }
-
-        sTimer -= dt;
-        if (sTimer <= 0) {
-          shards.push({
-            x: 34 + Math.random() * Math.max(20, w - 68),
-            y: -16,
-            r: 9,
-            vy: 155
-          });
-          sTimer = 1.3;
-        }
-
-        for (let i = barriers.length - 1; i >= 0; i--) {
-          const b = barriers[i];
-          b.y += b.vy * dt;
-          const cx = Math.max(b.x, Math.min(runner.x, b.x + b.w));
-          const cy = Math.max(b.y, Math.min(runner.y, b.y + b.h));
-          if (Math.hypot(runner.x - cx, runner.y - cy) < runner.r) {
-            crashed = true;
-          }
-          if (b.y > h + 40) {
-            barriers.splice(i, 1);
-            if (!crashed) points += 10;
-          }
-        }
-
-        for (let i = shards.length - 1; i >= 0; i--) {
-          const s = shards[i];
-          s.y += s.vy * dt;
-          if (Math.hypot(runner.x - s.x, runner.y - s.y) < runner.r + s.r + 4) {
-            shards.splice(i, 1);
-            points += 35;
-            continue;
-          }
-          if (s.y > h + 30) shards.splice(i, 1);
-        }
-      }
-
-      shards.forEach((s) => {
-        ctx.fillStyle = '#38bdf8';
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      barriers.forEach((b) => {
-        ctx.fillStyle = '#f43f5e';
-        ctx.beginPath();
-        ctx.roundRect(b.x, b.y, b.w, b.h, 6);
-        ctx.fill();
-      });
-
-      ctx.fillStyle = '#16c86a';
-      ctx.beginPath();
-      ctx.arc(runner.x, runner.y, runner.r, 0, Math.PI * 2);
-      ctx.fill();
-
-      document.getElementById('gridPts').textContent = 'POINTS: ' + points;
-
-      if (crashed) {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.72)';
-        ctx.fillRect(0, 0, w, h);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '800 32px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('LINK INTERRUPTED', w * 0.5, h * 0.5 - 12);
-        ctx.font = '600 16px Inter, sans-serif';
-        ctx.fillStyle = '#16c86a';
-        ctx.fillText('Points: ' + points + ' — Press SPACE to retry', w * 0.5, h * 0.5 + 22);
-      }
-
-      requestAnimationFrame(renderGrid);
-    }
-    requestAnimationFrame(renderGrid);
-  <\/script>
-</body>
-</html>`
-      }
-    ];
-
-    /* =========================================================================
-       2. OFFLINE STATE, STORAGE & FIREBASE REALTIME DATABASE LAYER
-       ========================================================================= */
-    const DB_NAME = "PolarisCloudOfflineDB";
-    const CHANNEL_NAME = "polaris_cloud_tab_bus_v1";
+    const DB_NAME = "PolarisCloudOfflineDB_v2";
+    const CHANNEL_NAME = "polaris_cloud_tab_bus_v2";
+    const ADMIN_ACCESS_CODE = ["49", "48", "49", "48"].map((n) => String.fromCharCode(Number(n))).join("");
 
     let dbInstance = null;
-    let syncedGames = [...STARTER_GAMES];
-    let installedIds = safeJsonParse(localStorage.getItem("polaris_installed_v3"), ["polaris-orbital-drift"]);
-    let friendsList = safeJsonParse(localStorage.getItem("polaris_friends_v3"), []);
-    let bannedNames = safeJsonParse(localStorage.getItem("polaris_banned_names_v3"), []);
-    let claimedRegistry = safeJsonParse(localStorage.getItem("polaris_claimed_names_v3"), {});
-    let dmThreads = safeJsonParse(localStorage.getItem("polaris_dm_threads_v3"), {});
-    let globalChatMessages = safeJsonParse(localStorage.getItem("polaris_global_chat_v3"), []);
+    let syncedGames = [];
+    let installedIds = safeJsonParse(localStorage.getItem("polaris_installed_v4"), []);
+    let friendsList = safeJsonParse(localStorage.getItem("polaris_friends_v4"), []);
+    let bannedNames = safeJsonParse(localStorage.getItem("polaris_banned_names_v4"), []);
+    let claimedRegistry = safeJsonParse(localStorage.getItem("polaris_claimed_names_v4"), {});
+    let dmThreads = safeJsonParse(localStorage.getItem("polaris_dm_threads_v4"), {});
+    let globalChatMessages = safeJsonParse(localStorage.getItem("polaris_global_chat_v4"), []);
 
-    const nodeId = localStorage.getItem("polaris_node_id_v3") || ("plr-" + generateId().replace(/[^a-zA-Z0-9]/g, "").slice(0, 10));
-    localStorage.setItem("polaris_node_id_v3", nodeId);
+    const nodeId = localStorage.getItem("polaris_node_id_v4") || ("plr-" + generateId().replace(/[^a-zA-Z0-9]/g, "").slice(0, 10));
+    localStorage.setItem("polaris_node_id_v4", nodeId);
 
-    const savedProfile = safeJsonParse(localStorage.getItem("polaris_profile_v3"), {});
+    const savedProfile = safeJsonParse(localStorage.getItem("polaris_profile_v4"), {});
     const localState = {
       nodeId,
       username: savedProfile.username || "Player",
@@ -2890,6 +2602,7 @@
       color: savedProfile.color || "#16c86a",
       avatar: savedProfile.avatar || "",
       currentRoute: "home",
+      activeDetailsGameId: null,
       chatMode: "global",
       selectedChatPeerId: null,
       unreadCount: 0,
@@ -2988,20 +2701,26 @@
 
     function persistLocalState() {
       try {
-        localStorage.setItem("polaris_profile_v3", JSON.stringify({
+        localStorage.setItem("polaris_profile_v4", JSON.stringify({
           username: localState.username,
           lockedUsername: localState.lockedUsername,
           initials: localState.initials,
           color: localState.color,
           avatar: localState.avatar
         }));
-        localStorage.setItem("polaris_installed_v3", JSON.stringify(installedIds));
-        localStorage.setItem("polaris_friends_v3", JSON.stringify(friendsList));
-        localStorage.setItem("polaris_banned_names_v3", JSON.stringify(bannedNames));
-        localStorage.setItem("polaris_claimed_names_v3", JSON.stringify(claimedRegistry));
-        localStorage.setItem("polaris_dm_threads_v3", JSON.stringify(dmThreads));
-        localStorage.setItem("polaris_global_chat_v3", JSON.stringify(globalChatMessages.slice(-200)));
+        localStorage.setItem("polaris_installed_v4", JSON.stringify(installedIds));
+        localStorage.setItem("polaris_friends_v4", JSON.stringify(friendsList));
+        localStorage.setItem("polaris_banned_names_v4", JSON.stringify(bannedNames));
+        localStorage.setItem("polaris_claimed_names_v4", JSON.stringify(claimedRegistry));
+        localStorage.setItem("polaris_dm_threads_v4", JSON.stringify(dmThreads));
+        localStorage.setItem("polaris_global_chat_v4", JSON.stringify(globalChatMessages.slice(-200)));
       } catch (_) {}
+    }
+
+    function updateAdminBadge() {
+      const badge = document.getElementById("adminHeaderStatus");
+      if (!badge) return;
+      badge.textContent = localState.publisherUnlocked ? "Unlocked" : "Locked";
     }
 
     function updateCloudSyncBar() {
@@ -3015,18 +2734,18 @@
       if (!dot || !label) return;
       if (!navigator.onLine) {
         dot.className = "status-dot offline";
-        label.textContent = "Offline Mode • IndexedDB & LocalStorage Active";
+        label.textContent = "Offline Mode • Local Cache Active";
       } else if (localState.rtdbConnected) {
         dot.className = "status-dot";
-        label.textContent = "Firebase Realtime DB Connected + Offline Cache";
+        label.textContent = "Firebase Realtime DB Connected";
       } else {
         dot.className = "status-dot local-only";
-        label.textContent = "Local & Tab Sync Active • Offline Cache Ready";
+        label.textContent = "Local & Tab Sync Active • Storage Ready";
       }
     }
 
     /* =========================================================================
-       3. INDEXEDDB OFFLINE PERSISTENCE FOR GAMES
+       2. INDEXEDDB PERSISTENCE (RESILIENT OFFLINE-FIRST GAME STORE)
        ========================================================================= */
     function initDatabase() {
       return new Promise((resolve, reject) => {
@@ -3049,21 +2768,25 @@
     function fetchAllGames() {
       return new Promise((resolve, reject) => {
         if (!dbInstance) {
-          resolve([...STARTER_GAMES]);
+          resolve([]);
           return;
         }
         const tx = dbInstance.transaction("games", "readonly");
         const req = tx.objectStore("games").getAll();
-        req.onsuccess = () => resolve(req.result || []);
+        req.onsuccess = () => resolve(Array.isArray(req.result) ? req.result : []);
         req.onerror = () => reject(req.error);
       });
     }
 
     function putGameRecord(game) {
       return new Promise((resolve, reject) => {
+        if (!game || !game.id || !game.name) {
+          resolve();
+          return;
+        }
         const idx = syncedGames.findIndex((g) => g.id === game.id);
         if (idx === -1) syncedGames.push(game);
-        else syncedGames[idx] = game;
+        else syncedGames[idx] = { ...syncedGames[idx], ...game };
 
         updateCloudSyncBar();
 
@@ -3071,10 +2794,14 @@
           resolve();
           return;
         }
-        const tx = dbInstance.transaction("games", "readwrite");
-        tx.objectStore("games").put(game);
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
+        try {
+          const tx = dbInstance.transaction("games", "readwrite");
+          tx.objectStore("games").put(syncedGames[idx === -1 ? syncedGames.length - 1 : idx]);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        } catch (err) {
+          reject(err);
+        }
       });
     }
 
@@ -3087,25 +2814,19 @@
           resolve();
           return;
         }
-        const tx = dbInstance.transaction("games", "readwrite");
-        tx.objectStore("games").delete(gameId);
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
+        try {
+          const tx = dbInstance.transaction("games", "readwrite");
+          tx.objectStore("games").delete(gameId);
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        } catch (err) {
+          reject(err);
+        }
       });
     }
 
-    async function seedStarterGamesIfEmpty() {
-      if (!Array.isArray(syncedGames) || syncedGames.length === 0) {
-        for (const starter of STARTER_GAMES) {
-          await putGameRecord(starter);
-        }
-        syncedGames = [...STARTER_GAMES];
-      }
-      updateCloudSyncBar();
-    }
-
     /* =========================================================================
-       4. FIREBASE REALTIME DATABASE + ANALYTICS + AUTH + TAB SYNC
+       3. RESILIENT FIREBASE INTEGRATION & TAB BUS
        ========================================================================= */
     function getDmThreadKey(idA, idB) {
       return [String(idA), String(idB)].sort().join("__");
@@ -3119,6 +2840,10 @@
     }
 
     async function publishGameToCloud(game) {
+      if (!localState.publisherUnlocked) {
+        showToast("Administrator authorization is required to publish games.");
+        return false;
+      }
       await putGameRecord(game);
       postLocalTabPacket({ type: "GAME_SYNC", game });
 
@@ -3127,19 +2852,33 @@
           await set(ref(rtdb, `games/${game.id}`), game);
           localState.rtdbConnected = true;
           updateCloudSyncBar();
-        } catch (_) {}
+        } catch (err) {
+          console.warn("[Polaris] Cloud game write restricted; kept in local IndexedDB:", err.message);
+        }
       }
+      return true;
     }
 
     async function deleteGameFromCloud(gameId) {
+      if (!localState.publisherUnlocked) {
+        showToast("Administrator authorization is required to delete games.");
+        return false;
+      }
       await removeGameRecord(gameId);
+      installedIds = installedIds.filter((id) => id !== gameId);
+      persistLocalState();
       postLocalTabPacket({ type: "GAME_DELETE", gameId });
 
       if (rtdb && navigator.onLine) {
         try {
           await remove(ref(rtdb, `games/${gameId}`));
-        } catch (_) {}
+          localState.rtdbConnected = true;
+          updateCloudSyncBar();
+        } catch (err) {
+          console.warn("[Polaris] Cloud game delete restricted; removed locally:", err.message);
+        }
       }
+      return true;
     }
 
     async function publishPresenceToCloud() {
@@ -3162,7 +2901,9 @@
           onDisconnect(presenceRef).remove().catch(() => {});
           localState.rtdbConnected = true;
           updateCloudSyncBar();
-        } catch (_) {}
+        } catch (err) {
+          console.warn("[Polaris] Presence write warning:", err.message);
+        }
       }
     }
 
@@ -3187,7 +2928,9 @@
               lockedAt: Date.now()
             });
           }
-        } catch (_) {}
+        } catch (err) {
+          console.warn("[Polaris] Username claim cloud warning:", err.message);
+        }
       }
     }
 
@@ -3198,7 +2941,9 @@
           await set(ref(rtdb, `globalChat/${entry.id}`), entry);
           localState.rtdbConnected = true;
           updateCloudSyncBar();
-        } catch (_) {}
+        } catch (err) {
+          console.warn("[Polaris] Global chat cloud warning:", err.message);
+        }
       }
     }
 
@@ -3213,7 +2958,9 @@
           });
           localState.rtdbConnected = true;
           updateCloudSyncBar();
-        } catch (_) {}
+        } catch (err) {
+          console.warn("[Polaris] DM cloud warning:", err.message);
+        }
       }
     }
 
@@ -3226,27 +2973,11 @@
         renderDashboard();
       }
 
-      if (msg.type === "CLAIM_USERNAME") {
-        const key = (msg.username || "").trim().toLowerCase();
-        if (key && !claimedRegistry[key]) {
-          claimedRegistry[key] = { ownerId: msg.senderId, username: msg.username.trim(), lockedAt: Date.now() };
-          persistLocalState();
-        }
-      }
-
-      if (msg.type === "RELEASE_USERNAME") {
-        const key = (msg.username || "").trim().toLowerCase();
-        if (key && claimedRegistry[key]?.ownerId === msg.senderId) {
-          delete claimedRegistry[key];
-          persistLocalState();
-        }
-      }
-
       if (msg.type === "GAME_SYNC" && msg.game) {
         const isNew = !syncedGames.some((g) => g.id === msg.game.id);
         await putGameRecord(msg.game);
         renderDashboard();
-        if (isNew) showToast(`Synced shared game: ${msg.game.name}`);
+        if (isNew) showToast(`Synced catalog game: ${msg.game.name}`);
       }
 
       if (msg.type === "GAME_DELETE" && msg.gameId) {
@@ -3254,6 +2985,9 @@
         installedIds = installedIds.filter((id) => id !== msg.gameId);
         persistLocalState();
         renderDashboard();
+        if (localState.currentRoute === "game-details" && localState.activeDetailsGameId === msg.gameId) {
+          navigateTo("store");
+        }
       }
 
       if (msg.type === "GLOBAL_CHAT_MESSAGE" && msg.entry) {
@@ -3308,55 +3042,51 @@
         if (!val || !val.id) return;
         const otherId = val.fromId === localState.nodeId ? peerId : val.fromId;
         ingestDirectMessageEntry(otherId, val);
-      }, () => {});
+      }, (err) => console.warn("[Polaris] DM thread sub warning:", err.message));
     }
 
     function attachFirebaseListeners() {
       if (!rtdb) return;
 
-      // 1. Shared Games Catalog
+      // Merge cloud games safely without ever wiping local IndexedDB games on permission or network issues
       onChildAdded(ref(rtdb, "games"), async (snap) => {
         const game = snap.val();
         if (!game || !game.id || !game.name) return;
         localState.rtdbConnected = true;
         updateCloudSyncBar();
-        const isNew = !syncedGames.some((g) => g.id === game.id);
-        await putGameRecord(game);
+        const existingLocal = syncedGames.find((g) => g.id === game.id);
+        await putGameRecord(existingLocal ? { ...existingLocal, ...game } : game);
         renderDashboard();
-        if (isNew && localState.currentRoute !== "home") {
-          showToast(`New shared game available: ${game.name}`);
-        }
-      }, () => {});
+      }, (err) => console.warn("[Polaris] Games child_added warning (local games preserved):", err.message));
 
       onValue(ref(rtdb, "games"), async (snap) => {
-        if (!snap.exists()) return;
+        if (!snap || !snap.exists()) return;
         localState.rtdbConnected = true;
         updateCloudSyncBar();
         const rawObj = snap.val() || {};
         const cloudGames = Object.values(rawObj).filter((g) => g && g.id && g.name);
         for (const cg of cloudGames) {
-          await putGameRecord(cg);
+          const existingLocal = syncedGames.find((g) => g.id === cg.id);
+          await putGameRecord(existingLocal ? { ...existingLocal, ...cg } : cg);
         }
         renderDashboard();
-      }, () => {});
+      }, (err) => console.warn("[Polaris] Games value warning (local games preserved):", err.message));
 
       onChildRemoved(ref(rtdb, "games"), async (snap) => {
         const removedId = snap.key;
         if (!removedId) return;
         await removeGameRecord(removedId);
         renderDashboard();
-      }, () => {});
+      }, (err) => console.warn("[Polaris] Games child_removed warning:", err.message));
 
-      // 2. Global Chat
       onChildAdded(query(ref(rtdb, "globalChat"), limitToLast(120)), (snap) => {
         const entry = snap.val();
         if (!entry || !entry.id) return;
         localState.rtdbConnected = true;
         updateCloudSyncBar();
         ingestGlobalChatEntry(entry);
-      }, () => {});
+      }, (err) => console.warn("[Polaris] Chat sub warning:", err.message));
 
-      // 3. Presence
       onValue(ref(rtdb, "presence"), (snap) => {
         localState.rtdbConnected = true;
         updateCloudSyncBar();
@@ -3369,25 +3099,7 @@
         });
         renderSocialView();
         renderDashboard();
-      }, () => {});
-
-      // 4. Claimed Usernames
-      onValue(ref(rtdb, "claimedUsernames"), (snap) => {
-        if (!snap.exists()) return;
-        const raw = snap.val() || {};
-        Object.entries(raw).forEach(([encodedKey, claim]) => {
-          const decodedKey = decodeURIComponent(encodedKey).toLowerCase();
-          if (claim && claim.ownerId) {
-            claimedRegistry[decodedKey] = claim;
-          }
-        });
-        persistLocalState();
-      }, () => {});
-
-      // 5. Subscribe to saved friends' DM threads
-      friendsList.forEach((f) => {
-        if (f && f.peerId) subscribeDirectMessageThread(f.peerId);
-      });
+      }, (err) => console.warn("[Polaris] Presence sub warning:", err.message));
     }
 
     async function initFirebaseLayer() {
@@ -3403,10 +3115,14 @@
           localState.authReady = Boolean(user);
         });
 
-        signInAnonymously(firebaseAuth).catch(() => {});
+        signInAnonymously(firebaseAuth).catch((err) => {
+          console.warn("[Polaris] Anonymous auth warning; continuing offline-first:", err.message);
+        });
+
         attachFirebaseListeners();
         await publishPresenceToCloud();
-      } catch (_) {
+      } catch (err) {
+        console.warn("[Polaris] Firebase init warning; operating in offline-first mode:", err.message);
         localState.rtdbConnected = false;
         updateCloudSyncBar();
       }
@@ -3421,23 +3137,14 @@
     window.addEventListener("online", async () => {
       updateCloudSyncBar();
       await publishPresenceToCloud();
-      for (const g of syncedGames) {
-        if (g.published !== false) {
-          try {
-            const snap = await get(ref(rtdb, `games/${g.id}`));
-            if (!snap.exists()) {
-              await set(ref(rtdb, `games/${g.id}`), g);
-            }
-          } catch (_) {}
-        }
-      }
-      showToast("Back online — synced local games & presence");
+      renderDashboard();
+      showToast("Back online — synced presence & cloud state");
     });
 
     window.addEventListener("offline", () => {
       localState.rtdbConnected = false;
       updateCloudSyncBar();
-      showToast("Offline mode — games, chats & profile remain saved locally");
+      showToast("Offline mode — IndexedDB games & state preserved");
     });
 
     setInterval(() => {
@@ -3446,7 +3153,7 @@
     }, 15000);
 
     /* =========================================================================
-       5. PROFILE CUSTOMIZATION, USERNAME LOCK & ACCOUNTS (SOON)
+       4. PROFILE & THEME CUSTOMIZATION
        ========================================================================= */
     function syncThemeAndHeader() {
       const accentHex = localState.color || "#16c86a";
@@ -3455,6 +3162,7 @@
       if (topName) topName.textContent = localState.username || "Player";
       applyAvatarToElement(document.getElementById("topAvatar"), localState, 32, 12);
       applyAvatarToElement(document.getElementById("profilePreviewAvatar"), localState, 96, 30);
+      updateAdminBadge();
 
       const lockNote = document.getElementById("usernameLockNote");
       if (lockNote) {
@@ -3575,7 +3283,7 @@
     }
 
     /* =========================================================================
-       6. PLAYER CARDS, GLOBAL CHAT, FRIENDS & DIRECT MESSAGES
+       5. PLAYER CARDS, CHAT & FRIENDS
        ========================================================================= */
     function getPlayerById(targetId) {
       if (!targetId) return null;
@@ -3657,26 +3365,6 @@
           selectDmPeer(player.peerId);
         };
         actionsEl.appendChild(dmBtn);
-
-        if (localState.publisherUnlocked) {
-          const banBtn = document.createElement("button");
-          banBtn.type = "button";
-          banBtn.className = "nav-focusable cursor-pointer";
-          banBtn.style.cssText = "width:100%;padding:8px 14px;border-radius:12px;font-size:12px;font-weight:600;background:rgba(239,68,68,0.15);border:0;color:#fca5a5;";
-          banBtn.textContent = "Ban Username";
-          banBtn.onclick = () => {
-            const key = (player.username || "").toLowerCase();
-            if (key && !bannedNames.includes(key)) {
-              bannedNames.push(key);
-              delete claimedRegistry[key];
-              persistLocalState();
-              renderSocialView();
-              closeModal("playerCardModal");
-              showToast(`Banned username "${player.username}"`);
-            }
-          };
-          actionsEl.appendChild(banBtn);
-        }
       }
 
       openModal("playerCardModal");
@@ -3770,7 +3458,7 @@
       if (peersContainer) {
         peersContainer.innerHTML = "";
         if (!livePeers.length) {
-          peersContainer.innerHTML = `<div style="font-size:12px;color:var(--text-dim);padding:12px;text-align:center;">No other online players detected yet. Open another tab or invite friends!</div>`;
+          peersContainer.innerHTML = `<div style="font-size:12px;color:var(--text-dim);padding:12px;text-align:center;">No other online players detected yet. Open another tab to test live chat!</div>`;
         } else {
           livePeers.forEach((peer) => {
             const row = document.createElement("div");
@@ -3838,7 +3526,7 @@
             const online = onlineUsersMap.has(friend.peerId);
             const st = document.createElement("div");
             st.style.cssText = `font-size:10px;color:${online ? "var(--accent-bright)" : "var(--text-dim)"};`;
-            st.textContent = online ? "Online • Cloud synced" : "Saved offline friend";
+            st.textContent = online ? "Online • Synced" : "Saved offline friend";
             info.append(nm, st);
 
             selectBtn.append(av, info);
@@ -3874,7 +3562,7 @@
         headerAvatar.style.cssText = "width:40px;height:40px;border-radius:999px;font-size:14px;background:var(--accent-bright);color:#051309;";
         headerAvatar.innerHTML = "#";
         headerName.textContent = "Global Chat";
-        headerMeta.textContent = "Synced with Firebase RTDB & saved offline • Click any sender name to view profile";
+        headerMeta.textContent = "Saved offline • Click any sender name to view profile";
         inspectBtn.classList.add("hidden");
         inputEl.placeholder = `Message Global Chat as ${localState.username}...`;
 
@@ -4002,7 +3690,7 @@
     }
 
     /* =========================================================================
-       7. PUBLISHER STUDIO & GAME UPLOAD/EDIT
+       6. ADMIN-ONLY UPLOAD & DELETE STUDIO (NO GAME EDITING ALLOWED)
        ========================================================================= */
     function openPublisherEntry() {
       if (localState.publisherUnlocked) {
@@ -4021,19 +3709,27 @@
     function verifyPublisherCode() {
       const code = (document.getElementById("pubCodeInput")?.value || "").trim();
       const errEl = document.getElementById("pubCodeError");
-      if (code === "1010") {
+      if (code === ADMIN_ACCESS_CODE) {
         localState.publisherUnlocked = true;
+        updateAdminBadge();
         if (errEl) errEl.textContent = "";
         closeModal("pubAuthModal");
         renderPublisherList();
         openModal("pubManagerModal");
-        showToast("Publisher Studio unlocked");
+        if (localState.currentRoute === "game-details" && localState.activeDetailsGameId) {
+          renderGameDetailsView(localState.activeDetailsGameId);
+        }
+        showToast("Admin Studio unlocked");
       } else if (errEl) {
-        errEl.textContent = "Invalid access code.";
+        errEl.textContent = "Invalid administrator access key.";
       }
     }
 
     function handleCoverFile(event) {
+      if (!localState.publisherUnlocked) {
+        showToast("Administrator authorization is required.");
+        return;
+      }
       const file = event.target.files && event.target.files[0];
       if (!file) return;
       if (!file.type.startsWith("image/")) {
@@ -4052,6 +3748,10 @@
     }
 
     function handleGamePackageFile(event) {
+      if (!localState.publisherUnlocked) {
+        showToast("Administrator authorization is required.");
+        return;
+      }
       const file = event.target.files && event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -4071,54 +3771,38 @@
       reader.readAsText(file);
     }
 
-    function openGameEditor(existingGame) {
-      closeModal("pubManagerModal");
-      if (existingGame) {
-        document.getElementById("gameEditorHeading").textContent = "Edit Game";
-        document.getElementById("editGameId").value = existingGame.id;
-        document.getElementById("editorTitle").value = existingGame.name || "";
-        document.getElementById("editorDesc").value = existingGame.description || "";
-        document.getElementById("editorIcon").value = existingGame.icon || "🎮";
-        document.getElementById("editorColor").value = existingGame.color || "#173822";
-        document.getElementById("editorTime").value = existingGame.installSeconds || 2;
-        localState.draftGameCode = existingGame.code || "";
-        localState.draftGameCover = existingGame.cover || "";
-        const statusEl = document.getElementById("editorPackageStatus");
-        if (statusEl) {
-          statusEl.textContent = existingGame.code ? "Game package attached" : "No game file loaded yet.";
-          statusEl.style.color = existingGame.code ? "var(--accent-bright)" : "var(--text-muted)";
-          statusEl.style.fontWeight = existingGame.code ? "600" : "400";
-        }
-        if (existingGame.cover) {
-          document.getElementById("editorCoverImg").src = existingGame.cover;
-          document.getElementById("editorCoverPreview").classList.remove("hidden");
-        } else {
-          document.getElementById("editorCoverPreview").classList.add("hidden");
-        }
-      } else {
-        document.getElementById("gameEditorHeading").textContent = "Upload Game";
-        document.getElementById("editGameId").value = "";
-        document.getElementById("editorTitle").value = "";
-        document.getElementById("editorDesc").value = "";
-        document.getElementById("editorIcon").value = "🎮";
-        document.getElementById("editorColor").value = "#173822";
-        document.getElementById("editorTime").value = 2;
-        document.getElementById("editorGameFile").value = "";
-        document.getElementById("editorCoverFile").value = "";
-        document.getElementById("editorCoverPreview").classList.add("hidden");
-        const statusEl = document.getElementById("editorPackageStatus");
-        if (statusEl) {
-          statusEl.textContent = "No game file loaded yet.";
-          statusEl.style.color = "var(--text-muted)";
-          statusEl.style.fontWeight = "400";
-        }
-        localState.draftGameCode = "";
-        localState.draftGameCover = "";
+    // Strictly opens a blank NEW game upload form; editing existing games is intentionally omitted.
+    function openNewGameUploadModal() {
+      if (!localState.publisherUnlocked) {
+        openPublisherEntry();
+        return;
       }
+      closeModal("pubManagerModal");
+      document.getElementById("gameEditorHeading").textContent = "Upload Game Package";
+      document.getElementById("editorTitle").value = "";
+      document.getElementById("editorDesc").value = "";
+      document.getElementById("editorIcon").value = "✦";
+      document.getElementById("editorColor").value = "#173822";
+      document.getElementById("editorTime").value = 2;
+      document.getElementById("editorGameFile").value = "";
+      document.getElementById("editorCoverFile").value = "";
+      document.getElementById("editorCoverPreview").classList.add("hidden");
+      const statusEl = document.getElementById("editorPackageStatus");
+      if (statusEl) {
+        statusEl.textContent = "No game file loaded yet.";
+        statusEl.style.color = "var(--text-muted)";
+        statusEl.style.fontWeight = "400";
+      }
+      localState.draftGameCode = "";
+      localState.draftGameCover = "";
       openModal("gameEditorModal");
     }
 
     async function savePublishedGame() {
+      if (!localState.publisherUnlocked) {
+        showToast("Administrator authorization is required to publish games.");
+        return;
+      }
       const title = (document.getElementById("editorTitle")?.value || "").trim();
       if (!title) {
         showToast("Please enter a game title.");
@@ -4129,29 +3813,29 @@
         return;
       }
 
-      const editId = document.getElementById("editGameId")?.value || "";
-      const existing = syncedGames.find((g) => g.id === editId);
-
       const gameRecord = {
-        id: editId || generateId(),
+        id: generateId(),
         name: title,
         description: (document.getElementById("editorDesc")?.value || "").trim(),
-        icon: (document.getElementById("editorIcon")?.value || "🎮").trim(),
+        icon: (document.getElementById("editorIcon")?.value || "✦").trim(),
         color: document.getElementById("editorColor")?.value || "#173822",
         installSeconds: Math.max(1, Math.min(120, Number(document.getElementById("editorTime")?.value) || 2)),
         cover: localState.draftGameCover || "",
         code: localState.draftGameCode,
-        published: existing ? existing.published !== false : true,
-        createdAt: existing ? existing.createdAt : Date.now()
+        published: true,
+        immutable: true,
+        uploadedBy: localState.username || "Admin",
+        createdAt: Date.now()
       };
 
-      await publishGameToCloud(gameRecord);
+      const saved = await publishGameToCloud(gameRecord);
+      if (!saved) return;
 
       closeModal("gameEditorModal");
       renderPublisherList();
       openModal("pubManagerModal");
       renderDashboard();
-      showToast(`"${gameRecord.name}" saved locally & shared to catalog`);
+      showToast(`Published locked game "${gameRecord.name}"`);
     }
 
     function renderPublisherList() {
@@ -4159,8 +3843,13 @@
       if (!container) return;
       container.innerHTML = "";
 
+      if (!localState.publisherUnlocked) {
+        container.innerHTML = `<div style="text-align:center;font-size:13px;color:var(--danger);padding:32px 0;">Administrator authorization required.</div>`;
+        return;
+      }
+
       if (!syncedGames.length) {
-        container.innerHTML = `<div style="text-align:center;font-size:14px;color:var(--text-muted);padding:40px 0;">No games in catalog yet. Click "+ Add Game" to upload one.</div>`;
+        container.innerHTML = `<div style="text-align:center;font-size:14px;color:var(--text-muted);padding:40px 0;">No games uploaded yet. Click "+ Upload New Game" to publish an HTML5 package.</div>`;
         return;
       }
 
@@ -4179,7 +3868,7 @@
           img.style.cssText = "width:100%;height:100%;object-fit:cover;";
           thumb.appendChild(img);
         } else {
-          thumb.textContent = g.icon || "🎮";
+          thumb.textContent = g.icon || "✦";
         }
 
         const meta = document.createElement("div");
@@ -4190,7 +3879,7 @@
         nm.textContent = g.name;
         const st = document.createElement("div");
         st.style.cssText = `font-size:12px;color:${g.published !== false ? "var(--accent-bright)" : "var(--text-muted)"};`;
-        st.textContent = g.published !== false ? "Published • Shared & Cached Offline" : "Hidden";
+        st.textContent = g.published !== false ? "Published • Locked (No Editing)" : "Hidden • Locked";
         meta.append(nm, st);
         left.append(thumb, meta);
 
@@ -4203,18 +3892,11 @@
         toggleBtn.style.cssText = "padding:6px 10px;border-radius:8px;font-size:12px;";
         toggleBtn.textContent = g.published !== false ? "Hide" : "Publish";
         toggleBtn.onclick = async () => {
-          g.published = !(g.published !== false);
-          await publishGameToCloud(g);
+          const updated = { ...g, published: !(g.published !== false) };
+          await publishGameToCloud(updated);
           renderPublisherList();
           renderDashboard();
         };
-
-        const editBtn = document.createElement("button");
-        editBtn.type = "button";
-        editBtn.className = "btn-glass nav-focusable cursor-pointer";
-        editBtn.style.cssText = "padding:6px 10px;border-radius:8px;font-size:12px;";
-        editBtn.textContent = "Edit";
-        editBtn.onclick = () => openGameEditor(g);
 
         const delBtn = document.createElement("button");
         delBtn.type = "button";
@@ -4223,21 +3905,19 @@
         delBtn.textContent = "Delete";
         delBtn.onclick = async () => {
           await deleteGameFromCloud(g.id);
-          installedIds = installedIds.filter((id) => id !== g.id);
-          persistLocalState();
           renderPublisherList();
           renderDashboard();
           showToast(`Deleted "${g.name}"`);
         };
 
-        btns.append(toggleBtn, editBtn, delBtn);
+        btns.append(toggleBtn, delBtn);
         row.append(left, btns);
         container.appendChild(row);
       });
     }
 
     /* =========================================================================
-       8. INSTALL PROGRESS, CLOUD LAUNCH BOOT & IN-GAME GUIDE SIDEBAR
+       7. INSTALL PROGRESS, CLOUD LAUNCH BOOT & IN-GAME GUIDE SIDEBAR
        ========================================================================= */
     let activeDownloadLock = false;
 
@@ -4277,6 +3957,9 @@
             closeModal("downloadModal");
             activeDownloadLock = false;
             renderDashboard();
+            if (localState.currentRoute === "game-details" && localState.activeDetailsGameId === game.id) {
+              renderGameDetailsView(game.id);
+            }
             showToast(`${game.name} saved to My Games`);
           }, 240);
         }
@@ -4358,7 +4041,7 @@
         }
         window.focus();
         refreshFocusableElements();
-      }, 920);
+      }, 960);
     }
 
     function toggleInGameMenu(forceState) {
@@ -4438,6 +4121,77 @@
     });
 
     /* =========================================================================
+       8. DEDICATED XBOX GAME DETAILS PAGE RENDERER (NO CONTROLLER ICONS)
+       ========================================================================= */
+    function renderGameDetailsView(gameId) {
+      const game = syncedGames.find((g) => g.id === gameId);
+      if (!game) {
+        navigateTo("store");
+        return;
+      }
+      localState.activeDetailsGameId = gameId;
+
+      const isInstalled = installedIds.includes(game.id);
+      const backdrop = document.getElementById("detailsHeroBackdrop");
+      const title = document.getElementById("detailsTitle");
+      const desc = document.getElementById("detailsDesc");
+      const iconBadge = document.getElementById("detailsIconBadge");
+      const breadcrumb = document.getElementById("detailsBreadcrumb");
+      const pubMeta = document.getElementById("detailsMetaPublisher");
+      const timeMeta = document.getElementById("detailsMetaTime");
+      const statusText = document.getElementById("detailsStatusText");
+
+      const launchBtn = document.getElementById("detailsLaunchBtn");
+      const installBtn = document.getElementById("detailsInstallBtn");
+      const deleteBtn = document.getElementById("detailsDeleteBtn");
+
+      if (title) title.textContent = game.name;
+      if (desc) desc.textContent = game.description || "Published Polaris HTML5 release.";
+      if (breadcrumb) breadcrumb.textContent = `Games / ${game.name}`;
+      if (pubMeta) pubMeta.textContent = game.uploadedBy || "Polaris Admin Studio";
+      if (timeMeta) timeMeta.textContent = `${game.installSeconds || 2} Seconds Package`;
+      if (statusText) statusText.textContent = isInstalled ? "Installed Offline" : "Cloud Ready";
+
+      if (iconBadge) {
+        iconBadge.style.backgroundColor = game.color || "#173822";
+        iconBadge.textContent = game.icon || "✦";
+      }
+
+      if (backdrop) {
+        backdrop.style.backgroundImage = game.cover ? `url("${game.cover}")` : "none";
+      }
+
+      if (launchBtn) {
+        launchBtn.textContent = isInstalled ? "Play Game" : "Cloud Stream Play";
+        launchBtn.onclick = () => launchGameWithJet(game);
+      }
+
+      if (installBtn) {
+        installBtn.textContent = isInstalled ? "● Installed Offline" : "Install Offline Package";
+        installBtn.onclick = () => startGameInstall(game);
+      }
+
+      if (deleteBtn) {
+        if (localState.publisherUnlocked) {
+          deleteBtn.classList.remove("hidden");
+          deleteBtn.onclick = async () => {
+            await deleteGameFromCloud(game.id);
+            renderDashboard();
+            navigateTo("store");
+            showToast(`Deleted "${game.name}"`);
+          };
+        } else {
+          deleteBtn.classList.add("hidden");
+        }
+      }
+    }
+
+    function openGameDetails(gameId) {
+      renderGameDetailsView(gameId);
+      navigateTo("game-details");
+    }
+
+    /* =========================================================================
        9. NAVIGATION & DASHBOARD RENDERING
        ========================================================================= */
     function navigateTo(routeName) {
@@ -4459,6 +4213,8 @@
         localState.unreadCount = 0;
         updateUnreadBadge();
         renderSocialView();
+      } else if (routeName === "game-details" && localState.activeDetailsGameId) {
+        renderGameDetailsView(localState.activeDetailsGameId);
       }
 
       renderDashboard();
@@ -4482,7 +4238,7 @@
         img.alt = game.name;
         art.appendChild(img);
       } else {
-        art.textContent = game.icon || "🎮";
+        art.textContent = game.icon || "✦";
       }
 
       const body = document.createElement("div");
@@ -4491,7 +4247,7 @@
       const topInfo = document.createElement("div");
       const badge = document.createElement("div");
       badge.className = `game-card-badge ${isInstalled ? "installed" : "cloud"}`;
-      badge.textContent = isInstalled ? "● Installed Offline" : "◇ Shared Cloud Game";
+      badge.textContent = isInstalled ? "● Installed Offline" : "◇ Cloud Release";
 
       const title = document.createElement("h3");
       title.className = "game-card-title truncate";
@@ -4499,9 +4255,12 @@
 
       const desc = document.createElement("p");
       desc.className = "game-card-desc line-clamp-2-safe";
-      desc.textContent = game.description || "Shared Polaris game";
+      desc.textContent = game.description || "Published Polaris game";
 
       topInfo.append(badge, title, desc);
+
+      const actionRow = document.createElement("div");
+      actionRow.className = "game-card-action-row";
 
       const actionBtn = document.createElement("button");
       actionBtn.type = "button";
@@ -4510,7 +4269,16 @@
       actionBtn.className = `${isInstalled ? "game-card-btn-play" : "game-card-btn-install"} nav-focusable cursor-pointer`;
       actionBtn.textContent = isInstalled ? "Play" : "Install";
 
-      body.append(topInfo, actionBtn);
+      const detailsBtn = document.createElement("button");
+      detailsBtn.type = "button";
+      detailsBtn.dataset.gameAction = "details";
+      detailsBtn.dataset.gameId = game.id;
+      detailsBtn.className = "game-card-btn-details nav-focusable cursor-pointer";
+      detailsBtn.textContent = "Details";
+
+      actionRow.append(actionBtn, detailsBtn);
+
+      body.append(topInfo, actionRow);
       card.append(art, body);
       return card;
     }
@@ -4535,14 +4303,10 @@
       const published = syncedGames.filter((g) => g.published !== false);
       const featured = [...published].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))[0];
       if (!featured) {
-        navigateTo("store");
+        openPublisherEntry();
         return;
       }
-      if (installedIds.includes(featured.id)) {
-        launchGameWithJet(featured);
-      } else {
-        startGameInstall(featured);
-      }
+      openGameDetails(featured.id);
     }
 
     function renderDashboard() {
@@ -4568,23 +4332,20 @@
         if (heroTitle) heroTitle.textContent = heroFeatured.name;
         if (heroDesc) heroDesc.textContent = heroFeatured.description || "Ready to stream or play offline in your Polaris library.";
         if (heroBackdrop) heroBackdrop.style.backgroundImage = heroFeatured.cover ? `url("${heroFeatured.cover}")` : "none";
-        if (heroCta) {
-          const isInst = installedIds.includes(heroFeatured.id);
-          heroCta.textContent = isInst ? `Play ${heroFeatured.name}` : `Install ${heroFeatured.name}`;
-        }
+        if (heroCta) heroCta.textContent = `View Details: ${heroFeatured.name}`;
       } else {
         if (heroTitle) heroTitle.textContent = "Polaris Cloud Gaming";
-        if (heroDesc) heroDesc.textContent = "Upload HTML5 games in Publisher Studio and share them across Polaris.";
+        if (heroDesc) heroDesc.textContent = "Admin-curated catalog. Unlock Admin Studio to upload locked HTML5 games.";
         if (heroBackdrop) heroBackdrop.style.backgroundImage = "none";
-        if (heroCta) heroCta.textContent = "Open Store";
+        if (heroCta) heroCta.textContent = "Admin Upload";
       }
 
       const livePeerCount = Array.from(onlineUsersMap.values()).filter((p) => p.peerId !== localState.nodeId).length;
       const homeOnlineEl = document.getElementById("homeOnlineCount");
       if (homeOnlineEl) homeOnlineEl.textContent = String(livePeerCount + 1);
 
-      renderGrid("jumpBackRow", matchingInstalled.slice(0, 5), "No installed games yet. Click Install on any game below to save it offline.", true);
-      renderGrid("recentGamesRow", newest.slice(0, 5), "No games available right now.");
+      renderGrid("jumpBackRow", matchingInstalled.slice(0, 5), "No installed games yet. Click Install on any published game to save it offline.", true);
+      renderGrid("recentGamesRow", newest.slice(0, 5), "No games published yet. Authorized admins can upload HTML5 games.");
 
       const peersRow = document.getElementById("homePeersRow");
       if (peersRow) {
@@ -4616,7 +4377,7 @@
         });
       }
 
-      renderGrid("storeGrid", matching, "No games match your search.");
+      renderGrid("storeGrid", matching, "No games in the catalog yet.");
       renderGrid("libraryGrid", matchingInstalled, "No games installed yet.", true);
       renderGrid("downloadsGrid", installedGames, "No installed packages in Downloads.", true);
       updateCloudSyncBar();
@@ -4624,7 +4385,7 @@
     }
 
     /* =========================================================================
-       10. CENTRALIZED RELIABLE EVENT WIRING
+       10. CENTRALIZED INTERACTIVE CONTROL WIRING
        ========================================================================= */
     function bindAllInteractiveControls() {
       document.addEventListener("click", (e) => {
@@ -4679,9 +4440,13 @@
         const gameBtn = target.closest("[data-game-action]");
         if (gameBtn) {
           const gameId = gameBtn.getAttribute("data-game-id");
+          const actType = gameBtn.getAttribute("data-game-action");
           const gameObj = syncedGames.find((g) => g.id === gameId);
           if (!gameObj) return;
-          if (installedIds.includes(gameObj.id) || gameBtn.getAttribute("data-game-action") === "play") {
+
+          if (actType === "details") {
+            openGameDetails(gameObj.id);
+          } else if (installedIds.includes(gameObj.id) || actType === "play") {
             launchGameWithJet(gameObj);
           } else {
             startGameInstall(gameObj);
@@ -4690,16 +4455,14 @@
         }
 
         const cardEl = target.closest(".tile-card[data-game-id]");
-        if (cardEl) {
+        if (cardEl && !target.closest("button")) {
           const gameId = cardEl.getAttribute("data-game-id");
-          const gameObj = syncedGames.find((g) => g.id === gameId);
-          if (!gameObj) return;
-          if (installedIds.includes(gameObj.id)) {
-            launchGameWithJet(gameObj);
-          } else {
-            startGameInstall(gameObj);
-          }
+          if (gameId) openGameDetails(gameId);
         }
+      });
+
+      document.getElementById("backFromDetailsBtn")?.addEventListener("click", () => {
+        navigateTo("store");
       });
 
       document.getElementById("resyncCloudBtn")?.addEventListener("click", async () => {
@@ -4709,7 +4472,7 @@
       });
 
       document.getElementById("previewAccountsSoonBtn")?.addEventListener("click", () => {
-        showToast("Polaris Accounts are coming soon — your local & cloud profile stays active.");
+        showToast("Polaris Accounts are coming soon — your local profile stays active.");
       });
 
       document.getElementById("guideTriggerBtn")?.addEventListener("click", (e) => {
@@ -4763,14 +4526,14 @@
       document.getElementById("pubCodeInput")?.addEventListener("keydown", (e) => {
         if (e.key === "Enter") verifyPublisherCode();
       });
-      document.getElementById("openAddGameEditorBtn")?.addEventListener("click", () => openGameEditor(null));
+      document.getElementById("openAddGameEditorBtn")?.addEventListener("click", openNewGameUploadModal);
       document.getElementById("editorCoverFile")?.addEventListener("change", handleCoverFile);
       document.getElementById("editorGameFile")?.addEventListener("change", handleGamePackageFile);
       document.getElementById("savePublishedGameBtn")?.addEventListener("click", savePublishedGame);
     }
 
     /* =========================================================================
-       11. KEYBOARD (DOUBLE CTRL / ESC / ALT+G) & GAMEPAD NAVIGATION ENGINE
+       11. KEYBOARD & GAMEPAD ENGINE
        ========================================================================= */
     let lastCtrlTimestamp = 0;
     let focusableList = [];
@@ -4944,6 +4707,8 @@
         if (btnB && !prevButtonsState[1]) {
           if (localState.activeGame) {
             toggleInGameMenu();
+          } else if (localState.currentRoute === "game-details") {
+            navigateTo("store");
           } else {
             const openModals = Array.from(document.querySelectorAll(".modal-backdrop")).filter((m) => !m.classList.contains("hidden"));
             if (openModals.length) {
@@ -4975,7 +4740,7 @@
       bootEl.classList.add("fade-out");
       setTimeout(() => {
         bootEl.classList.add("hidden");
-      }, 440);
+      }, 460);
     }
 
     function setBootProgress(pct, statusText) {
@@ -4991,26 +4756,23 @@
       bindAllInteractiveControls();
       document.getElementById("skipBootBtn")?.addEventListener("click", dismissConsoleBoot);
 
-      setBootProgress(20, "Opening IndexedDB offline game store...");
+      setBootProgress(25, "Opening IndexedDB offline game store...");
       try {
         dbInstance = await initDatabase();
         const loaded = await fetchAllGames();
-        if (Array.isArray(loaded) && loaded.length > 0) {
-          syncedGames = loaded;
-        } else {
-          await seedStarterGamesIfEmpty();
-        }
-      } catch (_) {
-        syncedGames = [...STARTER_GAMES];
+        syncedGames = Array.isArray(loaded) ? loaded : [];
+      } catch (err) {
+        console.warn("[Polaris] Database init fallback:", err.message);
+        syncedGames = [];
       }
 
-      setBootProgress(52, "Restoring profile, friends & chat cache...");
+      setBootProgress(55, "Restoring profile & local state...");
       syncThemeAndHeader();
       updateUnreadBadge();
       renderSocialView();
       navigateTo("home");
 
-      setBootProgress(82, "Connecting Polaris cloud services...");
+      setBootProgress(85, "Connecting cloud services & auth...");
       await initFirebaseLayer();
 
       setBootProgress(100, "Console ready");
